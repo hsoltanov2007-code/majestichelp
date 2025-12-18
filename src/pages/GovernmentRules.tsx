@@ -38,7 +38,7 @@ export default function GovernmentRules() {
           />
         </div>
 
-        <Accordion type="multiple" className="space-y-4" defaultValue={["general"]}>
+        <Accordion type="multiple" className="space-y-4">
           {filteredSections.map((section) => (
             <AccordionItem key={section.id} value={section.id} className="border rounded-lg bg-card">
               <AccordionTrigger className="px-4 hover:no-underline">
