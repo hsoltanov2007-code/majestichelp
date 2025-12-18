@@ -84,6 +84,15 @@ const ProceduralCode = () => {
                                   </p>
                                 </div>
                               )}
+
+                              {article.comment && (
+                                <div className="flex gap-2 p-3 bg-purple-500/10 border border-purple-500/20 rounded-lg">
+                                  <FileText className="h-4 w-4 text-purple-500 mt-0.5 flex-shrink-0" />
+                                  <p className="text-sm text-purple-200/80">
+                                    <span className="font-medium">Комментарий:</span> {article.comment}
+                                  </p>
+                                </div>
+                              )}
                             </div>
                           </AccordionContent>
                         </AccordionItem>
