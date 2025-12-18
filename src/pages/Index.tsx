@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Layout } from "@/components/Layout";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Scale, FileText, Car, Users, BookOpen, HelpCircle, Search } from "lucide-react";
+import { Scale, FileText, Car, Users, BookOpen, HelpCircle, Search, Shield } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import ServerStats from "@/components/ServerStats";
@@ -11,6 +11,7 @@ const sections = [
   { icon: FileText, title: "Административный кодекс", description: "Административные правонарушения", path: "/administrative-code", color: "bg-orange-500/10 text-orange-500" },
   { icon: Car, title: "Дорожный кодекс", description: "Правила дорожного движения", path: "/traffic-code", color: "bg-primary/10 text-primary" },
   { icon: Users, title: "Процедуры", description: "Инструкции для госслужащих", path: "/procedures", color: "bg-green-500/10 text-green-500" },
+  { icon: Shield, title: "Правила ГО", description: "Правила государственных организаций", path: "/government-rules", color: "bg-blue-500/10 text-blue-500" },
   { icon: BookOpen, title: "Юридическая справка", description: "Теория уголовного права", path: "/legal-reference", color: "bg-accent/10 text-accent" },
   { icon: HelpCircle, title: "Инструкции", description: "Как пользоваться порталом", path: "/instructions", color: "bg-muted text-muted-foreground" },
 ];

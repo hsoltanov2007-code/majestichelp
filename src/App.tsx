@@ -16,6 +16,7 @@ import Glossary from "./pages/Glossary";
 import Scenarios from "./pages/Scenarios";
 import FAQ from "./pages/FAQ";
 import History from "./pages/History";
+import GovernmentRules from "./pages/GovernmentRules";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +33,7 @@ const App = () => (
           <Route path="/administrative-code" element={<AdministrativeCode />} />
           <Route path="/traffic-code" element={<TrafficCode />} />
           <Route path="/procedures" element={<Procedures />} />
+          <Route path="/government-rules" element={<GovernmentRules />} />
           <Route path="/legal-reference" element={<LegalReference />} />
           <Route path="/instructions" element={<Instructions />} />
           <Route path="/favorites" element={<Favorites />} />
