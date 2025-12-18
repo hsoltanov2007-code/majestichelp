@@ -15,7 +15,7 @@ import Calculator from "./pages/Calculator";
 import Glossary from "./pages/Glossary";
 import Scenarios from "./pages/Scenarios";
 import FAQ from "./pages/FAQ";
-import History from "./pages/History";
+
 import GovernmentRules from "./pages/GovernmentRules";
 import NotFound from "./pages/NotFound";
 
@@ -41,7 +41,7 @@ const App = () => (
           <Route path="/glossary" element={<Glossary />} />
           <Route path="/scenarios" element={<Scenarios />} />
           <Route path="/faq" element={<FAQ />} />
-          <Route path="/history" element={<History />} />
+          
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

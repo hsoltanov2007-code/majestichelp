@@ -15,7 +15,6 @@ const navItems = [
   { path: "/scenarios", label: "Сценарии" },
   { path: "/glossary", label: "Глоссарий" },
   { path: "/faq", label: "FAQ" },
-  { path: "/history", label: "История" },
   { path: "/favorites", label: "Избранное", icon: true },
 ];
 
