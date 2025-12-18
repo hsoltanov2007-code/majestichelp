@@ -1,10 +1,10 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Layout } from "@/components/Layout";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Scale, FileText, Car, Users, BookOpen, HelpCircle, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import ServerStats from "@/components/ServerStats";
 
 const sections = [
   { icon: Scale, title: "Уголовный кодекс", description: "Все статьи УК с розыском и штрафами", path: "/criminal-code", color: "bg-destructive/10 text-destructive" },
@@ -55,20 +55,25 @@ export default function Index() {
       </section>
 
       <section className="container py-12">
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {sections.map((section) => (
-            <Link key={section.path} to={section.path}>
-              <Card className="h-full transition-all hover:shadow-lg hover:-translate-y-1 cursor-pointer group">
-                <CardHeader>
-                  <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${section.color} mb-2`}>
-                    <section.icon className="h-6 w-6" />
-                  </div>
-                  <CardTitle className="group-hover:text-accent transition-colors">{section.title}</CardTitle>
-                  <CardDescription>{section.description}</CardDescription>
-                </CardHeader>
-              </Card>
-            </Link>
-          ))}
+        <div className="grid gap-6 lg:grid-cols-4">
+          <div className="lg:col-span-3 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {sections.map((section) => (
+              <Link key={section.path} to={section.path}>
+                <Card className="h-full transition-all hover:shadow-lg hover:-translate-y-1 cursor-pointer group">
+                  <CardHeader>
+                    <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${section.color} mb-2`}>
+                      <section.icon className="h-6 w-6" />
+                    </div>
+                    <CardTitle className="group-hover:text-accent transition-colors">{section.title}</CardTitle>
+                    <CardDescription>{section.description}</CardDescription>
+                  </CardHeader>
+                </Card>
+              </Link>
+            ))}
+          </div>
+          <div className="lg:col-span-1">
+            <ServerStats />
+          </div>
         </div>
       </section>
     </Layout>
