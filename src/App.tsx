@@ -15,6 +15,7 @@ import Calculator from "./pages/Calculator";
 import Glossary from "./pages/Glossary";
 import Scenarios from "./pages/Scenarios";
 import FAQ from "./pages/FAQ";
+import ProceduralCode from "./pages/ProceduralCode";
 
 import GovernmentRules from "./pages/GovernmentRules";
 import NotFound from "./pages/NotFound";
@@ -34,6 +35,7 @@ const App = () => (
           <Route path="/traffic-code" element={<TrafficCode />} />
           <Route path="/procedures" element={<Procedures />} />
           <Route path="/government-rules" element={<GovernmentRules />} />
+          <Route path="/procedural-code" element={<ProceduralCode />} />
           <Route path="/legal-reference" element={<LegalReference />} />
           <Route path="/instructions" element={<Instructions />} />
           <Route path="/favorites" element={<Favorites />} />
