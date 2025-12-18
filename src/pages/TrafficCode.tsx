@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { Banknote, Car, Bookmark } from "lucide-react";
+import { Banknote, Car, Bookmark, Printer, Link2 } from "lucide-react";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useToast } from "@/hooks/use-toast";
 
@@ -32,6 +32,41 @@ export default function TrafficCode() {
     });
   };
 
+  const handleCopyLink = (articleId: string) => {
+    const url = `${window.location.origin}/traffic-code#${articleId}`;
+    navigator.clipboard.writeText(url);
+    toast({ title: "Ссылка скопирована", description: url });
+  };
+
+  const handlePrint = (article: typeof trafficArticles[0]) => {
+    const printWindow = window.open("", "_blank");
+    if (printWindow) {
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>${article.article}</title>
+            <style>
+              body { font-family: Arial, sans-serif; padding: 20px; }
+              h1 { color: #0A2342; }
+              .info { margin: 10px 0; }
+              .label { font-weight: bold; }
+            </style>
+          </head>
+          <body>
+            <h1>🚗 ${article.article}</h1>
+            <div class="info"><span class="label">Штраф:</span> ${article.fine}</div>
+            <h2>Описание</h2>
+            <p>${article.description}</p>
+            <hr/>
+            <p style="color: #666; font-size: 12px;">Denver | Majestic RP</p>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.print();
+    }
+  };
+
   return (
     <Layout>
       <div className="container py-8">
@@ -44,21 +79,30 @@ export default function TrafficCode() {
 
         <div className="grid gap-4 md:grid-cols-2">
           {filtered.map((article) => (
-            <Card key={article.id}>
+            <Card key={article.id} id={article.id}>
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Car className="h-5 w-5 text-primary" />
                     <CardTitle className="text-lg">{article.article}</CardTitle>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleToggleFavorite(article)}
-                    className={isFavorite(article.id, "traffic") ? "text-accent" : "text-muted-foreground"}
-                  >
-                    <Bookmark className={`h-5 w-5 ${isFavorite(article.id, "traffic") ? "fill-current" : ""}`} />
-                  </Button>
+                  <div className="flex gap-1">
+                    <Button variant="ghost" size="icon" onClick={() => handleCopyLink(article.id)} title="Копировать ссылку">
+                      <Link2 className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" onClick={() => handlePrint(article)} title="Печать">
+                      <Printer className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleToggleFavorite(article)}
+                      className={isFavorite(article.id, "traffic") ? "text-accent" : "text-muted-foreground"}
+                      title="В избранное"
+                    >
+                      <Bookmark className={`h-4 w-4 ${isFavorite(article.id, "traffic") ? "fill-current" : ""}`} />
+                    </Button>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent>

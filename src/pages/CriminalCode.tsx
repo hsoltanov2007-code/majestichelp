@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Star, Gavel, Banknote, AlertTriangle, Bookmark } from "lucide-react";
+import { Star, Gavel, Banknote, AlertTriangle, Bookmark, Printer, Link2 } from "lucide-react";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useToast } from "@/hooks/use-toast";
 
@@ -52,6 +52,49 @@ export default function CriminalCode() {
     });
   };
 
+  const handleCopyLink = (articleId: string) => {
+    const url = `${window.location.origin}/criminal-code#${articleId}`;
+    navigator.clipboard.writeText(url);
+    toast({ title: "Ссылка скопирована", description: url });
+  };
+
+  const handlePrint = (article: typeof criminalArticles[0]) => {
+    const printWindow = window.open("", "_blank");
+    if (printWindow) {
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>${article.article}</title>
+            <style>
+              body { font-family: Arial, sans-serif; padding: 20px; }
+              h1 { color: #0A2342; }
+              .info { margin: 10px 0; }
+              .label { font-weight: bold; }
+              ol { margin-top: 10px; }
+            </style>
+          </head>
+          <body>
+            <h1>📌 ${article.article}</h1>
+            <div class="info"><span class="label">Уровень розыска:</span> ${"⭐".repeat(article.stars)}</div>
+            <div class="info"><span class="label">Суд:</span> ${article.court ? "Требуется" : "Не требуется"}</div>
+            <div class="info"><span class="label">Залог:</span> ${article.bail}</div>
+            <div class="info"><span class="label">Штраф:</span> ${article.fine}</div>
+            <h2>Расшифровка</h2>
+            <p>${article.description}</p>
+            ${article.procedure.length > 0 ? `
+              <h2>Процедура задержания</h2>
+              <ol>${article.procedure.map(s => `<li>${s}</li>`).join("")}</ol>
+            ` : ""}
+            <hr/>
+            <p style="color: #666; font-size: 12px;">Denver | Majestic RP</p>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.print();
+    }
+  };
+
   return (
     <Layout>
       <div className="container py-8">
@@ -87,18 +130,25 @@ export default function CriminalCode() {
 
         <div className="space-y-4">
           {filtered.map((article) => (
-            <Card key={article.id} className={`border-l-4 ${getSeverityColor(article.stars)}`}>
+            <Card key={article.id} id={article.id} className={`border-l-4 ${getSeverityColor(article.stars)}`}>
               <CardHeader className="pb-2">
                 <div className="flex flex-wrap items-center gap-2 justify-between">
                   <CardTitle className="text-lg">📌 {article.article}</CardTitle>
-                  <div className="flex gap-2 flex-wrap items-center">
+                  <div className="flex gap-1 flex-wrap items-center">
+                    <Button variant="ghost" size="icon" onClick={() => handleCopyLink(article.id)} title="Копировать ссылку">
+                      <Link2 className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" onClick={() => handlePrint(article)} title="Печать">
+                      <Printer className="h-4 w-4" />
+                    </Button>
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={() => handleToggleFavorite(article)}
                       className={isFavorite(article.id, "criminal") ? "text-accent" : "text-muted-foreground"}
+                      title="В избранное"
                     >
-                      <Bookmark className={`h-5 w-5 ${isFavorite(article.id, "criminal") ? "fill-current" : ""}`} />
+                      <Bookmark className={`h-4 w-4 ${isFavorite(article.id, "criminal") ? "fill-current" : ""}`} />
                     </Button>
                     <Badge variant="outline" className="gap-1">
                       <Star className="h-3 w-3" /> {article.stars > 0 ? "⭐".repeat(article.stars) : "1-5⭐"}
