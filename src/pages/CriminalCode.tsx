@@ -3,11 +3,14 @@ import { criminalArticles, categories } from "@/data/criminalCode";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Star, Gavel, Banknote, AlertTriangle } from "lucide-react";
+import { Star, Gavel, Banknote, AlertTriangle, Bookmark } from "lucide-react";
+import { useFavorites } from "@/hooks/useFavorites";
+import { useToast } from "@/hooks/use-toast";
 
 export default function CriminalCode() {
   const [searchParams] = useSearchParams();
@@ -15,6 +18,8 @@ export default function CriminalCode() {
   const [categoryFilter, setCategoryFilter] = useState("Все");
   const [starsFilter, setStarsFilter] = useState("all");
   const [courtFilter, setCourtFilter] = useState("all");
+  const { isFavorite, toggleFavorite } = useFavorites();
+  const { toast } = useToast();
 
   const filtered = criminalArticles.filter((article) => {
     const matchesSearch = article.article.toLowerCase().includes(search.toLowerCase()) ||
@@ -28,9 +33,23 @@ export default function CriminalCode() {
   });
 
   const getSeverityColor = (stars: number) => {
-    if (stars >= 5) return "border-l-severity-high";
-    if (stars >= 3) return "border-l-severity-medium";
-    return "border-l-severity-low";
+    if (stars >= 5) return "border-l-destructive";
+    if (stars >= 3) return "border-l-orange-500";
+    return "border-l-green-500";
+  };
+
+  const handleToggleFavorite = (article: typeof criminalArticles[0]) => {
+    const wasFavorite = isFavorite(article.id, "criminal");
+    toggleFavorite({
+      id: article.id,
+      type: "criminal",
+      article: article.article,
+      description: article.description
+    });
+    toast({
+      title: wasFavorite ? "Удалено из избранного" : "Добавлено в избранное",
+      description: article.article
+    });
   };
 
   return (
@@ -72,7 +91,15 @@ export default function CriminalCode() {
               <CardHeader className="pb-2">
                 <div className="flex flex-wrap items-center gap-2 justify-between">
                   <CardTitle className="text-lg">📌 {article.article}</CardTitle>
-                  <div className="flex gap-2 flex-wrap">
+                  <div className="flex gap-2 flex-wrap items-center">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleToggleFavorite(article)}
+                      className={isFavorite(article.id, "criminal") ? "text-accent" : "text-muted-foreground"}
+                    >
+                      <Bookmark className={`h-5 w-5 ${isFavorite(article.id, "criminal") ? "fill-current" : ""}`} />
+                    </Button>
                     <Badge variant="outline" className="gap-1">
                       <Star className="h-3 w-3" /> {article.stars > 0 ? "⭐".repeat(article.stars) : "1-5⭐"}
                     </Badge>

@@ -2,16 +2,35 @@ import { Layout } from "@/components/Layout";
 import { trafficArticles } from "@/data/trafficCode";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { Banknote, Car } from "lucide-react";
+import { Banknote, Car, Bookmark } from "lucide-react";
+import { useFavorites } from "@/hooks/useFavorites";
+import { useToast } from "@/hooks/use-toast";
 
 export default function TrafficCode() {
   const [search, setSearch] = useState("");
+  const { isFavorite, toggleFavorite } = useFavorites();
+  const { toast } = useToast();
 
   const filtered = trafficArticles.filter((a) =>
     a.article.toLowerCase().includes(search.toLowerCase()) ||
     a.description.toLowerCase().includes(search.toLowerCase())
   );
+
+  const handleToggleFavorite = (article: typeof trafficArticles[0]) => {
+    const wasFavorite = isFavorite(article.id, "traffic");
+    toggleFavorite({
+      id: article.id,
+      type: "traffic",
+      article: article.article,
+      description: article.description
+    });
+    toast({
+      title: wasFavorite ? "Удалено из избранного" : "Добавлено в избранное",
+      description: article.article
+    });
+  };
 
   return (
     <Layout>
@@ -27,9 +46,19 @@ export default function TrafficCode() {
           {filtered.map((article) => (
             <Card key={article.id}>
               <CardHeader className="pb-2">
-                <div className="flex items-center gap-2">
-                  <Car className="h-5 w-5 text-primary" />
-                  <CardTitle className="text-lg">{article.article}</CardTitle>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Car className="h-5 w-5 text-primary" />
+                    <CardTitle className="text-lg">{article.article}</CardTitle>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleToggleFavorite(article)}
+                    className={isFavorite(article.id, "traffic") ? "text-accent" : "text-muted-foreground"}
+                  >
+                    <Bookmark className={`h-5 w-5 ${isFavorite(article.id, "traffic") ? "fill-current" : ""}`} />
+                  </Button>
                 </div>
               </CardHeader>
               <CardContent>
