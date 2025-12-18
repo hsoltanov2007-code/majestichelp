@@ -10,6 +10,7 @@ import TrafficCode from "./pages/TrafficCode";
 import Procedures from "./pages/Procedures";
 import LegalReference from "./pages/LegalReference";
 import Instructions from "./pages/Instructions";
+import Favorites from "./pages/Favorites";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/procedures" element={<Procedures />} />
           <Route path="/legal-reference" element={<LegalReference />} />
           <Route path="/instructions" element={<Instructions />} />
+          <Route path="/favorites" element={<Favorites />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
