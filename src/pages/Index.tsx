@@ -33,7 +33,7 @@ export default function Index() {
         <div className="container relative">
           <div className="max-w-3xl mx-auto text-center space-y-6">
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight">
-              Официальный портал <span className="text-accent">Denver</span>
+              Портал <span className="text-accent">Denver</span>
             </h1>
             <p className="text-xl text-muted-foreground">
               Majestic RP — здесь собраны все законы, правила и процедуры штата Denver
