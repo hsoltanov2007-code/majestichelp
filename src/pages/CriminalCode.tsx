@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Star, Gavel, Banknote, AlertTriangle, Bookmark, Printer, Link2 } from "lucide-react";
 import { useFavorites } from "@/hooks/useFavorites";
@@ -14,12 +14,26 @@ import { useToast } from "@/hooks/use-toast";
 
 export default function CriminalCode() {
   const [searchParams] = useSearchParams();
+  const articleId = searchParams.get("article");
   const [search, setSearch] = useState(searchParams.get("search") || "");
   const [categoryFilter, setCategoryFilter] = useState("Все");
   const [starsFilter, setStarsFilter] = useState("all");
   const [courtFilter, setCourtFilter] = useState("all");
   const { isFavorite, toggleFavorite } = useFavorites();
   const { toast } = useToast();
+  const articleRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+  useEffect(() => {
+    if (articleId && articleRefs.current[articleId]) {
+      setTimeout(() => {
+        articleRefs.current[articleId]?.scrollIntoView({ behavior: "smooth", block: "center" });
+        articleRefs.current[articleId]?.classList.add("ring-2", "ring-primary");
+        setTimeout(() => {
+          articleRefs.current[articleId]?.classList.remove("ring-2", "ring-primary");
+        }, 2000);
+      }, 100);
+    }
+  }, [articleId]);
 
   const filtered = criminalArticles.filter((article) => {
     const matchesSearch = article.article.toLowerCase().includes(search.toLowerCase()) ||
@@ -130,7 +144,12 @@ export default function CriminalCode() {
 
         <div className="space-y-4">
           {filtered.map((article) => (
-            <Card key={article.id} id={article.id} className={`border-l-4 ${getSeverityColor(article.stars)}`}>
+            <Card
+              key={article.id}
+              id={article.id}
+              ref={(el) => { articleRefs.current[article.id] = el; }}
+              className={`border-l-4 ${getSeverityColor(article.stars)} transition-all duration-300`}
+            >
               <CardHeader className="pb-2">
                 <div className="flex flex-wrap items-center gap-2 justify-between">
                   <CardTitle className="text-lg">📌 {article.article}</CardTitle>

@@ -3,15 +3,31 @@ import { adminArticles } from "@/data/administrativeCode";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Banknote, Bookmark, Printer, Link2 } from "lucide-react";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useToast } from "@/hooks/use-toast";
 
 export default function AdministrativeCode() {
+  const [searchParams] = useSearchParams();
+  const articleId = searchParams.get("article");
   const [search, setSearch] = useState("");
   const { isFavorite, toggleFavorite } = useFavorites();
   const { toast } = useToast();
+  const articleRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+  useEffect(() => {
+    if (articleId && articleRefs.current[articleId]) {
+      setTimeout(() => {
+        articleRefs.current[articleId]?.scrollIntoView({ behavior: "smooth", block: "center" });
+        articleRefs.current[articleId]?.classList.add("ring-2", "ring-primary");
+        setTimeout(() => {
+          articleRefs.current[articleId]?.classList.remove("ring-2", "ring-primary");
+        }, 2000);
+      }, 100);
+    }
+  }, [articleId]);
 
   const filtered = adminArticles.filter((a) =>
     a.article.toLowerCase().includes(search.toLowerCase()) ||
@@ -79,7 +95,12 @@ export default function AdministrativeCode() {
 
         <div className="space-y-4">
           {filtered.map((article) => (
-            <Card key={article.id} id={article.id} className="border-l-4 border-l-green-500">
+            <Card
+              key={article.id}
+              id={article.id}
+              ref={(el) => { articleRefs.current[article.id] = el; }}
+              className="border-l-4 border-l-green-500 transition-all duration-300"
+            >
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-lg">📜 {article.article}</CardTitle>

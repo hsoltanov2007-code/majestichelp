@@ -3,15 +3,31 @@ import { trafficArticles } from "@/data/trafficCode";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Banknote, Car, Bookmark, Printer, Link2 } from "lucide-react";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useToast } from "@/hooks/use-toast";
 
 export default function TrafficCode() {
+  const [searchParams] = useSearchParams();
+  const articleId = searchParams.get("article");
   const [search, setSearch] = useState("");
   const { isFavorite, toggleFavorite } = useFavorites();
   const { toast } = useToast();
+  const articleRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+  useEffect(() => {
+    if (articleId && articleRefs.current[articleId]) {
+      setTimeout(() => {
+        articleRefs.current[articleId]?.scrollIntoView({ behavior: "smooth", block: "center" });
+        articleRefs.current[articleId]?.classList.add("ring-2", "ring-primary");
+        setTimeout(() => {
+          articleRefs.current[articleId]?.classList.remove("ring-2", "ring-primary");
+        }, 2000);
+      }, 100);
+    }
+  }, [articleId]);
 
   const filtered = trafficArticles.filter((a) =>
     a.article.toLowerCase().includes(search.toLowerCase()) ||
@@ -79,7 +95,12 @@ export default function TrafficCode() {
 
         <div className="grid gap-4 md:grid-cols-2">
           {filtered.map((article) => (
-            <Card key={article.id} id={article.id}>
+            <Card
+              key={article.id}
+              id={article.id}
+              ref={(el) => { articleRefs.current[article.id] = el; }}
+              className="transition-all duration-300"
+            >
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
