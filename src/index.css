@@ -6,56 +6,56 @@
 
 @layer base {
   :root {
-    --background: 213 37% 8%;
-    --foreground: 210 40% 98%;
+    --background: 0 0% 100%;
+    --foreground: 213 37% 15%;
 
-    --card: 213 37% 12%;
-    --card-foreground: 210 40% 98%;
+    --card: 0 0% 100%;
+    --card-foreground: 213 37% 15%;
 
-    --popover: 213 37% 12%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 213 37% 15%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 213 67% 15%;
+    --primary: 213 50% 25%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 213 37% 18%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 213 20% 93%;
+    --secondary-foreground: 213 37% 15%;
 
-    --muted: 213 37% 18%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 213 20% 95%;
+    --muted-foreground: 213 20% 40%;
 
-    --accent: 351 76% 55%;
+    --accent: 351 76% 50%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 351 76% 55%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 213 37% 20%;
-    --input: 213 37% 20%;
-    --ring: 210 40% 80%;
+    --border: 213 20% 88%;
+    --input: 213 20% 88%;
+    --ring: 213 50% 50%;
 
     --radius: 0.5rem;
 
     /* Denver custom colors */
-    --denver-navy: 210 40% 98%;
-    --denver-red: 351 76% 55%;
-    --denver-gold: 45 93% 55%;
-    --denver-success: 142 71% 55%;
-    --denver-warning: 38 92% 55%;
+    --denver-navy: 213 50% 25%;
+    --denver-red: 351 76% 50%;
+    --denver-gold: 45 93% 50%;
+    --denver-success: 142 71% 45%;
+    --denver-warning: 38 92% 50%;
 
     /* Severity colors */
-    --severity-low: 142 71% 50%;
-    --severity-medium: 38 92% 55%;
-    --severity-high: 351 76% 55%;
+    --severity-low: 142 71% 45%;
+    --severity-medium: 38 92% 50%;
+    --severity-high: 351 76% 50%;
 
-    --sidebar-background: 213 37% 10%;
-    --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 210 40% 98%;
-    --sidebar-primary-foreground: 213 67% 15%;
-    --sidebar-accent: 213 37% 15%;
-    --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 213 37% 18%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 213 37% 15%;
+    --sidebar-primary: 213 50% 25%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 213 20% 93%;
+    --sidebar-accent-foreground: 213 37% 15%;
+    --sidebar-border: 213 20% 88%;
+    --sidebar-ring: 213 50% 50%;
   }
 
   .dark {
