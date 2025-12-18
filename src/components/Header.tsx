@@ -10,6 +10,7 @@ const navItems = [
   { path: "/criminal-code", label: "УК" },
   { path: "/administrative-code", label: "АК" },
   { path: "/traffic-code", label: "ДК" },
+  { path: "/procedural-code", label: "ПК" },
   { path: "/government-rules", label: "ПГО" },
   { path: "/calculator", label: "Калькулятор" },
   { path: "/scenarios", label: "Сценарии" },
