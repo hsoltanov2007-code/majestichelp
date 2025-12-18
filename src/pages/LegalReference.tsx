@@ -3,6 +3,7 @@ import { crimeComposition, normStructure, guiltForms, criminalPrinciples, public
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
+import { CrimeCompositionDiagram } from "@/components/CrimeCompositionDiagram";
 
 export default function LegalReference() {
   return (
@@ -10,33 +11,18 @@ export default function LegalReference() {
       <div className="container py-8">
         <h1 className="text-3xl font-bold mb-8">Юридическая справка</h1>
 
+        {/* Interactive Crime Composition Diagram */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle>📋 {crimeComposition.title}</CardTitle>
+            <p className="text-muted-foreground">{crimeComposition.description}</p>
+          </CardHeader>
+          <CardContent>
+            <CrimeCompositionDiagram />
+          </CardContent>
+        </Card>
+
         <div className="grid gap-6 lg:grid-cols-2">
-          <Card>
-            <CardHeader><CardTitle>📋 {crimeComposition.title}</CardTitle></CardHeader>
-            <CardContent>
-              <p className="mb-4 text-muted-foreground">{crimeComposition.description}</p>
-              <div className="space-y-4">
-                <div>
-                  <h4 className="font-semibold mb-2">Объективные признаки:</h4>
-                  {crimeComposition.objectiveSigns.map((s) => (
-                    <div key={s.name} className="mb-2">
-                      <Badge className="mr-2">{s.name}</Badge>
-                      <span className="text-sm">{s.description}</span>
-                    </div>
-                  ))}
-                </div>
-                <div>
-                  <h4 className="font-semibold mb-2">Субъективные признаки:</h4>
-                  {crimeComposition.subjectiveSigns.map((s) => (
-                    <div key={s.name} className="mb-2">
-                      <Badge className="mr-2">{s.name}</Badge>
-                      <span className="text-sm">{s.description}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
 
           <Card>
             <CardHeader><CardTitle>📜 {normStructure.title}</CardTitle></CardHeader>
