@@ -11,6 +11,11 @@ import Procedures from "./pages/Procedures";
 import LegalReference from "./pages/LegalReference";
 import Instructions from "./pages/Instructions";
 import Favorites from "./pages/Favorites";
+import Calculator from "./pages/Calculator";
+import Glossary from "./pages/Glossary";
+import Scenarios from "./pages/Scenarios";
+import FAQ from "./pages/FAQ";
+import History from "./pages/History";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +35,11 @@ const App = () => (
           <Route path="/legal-reference" element={<LegalReference />} />
           <Route path="/instructions" element={<Instructions />} />
           <Route path="/favorites" element={<Favorites />} />
+          <Route path="/calculator" element={<Calculator />} />
+          <Route path="/glossary" element={<Glossary />} />
+          <Route path="/scenarios" element={<Scenarios />} />
+          <Route path="/faq" element={<FAQ />} />
+          <Route path="/history" element={<History />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

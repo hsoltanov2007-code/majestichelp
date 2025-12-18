@@ -1,17 +1,20 @@
 import { Link, useLocation } from "react-router-dom";
-import { Menu, Moon, Sun, Bookmark } from "lucide-react";
+import { Menu, Moon, Sun, Bookmark, Calculator, BookOpen, Siren, HelpCircle, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useState, useEffect } from "react";
+import { GlobalSearch } from "@/components/GlobalSearch";
 
 const navItems = [
   { path: "/", label: "Главная" },
   { path: "/criminal-code", label: "УК" },
   { path: "/administrative-code", label: "АК" },
   { path: "/traffic-code", label: "ДК" },
-  { path: "/procedures", label: "Процедуры" },
-  { path: "/legal-reference", label: "Справка" },
-  { path: "/instructions", label: "Инструкции" },
+  { path: "/calculator", label: "Калькулятор" },
+  { path: "/scenarios", label: "Сценарии" },
+  { path: "/glossary", label: "Глоссарий" },
+  { path: "/faq", label: "FAQ" },
+  { path: "/history", label: "История" },
   { path: "/favorites", label: "Избранное", icon: true },
 ];
 
@@ -43,6 +46,9 @@ export function Header() {
             </div>
             <span className="hidden font-bold text-xl sm:inline-block">Denver</span>
           </Link>
+          <div className="hidden lg:block">
+            <GlobalSearch />
+          </div>
         </div>
 
         <nav className="hidden md:flex items-center gap-1">
