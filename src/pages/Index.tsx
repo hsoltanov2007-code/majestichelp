@@ -4,6 +4,7 @@ import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/ca
 import { Scale, FileText, Car, Users, BookOpen, HelpCircle, Search, Shield } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
+import { VisitorCounter } from "@/components/VisitorCounter";
 
 const sections = [
   { icon: Scale, title: "Уголовный кодекс", description: "Все статьи УК с розыском и штрафами", path: "/criminal-code", color: "bg-destructive/10 text-destructive" },
@@ -50,6 +51,10 @@ export default function Index() {
                 />
               </div>
             </form>
+
+            <div className="flex justify-center mt-6">
+              <VisitorCounter />
+            </div>
           </div>
         </div>
       </section>
