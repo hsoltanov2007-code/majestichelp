@@ -57,6 +57,18 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        denver: {
+          navy: "hsl(var(--denver-navy))",
+          red: "hsl(var(--denver-red))",
+          gold: "hsl(var(--denver-gold))",
+          success: "hsl(var(--denver-success))",
+          warning: "hsl(var(--denver-warning))",
+        },
+        severity: {
+          low: "hsl(var(--severity-low))",
+          medium: "hsl(var(--severity-medium))",
+          high: "hsl(var(--severity-high))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
