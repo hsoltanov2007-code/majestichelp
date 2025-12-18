@@ -39,15 +39,8 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
       <div className="container flex h-16 items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-lg">
-              Y
-            </div>
-          </Link>
-          <div className="hidden lg:block">
-            <GlobalSearch />
-          </div>
+        <div className="hidden lg:block">
+          <GlobalSearch />
         </div>
 
         <nav className="hidden md:flex items-center gap-1">
