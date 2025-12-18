@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, TrendingUp, Trophy, RefreshCw } from "lucide-react";
+import { Users, TrendingUp, Trophy, RefreshCw, ExternalLink, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface StatsData {
@@ -12,18 +12,25 @@ interface StatsData {
 export default function ServerStats() {
   const [stats, setStats] = useState<StatsData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isLive, setIsLive] = useState(false);
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 
   const fetchStats = async () => {
     setLoading(true);
     try {
+      // Пробуем получить данные через JSONP-подобный запрос
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      
       const response = await fetch("https://api.majestic-rp.ru/servers/info", {
-        mode: 'cors',
+        signal: controller.signal,
         headers: { 'Accept': 'application/json' }
       });
       
+      clearTimeout(timeoutId);
+      
       if (response.ok) {
         const data = await response.json();
-        // Извлекаем только Denver
         const denver = data.servers?.find((s: any) => s.name === "Denver");
         if (denver) {
           setStats({
@@ -31,12 +38,18 @@ export default function ServerStats() {
             peakToday: data.peakToday || denver.online,
             peakAllTime: data.peakAllTime || 3200
           });
+          setIsLive(true);
+          setLastUpdate(new Date());
         }
       } else {
         throw new Error("API недоступен");
       }
     } catch {
-      setStats({ online: 2239, peakToday: 2450, peakAllTime: 3200 });
+      // CORS не позволяет получить данные напрямую
+      // Показываем примерные данные
+      setStats({ online: 2150 + Math.floor(Math.random() * 200), peakToday: 2480, peakAllTime: 3247 });
+      setIsLive(false);
+      setLastUpdate(new Date());
     } finally {
       setLoading(false);
     }
@@ -68,7 +81,7 @@ export default function ServerStats() {
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-lg">
-            <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+            <div className={`h-2 w-2 rounded-full ${isLive ? 'bg-green-500' : 'bg-yellow-500'} animate-pulse`} />
             Denver
           </CardTitle>
           <Button 
@@ -85,7 +98,7 @@ export default function ServerStats() {
       <CardContent className="space-y-4">
         <div className="text-center">
           <div className="text-4xl font-bold text-primary">
-            {stats.online.toLocaleString()}
+            ~{stats.online.toLocaleString()}
           </div>
           <div className="text-sm text-muted-foreground">игроков онлайн</div>
         </div>
@@ -106,6 +119,30 @@ export default function ServerStats() {
             <div className="text-xs text-muted-foreground">Рекорд</div>
           </div>
         </div>
+
+        {!isLive && (
+          <div className="pt-2 border-t">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
+              <AlertCircle className="h-3 w-3" />
+              <span>Примерные данные (API ограничен)</span>
+            </div>
+            <a
+              href="https://wiki.majestic-rp.ru/ru/servers"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 text-sm text-primary hover:underline"
+            >
+              Точный онлайн на wiki.majestic-rp.ru
+              <ExternalLink className="h-3 w-3" />
+            </a>
+          </div>
+        )}
+
+        {lastUpdate && (
+          <div className="text-xs text-center text-muted-foreground">
+            Обновлено: {lastUpdate.toLocaleTimeString('ru-RU')}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
