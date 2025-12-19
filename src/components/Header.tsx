@@ -1,9 +1,11 @@
 import { Link, useLocation } from "react-router-dom";
-import { Menu, Moon, Sun, Bookmark, Calculator, BookOpen, Siren, HelpCircle, Clock } from "lucide-react";
+import { Menu, Moon, Sun, Bookmark, MessageSquare, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useState, useEffect } from "react";
 import { GlobalSearch } from "@/components/GlobalSearch";
+import { NotificationBell } from "@/components/NotificationBell";
+import { useAuth } from "@/hooks/useAuth";
 
 const navItems = [
   { path: "/", label: "Главная" },
@@ -16,11 +18,13 @@ const navItems = [
   { path: "/scenarios", label: "Сценарии" },
   { path: "/glossary", label: "Глоссарий" },
   { path: "/faq", label: "FAQ" },
-  { path: "/favorites", label: "Избранное", icon: true },
+  { path: "/forum", label: "Форум", icon: MessageSquare },
+  { path: "/favorites", label: "Избранное", icon: Bookmark },
 ];
 
 export function Header() {
   const location = useLocation();
+  const { user, signOut } = useAuth();
   const [isDark, setIsDark] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -45,26 +49,43 @@ export function Header() {
         </div>
 
         <nav className="hidden md:flex items-center gap-1">
-          {navItems.map((item) => (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={`px-3 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-1 ${
-                location.pathname === item.path
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
-              }`}
-            >
-              {item.icon && <Bookmark className="h-4 w-4" />}
-              {item.label}
-            </Link>
-          ))}
+          {navItems.map((item) => {
+            const IconComponent = item.icon;
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`px-3 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-1 ${
+                  location.pathname === item.path || location.pathname.startsWith(item.path + '/')
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                }`}
+              >
+                {IconComponent && <IconComponent className="h-4 w-4" />}
+                {item.label}
+              </Link>
+            );
+          })}
         </nav>
 
         <div className="flex items-center gap-2">
+          {user && <NotificationBell />}
+          
           <Button variant="ghost" size="icon" onClick={toggleTheme}>
             {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
           </Button>
+          
+          {user ? (
+            <Button variant="ghost" size="icon" onClick={signOut} title="Выйти">
+              <LogOut className="h-5 w-5" />
+            </Button>
+          ) : (
+            <Button asChild variant="ghost" size="icon" title="Войти">
+              <Link to="/auth">
+                <User className="h-5 w-5" />
+              </Link>
+            </Button>
+          )}
 
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild className="md:hidden">
@@ -74,21 +95,24 @@ export function Header() {
             </SheetTrigger>
             <SheetContent side="right" className="w-72">
               <nav className="flex flex-col gap-2 mt-8">
-                {navItems.map((item) => (
-                  <Link
-                    key={item.path}
-                    to={item.path}
-                    onClick={() => setIsOpen(false)}
-                    className={`px-4 py-3 text-base font-medium rounded-lg transition-colors flex items-center gap-2 ${
-                      location.pathname === item.path
-                        ? "bg-primary text-primary-foreground"
-                        : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                    }`}
-                  >
-                    {item.icon && <Bookmark className="h-4 w-4" />}
-                    {item.label}
-                  </Link>
-                ))}
+                {navItems.map((item) => {
+                  const IconComponent = item.icon;
+                  return (
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      onClick={() => setIsOpen(false)}
+                      className={`px-4 py-3 text-base font-medium rounded-lg transition-colors flex items-center gap-2 ${
+                        location.pathname === item.path || location.pathname.startsWith(item.path + '/')
+                          ? "bg-primary text-primary-foreground"
+                          : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                      }`}
+                    >
+                      {IconComponent && <IconComponent className="h-4 w-4" />}
+                      {item.label}
+                    </Link>
+                  );
+                })}
               </nav>
             </SheetContent>
           </Sheet>
