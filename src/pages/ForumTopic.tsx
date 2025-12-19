@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
-import { ArrowLeft, Pin, Lock, User, Clock, Send, Trash2, Loader2, Pencil, X, Check } from 'lucide-react';
+import { ArrowLeft, Pin, Lock, User, Clock, Send, Trash2, Loader2, Pencil, X, Check, Crown } from 'lucide-react';
 
 interface Comment {
   id: string;
@@ -20,6 +20,7 @@ interface Comment {
   author?: {
     username: string;
   };
+  author_is_admin?: boolean;
 }
 
 interface Topic {
@@ -35,6 +36,7 @@ interface Topic {
   author?: {
     username: string;
   };
+  author_is_admin?: boolean;
 }
 
 export default function ForumTopic() {
@@ -78,7 +80,15 @@ export default function ForumTopic() {
         .eq('id', topicData.author_id)
         .single();
 
-      setTopic({ ...topicData, author: topicAuthor });
+      // Check if topic author is admin
+      const { data: topicAuthorRole } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', topicData.author_id)
+        .eq('role', 'admin')
+        .maybeSingle();
+
+      setTopic({ ...topicData, author: topicAuthor, author_is_admin: !!topicAuthorRole });
 
       const { data: commentsData, error: commentsError } = await supabase
         .from('forum_comments')
@@ -96,7 +106,15 @@ export default function ForumTopic() {
             .eq('id', comment.author_id)
             .single();
 
-          return { ...comment, author: profile };
+          // Check if comment author is admin
+          const { data: authorRole } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', comment.author_id)
+            .eq('role', 'admin')
+            .maybeSingle();
+
+          return { ...comment, author: profile, author_is_admin: !!authorRole };
         })
       );
 
@@ -282,8 +300,11 @@ export default function ForumTopic() {
     });
   };
 
+  // Only author or admin can edit/delete
   const canEditTopic = user && topic && (user.id === topic.author_id || isAdmin);
   const canDeleteTopic = canEditTopic;
+  const canEditComment = (comment: Comment) => user && (user.id === comment.author_id || isAdmin);
+  const canDeleteComment = (comment: Comment) => user && (user.id === comment.author_id || isAdmin);
 
   return (
     <Layout>
@@ -383,7 +404,10 @@ export default function ForumTopic() {
                     <div className="flex items-center gap-4 text-sm text-muted-foreground mt-2">
                       <span className="flex items-center gap-1">
                         <User className="h-4 w-4" />
-                        {topic.author?.username || 'Аноним'}
+                        {topic.author_is_admin && <Crown className="h-4 w-4 text-red-500" />}
+                        <span className={topic.author_is_admin ? "text-red-500 font-medium" : ""}>
+                          {topic.author?.username || 'Аноним'}
+                        </span>
                       </span>
                       <span className="flex items-center gap-1">
                         <Clock className="h-4 w-4" />
@@ -415,7 +439,8 @@ export default function ForumTopic() {
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2 text-sm text-muted-foreground">
                           <User className="h-4 w-4" />
-                          <span className="font-medium text-foreground">
+                          {comment.author_is_admin && <Crown className="h-4 w-4 text-red-500" />}
+                          <span className={`font-medium ${comment.author_is_admin ? 'text-red-500' : 'text-foreground'}`}>
                             {comment.author?.username || 'Аноним'}
                           </span>
                           <span>•</span>
@@ -455,7 +480,7 @@ export default function ForumTopic() {
                           <p className="whitespace-pre-wrap">{comment.content}</p>
                         )}
                       </div>
-                      {user && (user.id === comment.author_id || isAdmin) && editingCommentId !== comment.id && (
+                      {canEditComment(comment) && editingCommentId !== comment.id && (
                         <div className="flex gap-1 shrink-0">
                           <Button
                             variant="ghost"
@@ -465,14 +490,16 @@ export default function ForumTopic() {
                           >
                             <Pencil className="h-4 w-4" />
                           </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-destructive hover:text-destructive"
-                            onClick={() => handleDeleteComment(comment.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          {canDeleteComment(comment) && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-destructive hover:text-destructive"
+                              onClick={() => handleDeleteComment(comment.id)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
                         </div>
                       )}
                     </div>

@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Menu, Moon, Sun, Bookmark, MessageSquare, User, LogOut } from "lucide-react";
+import { Menu, Moon, Sun, Bookmark, MessageSquare, User, LogOut, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useState, useEffect } from "react";
@@ -24,7 +24,7 @@ const navItems = [
 
 export function Header() {
   const location = useLocation();
-  const { user, signOut } = useAuth();
+  const { user, profile, isAdmin, signOut } = useAuth();
   const [isDark, setIsDark] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -76,9 +76,19 @@ export function Header() {
           </Button>
           
           {user ? (
-            <Button variant="ghost" size="icon" onClick={signOut} title="Выйти">
-              <LogOut className="h-5 w-5" />
-            </Button>
+            <>
+              <Button asChild variant="ghost" size="sm" className="gap-2" title="Мой профиль">
+                <Link to="/profile">
+                  {isAdmin && <Crown className="h-4 w-4 text-red-500" />}
+                  <span className={isAdmin ? "text-red-500" : ""}>
+                    {profile?.username || 'Профиль'}
+                  </span>
+                </Link>
+              </Button>
+              <Button variant="ghost" size="icon" onClick={signOut} title="Выйти">
+                <LogOut className="h-5 w-5" />
+              </Button>
+            </>
           ) : (
             <Button asChild variant="ghost" size="icon" title="Войти">
               <Link to="/auth">
