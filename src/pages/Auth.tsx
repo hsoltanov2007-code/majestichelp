@@ -1,25 +1,21 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
 import { toast } from 'sonner';
-import { Loader2, Shield, ArrowLeft, Mail } from 'lucide-react';
-
-type AuthStep = 'credentials' | 'verify';
+import { Loader2, Shield, Mail, CheckCircle } from 'lucide-react';
 
 export default function Auth() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user, isLoading: authLoading, signIn, signUp } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const [authStep, setAuthStep] = useState<AuthStep>('credentials');
+  const [showConfirmation, setShowConfirmation] = useState(false);
   const [pendingEmail, setPendingEmail] = useState('');
-  const [otpCode, setOtpCode] = useState('');
   
   // Login fields
   const [loginEmail, setLoginEmail] = useState('');
@@ -36,6 +32,14 @@ export default function Auth() {
     }
   }, [user, authLoading, navigate]);
 
+  // Check for confirmation success from URL
+  useEffect(() => {
+    const confirmed = searchParams.get('confirmed');
+    if (confirmed === 'true') {
+      toast.success('Email подтверждён! Теперь войдите в аккаунт.');
+    }
+  }, [searchParams]);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!loginEmail || !loginPassword) {
@@ -51,7 +55,7 @@ export default function Auth() {
       if (error.message.includes('Invalid login credentials')) {
         toast.error('Неверный email или пароль');
       } else if (error.message.includes('Email not confirmed')) {
-        toast.error('Email не подтверждён. Проверьте почту.');
+        toast.error('Email не подтверждён. Проверьте почту и перейдите по ссылке.');
       } else {
         toast.error(error.message);
       }
@@ -90,64 +94,8 @@ export default function Auth() {
       }
     } else {
       setPendingEmail(signupEmail);
-      setAuthStep('verify');
-      toast.success('Код подтверждения отправлен на почту!');
+      setShowConfirmation(true);
     }
-  };
-
-  const handleVerifyOTP = async () => {
-    if (otpCode.length !== 6) {
-      toast.error('Введите 6-значный код');
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      const { error } = await supabase.auth.verifyOtp({
-        email: pendingEmail,
-        token: otpCode,
-        type: 'signup',
-      });
-
-      if (error) throw error;
-
-      toast.success('Email подтверждён! Добро пожаловать!');
-      navigate('/forum');
-    } catch (error: any) {
-      console.error('OTP verification error:', error);
-      if (error.message.includes('expired')) {
-        toast.error('Код истёк. Зарегистрируйтесь заново.');
-      } else if (error.message.includes('invalid')) {
-        toast.error('Неверный код');
-      } else {
-        toast.error(error.message);
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleResendCode = async () => {
-    setIsLoading(true);
-    try {
-      const { error } = await supabase.auth.resend({
-        type: 'signup',
-        email: pendingEmail,
-      });
-
-      if (error) throw error;
-      toast.success('Код отправлен повторно');
-    } catch (error: any) {
-      toast.error(error.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleBackToCredentials = () => {
-    setAuthStep('credentials');
-    setOtpCode('');
-    setPendingEmail('');
   };
 
   if (authLoading) {
@@ -158,72 +106,47 @@ export default function Auth() {
     );
   }
 
-  // OTP Verification Screen
-  if (authStep === 'verify') {
+  // Email sent confirmation screen
+  if (showConfirmation) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-background to-muted/30 px-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-              <Mail className="h-6 w-6 text-primary" />
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-500/10">
+              <Mail className="h-6 w-6 text-green-500" />
             </div>
-            <CardTitle className="text-2xl">Подтверждение email</CardTitle>
+            <CardTitle className="text-2xl">Проверьте почту</CardTitle>
             <CardDescription>
-              Введите 6-значный код, отправленный на {pendingEmail}
+              Мы отправили ссылку для подтверждения на
             </CardDescription>
+            <p className="font-medium text-foreground mt-2">{pendingEmail}</p>
           </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="flex justify-center">
-              <InputOTP
-                maxLength={6}
-                value={otpCode}
-                onChange={(value) => setOtpCode(value)}
-              >
-                <InputOTPGroup>
-                  <InputOTPSlot index={0} />
-                  <InputOTPSlot index={1} />
-                  <InputOTPSlot index={2} />
-                  <InputOTPSlot index={3} />
-                  <InputOTPSlot index={4} />
-                  <InputOTPSlot index={5} />
-                </InputOTPGroup>
-              </InputOTP>
+          <CardContent className="space-y-4">
+            <div className="bg-muted/50 rounded-lg p-4 text-sm text-muted-foreground">
+              <p className="flex items-start gap-2">
+                <CheckCircle className="h-4 w-4 mt-0.5 text-green-500 shrink-0" />
+                Перейдите по ссылке в письме для подтверждения email
+              </p>
+              <p className="flex items-start gap-2 mt-2">
+                <CheckCircle className="h-4 w-4 mt-0.5 text-green-500 shrink-0" />
+                После подтверждения вернитесь и войдите с паролем
+              </p>
             </div>
-
+            
             <Button
-              onClick={handleVerifyOTP}
+              variant="outline"
               className="w-full"
-              disabled={isLoading || otpCode.length !== 6}
+              onClick={() => {
+                setShowConfirmation(false);
+                setPendingEmail('');
+              }}
             >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Проверка...
-                </>
-              ) : (
-                'Подтвердить'
-              )}
+              Вернуться к входу
             </Button>
-
-            <div className="flex items-center justify-between text-sm">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleBackToCredentials}
-                disabled={isLoading}
-              >
-                <ArrowLeft className="mr-1 h-4 w-4" />
-                Назад
-              </Button>
-              <Button
-                variant="link"
-                size="sm"
-                onClick={handleResendCode}
-                disabled={isLoading}
-              >
-                Отправить код повторно
-              </Button>
-            </div>
+            
+            <p className="text-xs text-center text-muted-foreground">
+              Не получили письмо? Проверьте папку "Спам"
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -332,7 +255,7 @@ export default function Auth() {
                   )}
                 </Button>
                 <p className="text-xs text-center text-muted-foreground">
-                  На ваш email придёт код подтверждения
+                  На email придёт ссылка для подтверждения
                 </p>
               </form>
             </TabsContent>
