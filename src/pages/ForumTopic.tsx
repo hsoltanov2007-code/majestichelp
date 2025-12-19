@@ -6,10 +6,11 @@ import { Layout } from '@/components/Layout';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
-import { ArrowLeft, Pin, Lock, User, Clock, Send, Trash2, Loader2 } from 'lucide-react';
+import { ArrowLeft, Pin, Lock, User, Clock, Send, Trash2, Loader2, Pencil, X, Check } from 'lucide-react';
 
 interface Comment {
   id: string;
@@ -45,6 +46,14 @@ export default function ForumTopic() {
   const [newComment, setNewComment] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Edit states
+  const [editingTopicId, setEditingTopicId] = useState<string | null>(null);
+  const [editTopicTitle, setEditTopicTitle] = useState('');
+  const [editTopicContent, setEditTopicContent] = useState('');
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
+  const [editCommentContent, setEditCommentContent] = useState('');
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -55,7 +64,6 @@ export default function ForumTopic() {
 
   const fetchTopicAndComments = async () => {
     try {
-      // Fetch topic with author
       const { data: topicData, error: topicError } = await supabase
         .from('forum_topics')
         .select('*')
@@ -72,7 +80,6 @@ export default function ForumTopic() {
 
       setTopic({ ...topicData, author: topicAuthor });
 
-      // Fetch comments with authors
       const { data: commentsData, error: commentsError } = await supabase
         .from('forum_comments')
         .select('*')
@@ -179,6 +186,92 @@ export default function ForumTopic() {
     }
   };
 
+  // Edit topic handlers
+  const startEditTopic = () => {
+    if (!topic) return;
+    setEditingTopicId(topic.id);
+    setEditTopicTitle(topic.title);
+    setEditTopicContent(topic.content);
+  };
+
+  const cancelEditTopic = () => {
+    setEditingTopicId(null);
+    setEditTopicTitle('');
+    setEditTopicContent('');
+  };
+
+  const saveEditTopic = async () => {
+    if (!topic || !editTopicTitle.trim() || !editTopicContent.trim()) return;
+
+    setIsSavingEdit(true);
+    try {
+      const { error } = await supabase
+        .from('forum_topics')
+        .update({
+          title: editTopicTitle.trim(),
+          content: editTopicContent.trim(),
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', topic.id);
+
+      if (error) throw error;
+
+      setTopic({
+        ...topic,
+        title: editTopicTitle.trim(),
+        content: editTopicContent.trim(),
+      });
+      cancelEditTopic();
+      toast.success('Тема обновлена');
+    } catch (error) {
+      console.error('Error updating topic:', error);
+      toast.error('Ошибка при обновлении');
+    } finally {
+      setIsSavingEdit(false);
+    }
+  };
+
+  // Edit comment handlers
+  const startEditComment = (comment: Comment) => {
+    setEditingCommentId(comment.id);
+    setEditCommentContent(comment.content);
+  };
+
+  const cancelEditComment = () => {
+    setEditingCommentId(null);
+    setEditCommentContent('');
+  };
+
+  const saveEditComment = async (commentId: string) => {
+    if (!editCommentContent.trim()) return;
+
+    setIsSavingEdit(true);
+    try {
+      const { error } = await supabase
+        .from('forum_comments')
+        .update({
+          content: editCommentContent.trim(),
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', commentId);
+
+      if (error) throw error;
+
+      setComments(
+        comments.map((c) =>
+          c.id === commentId ? { ...c, content: editCommentContent.trim() } : c
+        )
+      );
+      cancelEditComment();
+      toast.success('Комментарий обновлён');
+    } catch (error) {
+      console.error('Error updating comment:', error);
+      toast.error('Ошибка при обновлении');
+    } finally {
+      setIsSavingEdit(false);
+    }
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('ru-RU', {
       day: 'numeric',
@@ -189,7 +282,8 @@ export default function ForumTopic() {
     });
   };
 
-  const canDeleteTopic = user && topic && (user.id === topic.author_id || isAdmin);
+  const canEditTopic = user && topic && (user.id === topic.author_id || isAdmin);
+  const canDeleteTopic = canEditTopic;
 
   return (
     <Layout>
@@ -203,6 +297,12 @@ export default function ForumTopic() {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div className="flex-1" />
+          {canEditTopic && !editingTopicId && (
+            <Button variant="outline" size="sm" onClick={startEditTopic}>
+              <Pencil className="mr-2 h-4 w-4" />
+              Редактировать
+            </Button>
+          )}
           {canDeleteTopic && (
             <Button variant="destructive" size="sm" onClick={handleDeleteTopic}>
               <Trash2 className="mr-2 h-4 w-4" />
@@ -240,23 +340,66 @@ export default function ForumTopic() {
                     </Badge>
                   )}
                 </div>
-                <h1 className="text-2xl font-bold text-foreground">{topic.title}</h1>
-                <div className="flex items-center gap-4 text-sm text-muted-foreground mt-2">
-                  <span className="flex items-center gap-1">
-                    <User className="h-4 w-4" />
-                    {topic.author?.username || 'Аноним'}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Clock className="h-4 w-4" />
-                    {formatDate(topic.created_at)}
-                  </span>
-                </div>
+                {editingTopicId === topic.id ? (
+                  <div className="space-y-3">
+                    <Input
+                      value={editTopicTitle}
+                      onChange={(e) => setEditTopicTitle(e.target.value)}
+                      placeholder="Заголовок темы"
+                      className="text-lg font-bold"
+                    />
+                    <Textarea
+                      value={editTopicContent}
+                      onChange={(e) => setEditTopicContent(e.target.value)}
+                      placeholder="Содержание темы"
+                      rows={5}
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        onClick={saveEditTopic}
+                        disabled={isSavingEdit}
+                      >
+                        {isSavingEdit ? (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                          <Check className="mr-2 h-4 w-4" />
+                        )}
+                        Сохранить
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={cancelEditTopic}
+                      >
+                        <X className="mr-2 h-4 w-4" />
+                        Отмена
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <h1 className="text-2xl font-bold text-foreground">{topic.title}</h1>
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground mt-2">
+                      <span className="flex items-center gap-1">
+                        <User className="h-4 w-4" />
+                        {topic.author?.username || 'Аноним'}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Clock className="h-4 w-4" />
+                        {formatDate(topic.created_at)}
+                      </span>
+                    </div>
+                  </>
+                )}
               </CardHeader>
-              <CardContent>
-                <div className="prose prose-sm max-w-none dark:prose-invert">
-                  <p className="whitespace-pre-wrap">{topic.content}</p>
-                </div>
-              </CardContent>
+              {editingTopicId !== topic.id && (
+                <CardContent>
+                  <div className="prose prose-sm max-w-none dark:prose-invert">
+                    <p className="whitespace-pre-wrap">{topic.content}</p>
+                  </div>
+                </CardContent>
+              )}
             </Card>
 
             {/* Comments */}
@@ -278,17 +421,59 @@ export default function ForumTopic() {
                           <span>•</span>
                           <span>{formatDate(comment.created_at)}</span>
                         </div>
-                        <p className="whitespace-pre-wrap">{comment.content}</p>
+                        {editingCommentId === comment.id ? (
+                          <div className="space-y-3">
+                            <Textarea
+                              value={editCommentContent}
+                              onChange={(e) => setEditCommentContent(e.target.value)}
+                              rows={3}
+                            />
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                onClick={() => saveEditComment(comment.id)}
+                                disabled={isSavingEdit}
+                              >
+                                {isSavingEdit ? (
+                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                ) : (
+                                  <Check className="mr-2 h-4 w-4" />
+                                )}
+                                Сохранить
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={cancelEditComment}
+                              >
+                                <X className="mr-2 h-4 w-4" />
+                                Отмена
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <p className="whitespace-pre-wrap">{comment.content}</p>
+                        )}
                       </div>
-                      {user && (user.id === comment.author_id || isAdmin) && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="shrink-0 text-destructive hover:text-destructive"
-                          onClick={() => handleDeleteComment(comment.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                      {user && (user.id === comment.author_id || isAdmin) && editingCommentId !== comment.id && (
+                        <div className="flex gap-1 shrink-0">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => startEditComment(comment)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-destructive hover:text-destructive"
+                            onClick={() => handleDeleteComment(comment.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       )}
                     </div>
                   </CardContent>
