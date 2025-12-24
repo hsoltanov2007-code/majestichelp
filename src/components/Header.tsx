@@ -309,7 +309,7 @@ export function Header() {
             </SheetTrigger>
             <SheetContent side="right" className="w-80 overflow-y-auto">
               <div className="mt-4 mb-6">
-                <GlobalSearch />
+                <GlobalSearch onResultClick={() => setIsOpen(false)} />
               </div>
               <nav className="flex flex-col gap-4">
                 {/* Главная */}

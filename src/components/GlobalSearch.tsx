@@ -15,7 +15,11 @@ interface SearchResult {
   path: string;
 }
 
-export function GlobalSearch() {
+interface GlobalSearchProps {
+  onResultClick?: () => void;
+}
+
+export function GlobalSearch({ onResultClick }: GlobalSearchProps = {}) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -105,6 +109,7 @@ export function GlobalSearch() {
       navigate(results[selectedIndex].path);
       setQuery("");
       setIsOpen(false);
+      onResultClick?.();
     } else if (e.key === "Escape") {
       setIsOpen(false);
     }
@@ -171,6 +176,7 @@ export function GlobalSearch() {
                 navigate(result.path);
                 setQuery("");
                 setIsOpen(false);
+                onResultClick?.();
               }}
               className={cn(
                 "flex w-full items-start gap-3 rounded-md p-3 text-left transition-colors",
