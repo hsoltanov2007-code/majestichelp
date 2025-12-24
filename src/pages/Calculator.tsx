@@ -59,15 +59,22 @@ export default function Calculator() {
     { min: 0, max: 0 }
   );
 
-  const parseBail = (bailStr: string): number => {
-    if (bailStr === "Не предусмотрен") return 0;
+  const parseBail = (bailStr: string): number | null => {
+    if (bailStr === "Не предусмотрен") return null;
     const match = bailStr.match(/\$?([\d,]+)/);
-    return match ? parseInt(match[1].replace(/,/g, "")) : 0;
+    return match ? parseInt(match[1].replace(/,/g, "")) : null;
   };
 
-  const totalBail = selectedArticles.reduce((acc, article) => {
-    return acc + parseBail(article.bail);
-  }, 0);
+  // If any article has no bail, bail is not available for the whole set
+  const hasBailUnavailable = selectedArticles.some(
+    (article) => parseBail(article.bail) === null
+  );
+
+  const totalBail = hasBailUnavailable
+    ? null
+    : selectedArticles.reduce((acc, article) => {
+        return acc + (parseBail(article.bail) || 0);
+      }, 0);
 
   return (
     <Layout>
@@ -202,8 +209,10 @@ export default function Calculator() {
                     <span className="text-muted-foreground">Залог:</span>
                   </div>
                   <p className="font-bold text-lg">
-                    {totalBail === 0
+                    {totalBail === null
                       ? "Не предусмотрен"
+                      : totalBail === 0
+                      ? "—"
                       : `$${totalBail.toLocaleString()}`}
                   </p>
                 </div>
