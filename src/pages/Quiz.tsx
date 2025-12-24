@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { Layout } from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,9 @@ import {
   Clock,
   Target,
   Flame,
-  Award
+  Award,
+  Download,
+  FileText
 } from "lucide-react";
 
 interface Question {
@@ -25,6 +27,12 @@ interface Question {
   options: string[];
   correctAnswer: string;
   questionText: string;
+}
+
+interface AnswerRecord {
+  question: Question;
+  userAnswer: string;
+  isCorrect: boolean;
 }
 
 interface QuizStats {
@@ -44,6 +52,8 @@ export default function Quiz() {
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
   const [questions, setQuestions] = useState<Question[]>([]);
+  const [answerHistory, setAnswerHistory] = useState<AnswerRecord[]>([]);
+  const [sessionTime, setSessionTime] = useState(0);
   const [stats, setStats] = useState<QuizStats>({
     totalQuestions: 0,
     correctAnswers: 0,
@@ -82,28 +92,39 @@ export default function Quiz() {
     }));
   };
 
+  // Fisher-Yates shuffle for true randomization
+  const shuffleArray = <T,>(array: T[]): T[] => {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  };
+
   const generateQuestions = (): Question[] => {
-    const shuffledArticles = [...criminalArticles].sort(() => Math.random() - 0.5);
+    // True random shuffle using Fisher-Yates
+    const shuffledArticles = shuffleArray(criminalArticles);
     const selectedArticles = shuffledArticles.slice(0, QUESTIONS_PER_QUIZ);
     
+    // Randomize question types for each question
+    const questionTypes: Question["type"][] = difficulty === "easy" 
+      ? ["description", "court"] 
+      : difficulty === "medium" 
+      ? ["description", "stars", "court"] 
+      : ["description", "stars", "court", "bail"];
+    
     return selectedArticles.map((article, index) => {
-      const questionTypes: Question["type"][] = difficulty === "easy" 
-        ? ["description", "court"] 
-        : difficulty === "medium" 
-        ? ["description", "stars", "court"] 
-        : ["description", "stars", "court", "bail"];
-      
-      const type = questionTypes[index % questionTypes.length];
+      // Random type selection for each question
+      const type = questionTypes[Math.floor(Math.random() * questionTypes.length)];
       
       switch (type) {
         case "description": {
-          const wrongOptions = shuffledArticles
-            .filter(a => a.id !== article.id)
-            .slice(0, 3)
-            .map(a => a.article);
-          const options = [...wrongOptions, article.article].sort(() => Math.random() - 0.5);
+          const otherArticles = shuffleArray(shuffledArticles.filter(a => a.id !== article.id));
+          const wrongOptions = otherArticles.slice(0, 3).map(a => a.article);
+          const options = shuffleArray([...wrongOptions, article.article]);
           return {
-            id: `q-${index}`,
+            id: `q-${index}-${Date.now()}`,
             type,
             article,
             options,
@@ -112,9 +133,9 @@ export default function Quiz() {
           };
         }
         case "stars": {
-          const starsOptions = ["1", "2", "3", "4", "5"];
+          const starsOptions = shuffleArray(["1", "2", "3", "4", "5"]);
           return {
-            id: `q-${index}`,
+            id: `q-${index}-${Date.now()}`,
             type,
             article,
             options: starsOptions,
@@ -124,25 +145,25 @@ export default function Quiz() {
         }
         case "court": {
           return {
-            id: `q-${index}`,
+            id: `q-${index}-${Date.now()}`,
             type,
             article,
-            options: ["Требуется суд", "Не требуется суд"],
+            options: shuffleArray(["Требуется суд", "Не требуется суд"]),
             correctAnswer: article.court ? "Требуется суд" : "Не требуется суд",
             questionText: `Требуется ли суд по статье "${article.article}" (${article.description})?`
           };
         }
         case "bail": {
-          const bailOptions = ["$25,000", "$50,000", "$75,000", "Не предусмотрен"];
+          let bailOptions = ["$25,000", "$50,000", "$75,000", "Не предусмотрен"];
           const correctBail = article.bail.includes("Не предусмотрен") ? "Не предусмотрен" : article.bail;
           if (!bailOptions.includes(correctBail)) {
             bailOptions[Math.floor(Math.random() * 3)] = correctBail;
           }
           return {
-            id: `q-${index}`,
+            id: `q-${index}-${Date.now()}`,
             type,
             article,
-            options: bailOptions.sort(() => Math.random() - 0.5),
+            options: shuffleArray(bailOptions),
             correctAnswer: correctBail,
             questionText: `Какой залог предусмотрен по статье "${article.article}"?`
           };
@@ -156,6 +177,7 @@ export default function Quiz() {
     setCurrentQuestionIndex(0);
     setSelectedAnswer(null);
     setIsAnswered(false);
+    setAnswerHistory([]);
     setGameState("playing");
     setStartTime(Date.now());
     setStats(prev => ({ ...prev, streak: 0 }));
@@ -167,12 +189,20 @@ export default function Quiz() {
     setSelectedAnswer(answer);
     setIsAnswered(true);
     
-    const isCorrect = answer === questions[currentQuestionIndex].correctAnswer;
+    const currentQ = questions[currentQuestionIndex];
+    const isCorrect = answer === currentQ.correctAnswer;
+    
+    // Record answer
+    setAnswerHistory(prev => [...prev, {
+      question: currentQ,
+      userAnswer: answer,
+      isCorrect
+    }]);
     
     setStats(prev => {
       const newStreak = isCorrect ? prev.streak + 1 : 0;
       const newBestStreak = Math.max(prev.bestStreak, newStreak);
-      const newStats = {
+      return {
         ...prev,
         totalQuestions: prev.totalQuestions + 1,
         correctAnswers: prev.correctAnswers + (isCorrect ? 1 : 0),
@@ -180,7 +210,6 @@ export default function Quiz() {
         streak: newStreak,
         bestStreak: newBestStreak
       };
-      return newStats;
     });
   };
 
@@ -191,6 +220,7 @@ export default function Quiz() {
       setIsAnswered(false);
     } else {
       const timeSpent = Math.round((Date.now() - startTime) / 1000);
+      setSessionTime(timeSpent);
       setStats(prev => {
         const newStats = { ...prev, timeSpent: prev.timeSpent + timeSpent };
         saveStats(newStats);
@@ -203,11 +233,8 @@ export default function Quiz() {
   const currentQuestion = questions[currentQuestionIndex];
   const progress = questions.length > 0 ? ((currentQuestionIndex + 1) / questions.length) * 100 : 0;
   
-  const sessionCorrect = useMemo(() => {
-    if (gameState !== "result") return 0;
-    const sessionAnswers = questions.filter((q, i) => i < QUESTIONS_PER_QUIZ).length;
-    return stats.correctAnswers - (stats.totalQuestions - sessionAnswers);
-  }, [gameState, questions, stats]);
+  const sessionCorrect = answerHistory.filter(a => a.isCorrect).length;
+  const sessionWrong = answerHistory.filter(a => !a.isCorrect).length;
 
   const accuracy = stats.totalQuestions > 0 
     ? Math.round((stats.correctAnswers / stats.totalQuestions) * 100) 
@@ -230,6 +257,216 @@ export default function Quiz() {
     };
     setStats(newStats);
     saveStats(newStats);
+  };
+
+  const downloadPDF = () => {
+    const date = new Date().toLocaleDateString('ru-RU');
+    const time = new Date().toLocaleTimeString('ru-RU');
+    
+    const difficultyLabels = {
+      easy: "Лёгкий",
+      medium: "Средний", 
+      hard: "Сложный"
+    };
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>Результаты теста УК - ${date}</title>
+        <style>
+          * { margin: 0; padding: 0; box-sizing: border-box; }
+          body { 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            padding: 40px; 
+            background: #f5f5f5;
+            color: #333;
+          }
+          .container { 
+            max-width: 800px; 
+            margin: 0 auto; 
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+          }
+          .header { 
+            text-align: center; 
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e5e5e5;
+          }
+          .header h1 { 
+            color: #1a1a2e; 
+            font-size: 28px;
+            margin-bottom: 8px;
+          }
+          .header p { color: #666; font-size: 14px; }
+          .stats-grid { 
+            display: grid; 
+            grid-template-columns: repeat(4, 1fr); 
+            gap: 15px; 
+            margin-bottom: 30px; 
+          }
+          .stat-card { 
+            background: #f8f9fa; 
+            padding: 20px; 
+            border-radius: 10px; 
+            text-align: center;
+            border: 1px solid #e9ecef;
+          }
+          .stat-card .value { 
+            font-size: 28px; 
+            font-weight: bold; 
+            color: #1a1a2e;
+          }
+          .stat-card .label { 
+            font-size: 12px; 
+            color: #666;
+            margin-top: 5px;
+          }
+          .stat-card.correct { background: #d4edda; border-color: #c3e6cb; }
+          .stat-card.correct .value { color: #28a745; }
+          .stat-card.wrong { background: #f8d7da; border-color: #f5c6cb; }
+          .stat-card.wrong .value { color: #dc3545; }
+          .questions-section h2 { 
+            font-size: 20px; 
+            margin-bottom: 20px;
+            color: #1a1a2e;
+          }
+          .question { 
+            margin-bottom: 20px; 
+            padding: 20px;
+            border: 1px solid #e5e5e5;
+            border-radius: 10px;
+            page-break-inside: avoid;
+          }
+          .question.correct { border-left: 4px solid #28a745; background: #f8fff9; }
+          .question.wrong { border-left: 4px solid #dc3545; background: #fff8f8; }
+          .question-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            margin-bottom: 10px;
+          }
+          .question-number { 
+            font-weight: bold; 
+            color: #666;
+            font-size: 14px;
+          }
+          .question-status { 
+            padding: 4px 12px; 
+            border-radius: 20px; 
+            font-size: 12px;
+            font-weight: bold;
+          }
+          .question-status.correct { background: #28a745; color: white; }
+          .question-status.wrong { background: #dc3545; color: white; }
+          .question-text { 
+            font-size: 15px; 
+            margin-bottom: 12px;
+            color: #333;
+            line-height: 1.5;
+          }
+          .answer-row { 
+            font-size: 14px;
+            padding: 8px 0;
+            border-top: 1px solid #e9ecef;
+          }
+          .answer-row:first-of-type { border-top: none; }
+          .answer-label { color: #666; font-weight: 500; }
+          .answer-value { color: #333; }
+          .answer-value.correct-answer { color: #28a745; font-weight: bold; }
+          .answer-value.user-wrong { color: #dc3545; text-decoration: line-through; }
+          .footer { 
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #e5e5e5;
+            text-align: center;
+            color: #999;
+            font-size: 12px;
+          }
+          @media print {
+            body { padding: 20px; background: white; }
+            .container { box-shadow: none; padding: 0; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>🎓 Результаты теста на знание УК</h1>
+            <p>Дата: ${date} | Время: ${time} | Сложность: ${difficultyLabels[difficulty]}</p>
+          </div>
+          
+          <div class="stats-grid">
+            <div class="stat-card correct">
+              <div class="value">${sessionCorrect}</div>
+              <div class="label">Правильно</div>
+            </div>
+            <div class="stat-card wrong">
+              <div class="value">${sessionWrong}</div>
+              <div class="label">Неправильно</div>
+            </div>
+            <div class="stat-card">
+              <div class="value">${Math.round((sessionCorrect / QUESTIONS_PER_QUIZ) * 100)}%</div>
+              <div class="label">Точность</div>
+            </div>
+            <div class="stat-card">
+              <div class="value">${formatTime(sessionTime)}</div>
+              <div class="label">Время</div>
+            </div>
+          </div>
+
+          <div class="questions-section">
+            <h2>📋 Детальные результаты</h2>
+            ${answerHistory.map((record, index) => `
+              <div class="question ${record.isCorrect ? 'correct' : 'wrong'}">
+                <div class="question-header">
+                  <span class="question-number">Вопрос ${index + 1}</span>
+                  <span class="question-status ${record.isCorrect ? 'correct' : 'wrong'}">
+                    ${record.isCorrect ? '✓ Верно' : '✗ Неверно'}
+                  </span>
+                </div>
+                <div class="question-text">${record.question.questionText}</div>
+                <div class="answer-row">
+                  <span class="answer-label">Ваш ответ: </span>
+                  <span class="answer-value ${record.isCorrect ? '' : 'user-wrong'}">${record.userAnswer}</span>
+                </div>
+                ${!record.isCorrect ? `
+                  <div class="answer-row">
+                    <span class="answer-label">Правильный ответ: </span>
+                    <span class="answer-value correct-answer">${record.question.correctAnswer}</span>
+                  </div>
+                ` : ''}
+                <div class="answer-row">
+                  <span class="answer-label">Статья: </span>
+                  <span class="answer-value">${record.question.article.article} - ${record.question.article.description}</span>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+
+          <div class="footer">
+            <p>Denver | Majestic RP - Справочник законов</p>
+            <p>Создано: ${date} ${time}</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(htmlContent);
+      printWindow.document.close();
+      
+      // Auto print after loading
+      printWindow.onload = () => {
+        printWindow.print();
+      };
+    }
   };
 
   return (
@@ -432,24 +669,24 @@ export default function Quiz() {
                 <Trophy className="h-16 w-16 mx-auto mb-4 text-yellow-500" />
                 <h2 className="text-2xl font-bold mb-2">Тест завершён!</h2>
                 <p className="text-muted-foreground mb-6">
-                  Вы ответили на {QUESTIONS_PER_QUIZ} вопросов
+                  Время: {formatTime(sessionTime)}
                 </p>
                 
                 <div className="grid gap-4 md:grid-cols-3 mb-6">
                   <div className="p-4 rounded-lg bg-green-500/10">
                     <CheckCircle2 className="h-8 w-8 mx-auto mb-2 text-green-500" />
-                    <p className="text-2xl font-bold text-green-600">{stats.correctAnswers - (stats.totalQuestions - QUESTIONS_PER_QUIZ)}</p>
+                    <p className="text-2xl font-bold text-green-600">{sessionCorrect}</p>
                     <p className="text-sm text-muted-foreground">Правильно</p>
                   </div>
                   <div className="p-4 rounded-lg bg-red-500/10">
                     <XCircle className="h-8 w-8 mx-auto mb-2 text-red-500" />
-                    <p className="text-2xl font-bold text-red-600">{QUESTIONS_PER_QUIZ - (stats.correctAnswers - (stats.totalQuestions - QUESTIONS_PER_QUIZ))}</p>
+                    <p className="text-2xl font-bold text-red-600">{sessionWrong}</p>
                     <p className="text-sm text-muted-foreground">Неправильно</p>
                   </div>
-                  <div className="p-4 rounded-lg bg-orange-500/10">
-                    <Flame className="h-8 w-8 mx-auto mb-2 text-orange-500" />
-                    <p className="text-2xl font-bold text-orange-600">{stats.bestStreak}</p>
-                    <p className="text-sm text-muted-foreground">Лучшая серия</p>
+                  <div className="p-4 rounded-lg bg-blue-500/10">
+                    <Target className="h-8 w-8 mx-auto mb-2 text-blue-500" />
+                    <p className="text-2xl font-bold text-blue-600">{Math.round((sessionCorrect / QUESTIONS_PER_QUIZ) * 100)}%</p>
+                    <p className="text-sm text-muted-foreground">Точность</p>
                   </div>
                 </div>
 
@@ -458,22 +695,73 @@ export default function Quiz() {
                     <RotateCcw className="mr-2 h-5 w-5" />
                     Пройти ещё раз
                   </Button>
-                  <Button variant="outline" size="lg" onClick={() => setGameState("menu")}>
+                  <Button variant="outline" size="lg" onClick={downloadPDF}>
+                    <Download className="mr-2 h-5 w-5" />
+                    Скачать PDF
+                  </Button>
+                  <Button variant="ghost" size="lg" onClick={() => setGameState("menu")}>
                     В меню
                   </Button>
                 </div>
               </CardContent>
             </Card>
 
+            {/* Detailed Results */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="h-5 w-5" />
+                  Детальные результаты
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {answerHistory.map((record, index) => (
+                  <div 
+                    key={index}
+                    className={`p-4 rounded-lg border-l-4 ${
+                      record.isCorrect 
+                        ? 'border-l-green-500 bg-green-500/5' 
+                        : 'border-l-red-500 bg-red-500/5'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <span className="text-sm text-muted-foreground">Вопрос {index + 1}</span>
+                      <Badge variant={record.isCorrect ? "default" : "destructive"}>
+                        {record.isCorrect ? "Верно" : "Неверно"}
+                      </Badge>
+                    </div>
+                    <p className="font-medium mb-2">{record.question.questionText}</p>
+                    <div className="text-sm space-y-1">
+                      <p>
+                        <span className="text-muted-foreground">Ваш ответ: </span>
+                        <span className={record.isCorrect ? "text-green-600" : "text-red-600 line-through"}>
+                          {record.userAnswer}
+                        </span>
+                      </p>
+                      {!record.isCorrect && (
+                        <p>
+                          <span className="text-muted-foreground">Правильный ответ: </span>
+                          <span className="text-green-600 font-medium">{record.question.correctAnswer}</span>
+                        </p>
+                      )}
+                      <p className="text-muted-foreground text-xs mt-2">
+                        {record.question.article.article} — {record.question.article.description}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+
             {/* Achievement hint */}
-            {accuracy >= 80 && (
+            {(sessionCorrect / QUESTIONS_PER_QUIZ) >= 0.8 && (
               <Card className="bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border-yellow-500/30">
                 <CardContent className="pt-6 flex items-center gap-4">
                   <Award className="h-12 w-12 text-yellow-500" />
                   <div>
                     <p className="font-bold text-lg">Отличный результат!</p>
                     <p className="text-muted-foreground">
-                      Ваша общая точность: {accuracy}%. Вы хорошо знаете уголовный кодекс!
+                      Вы правильно ответили на {sessionCorrect} из {QUESTIONS_PER_QUIZ} вопросов. Отличное знание УК!
                     </p>
                   </div>
                 </CardContent>
