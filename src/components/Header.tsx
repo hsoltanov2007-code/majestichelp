@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Menu, Moon, Sun, Bookmark, MessageSquare, User, LogOut, Crown } from "lucide-react";
+import { Menu, Moon, Sun, Bookmark, MessageSquare, User, LogOut, Crown, Brain } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useState, useEffect } from "react";
@@ -15,6 +15,7 @@ const navItems = [
   { path: "/procedural-code", label: "ПК" },
   { path: "/government-rules", label: "ПГО" },
   { path: "/calculator", label: "Калькулятор" },
+  { path: "/quiz", label: "Тест", icon: Brain },
   { path: "/scenarios", label: "Сценарии" },
   { path: "/glossary", label: "Глоссарий" },
   { path: "/faq", label: "FAQ" },

@@ -16,6 +16,7 @@ import Glossary from "./pages/Glossary";
 import Scenarios from "./pages/Scenarios";
 import FAQ from "./pages/FAQ";
 import ProceduralCode from "./pages/ProceduralCode";
+import Quiz from "./pages/Quiz";
 
 import GovernmentRules from "./pages/GovernmentRules";
 import NotFound from "./pages/NotFound";
@@ -49,6 +50,7 @@ const App = () => (
           <Route path="/glossary" element={<Glossary />} />
           <Route path="/scenarios" element={<Scenarios />} />
           <Route path="/faq" element={<FAQ />} />
+          <Route path="/quiz" element={<Quiz />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/forum" element={<Forum />} />
           <Route path="/forum/category/:id" element={<ForumCategory />} />
