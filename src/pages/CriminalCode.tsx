@@ -170,7 +170,7 @@ export default function CriminalCode() {
                       <Bookmark className={`h-4 w-4 ${isFavorite(article.id, "criminal") ? "fill-current" : ""}`} />
                     </Button>
                     <Badge variant="outline" className="gap-1">
-                      <Star className="h-3 w-3" /> {article.stars > 0 ? "⭐".repeat(article.stars) : "1-5⭐"}
+                      <Star className="h-3 w-3" /> {article.starsRange || (article.stars > 0 ? "⭐".repeat(article.stars) : "1-5⭐")}
                     </Badge>
                     <Badge variant={article.court ? "destructive" : "secondary"}>
                       <Gavel className="h-3 w-3 mr-1" /> {article.court ? "Суд" : "Без суда"}
