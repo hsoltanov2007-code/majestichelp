@@ -308,7 +308,10 @@ export function Header() {
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-80 overflow-y-auto">
-              <nav className="flex flex-col gap-4 mt-8">
+              <div className="mt-4 mb-6">
+                <GlobalSearch />
+              </div>
+              <nav className="flex flex-col gap-4">
                 {/* Главная */}
                 <Link
                   to="/"
