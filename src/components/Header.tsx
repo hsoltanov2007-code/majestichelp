@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Menu, Moon, Sun, Bookmark, MessageSquare, User, LogOut, Crown, Brain, Scale, BookOpen, Wrench, ChevronDown, Gavel, FileWarning, Car, ScrollText, Building2, LucideIcon } from "lucide-react";
+import { Menu, Moon, Sun, Bookmark, MessageSquare, User, LogOut, Crown, Brain, Scale, BookOpen, Wrench, ChevronDown, Gavel, FileWarning, Car, ScrollText, Building2, LucideIcon, Home, HelpCircle, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useState, useEffect } from "react";
@@ -12,6 +12,17 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 const codeItems: { path: string; label: string; short: string; icon: LucideIcon }[] = [
   { path: "/criminal-code", label: "Уголовный кодекс", short: "УК", icon: Gavel },
@@ -27,19 +38,63 @@ const toolItems = [
   { path: "/scenarios", label: "Сценарии", icon: BookOpen },
 ];
 
-const referenceItems = [
-  { path: "/glossary", label: "Глоссарий" },
-  { path: "/faq", label: "FAQ" },
+const referenceItems: { path: string; label: string; tooltip: string; icon: LucideIcon }[] = [
+  { path: "/glossary", label: "Глоссарий", tooltip: "Словарь терминов", icon: FileText },
+  { path: "/faq", label: "FAQ", tooltip: "Частые вопросы", icon: HelpCircle },
 ];
 
-const allMobileItems = [
-  { path: "/", label: "Главная" },
-  ...codeItems.map(i => ({ path: i.path, label: i.short })),
-  ...toolItems.map(i => ({ path: i.path, label: i.label, icon: i.icon })),
-  ...referenceItems,
-  { path: "/forum", label: "Форум", icon: MessageSquare },
-  { path: "/favorites", label: "Избранное", icon: Bookmark },
-];
+// Mobile menu group component
+function MobileMenuGroup({ 
+  title, 
+  icon: Icon, 
+  items, 
+  location, 
+  onClose 
+}: { 
+  title: string; 
+  icon: LucideIcon; 
+  items: { path: string; label: string; icon?: LucideIcon; short?: string }[]; 
+  location: ReturnType<typeof useLocation>; 
+  onClose: () => void;
+}) {
+  const [isOpen, setIsOpen] = useState(
+    items.some(item => location.pathname.startsWith(item.path))
+  );
+
+  return (
+    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+      <CollapsibleTrigger asChild>
+        <button className="w-full px-4 py-3 text-base font-medium rounded-lg transition-colors flex items-center justify-between text-muted-foreground hover:text-foreground hover:bg-muted">
+          <span className="flex items-center gap-3">
+            <Icon className="h-5 w-5" />
+            {title}
+          </span>
+          <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+        </button>
+      </CollapsibleTrigger>
+      <CollapsibleContent className="pl-6 space-y-1 animate-accordion-down">
+        {items.map((item) => {
+          const ItemIcon = item.icon;
+          return (
+            <Link
+              key={item.path}
+              to={item.path}
+              onClick={onClose}
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors flex items-center gap-2 ${
+                location.pathname.startsWith(item.path)
+                  ? "bg-primary/10 text-primary"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
+              }`}
+            >
+              {ItemIcon && <ItemIcon className="h-4 w-4" />}
+              {item.short || item.label}
+            </Link>
+          );
+        })}
+      </CollapsibleContent>
+    </Collapsible>
+  );
+}
 
 export function Header() {
   const location = useLocation();
@@ -153,44 +208,68 @@ export function Header() {
           </DropdownMenu>
 
           {/* Справка */}
-          {referenceItems.map((item) => (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                location.pathname === item.path
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
-              }`}
-            >
-              {item.label}
-            </Link>
-          ))}
+          <TooltipProvider delayDuration={300}>
+            {referenceItems.map((item) => (
+              <Tooltip key={item.path}>
+                <TooltipTrigger asChild>
+                  <Link
+                    to={item.path}
+                    className={`px-3 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-1 ${
+                      location.pathname === item.path
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                    }`}
+                  >
+                    <item.icon className="h-4 w-4" />
+                    {item.label}
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{item.tooltip}</p>
+                </TooltipContent>
+              </Tooltip>
+            ))}
+          </TooltipProvider>
 
-          {/* Форум */}
-          <Link
-            to="/forum"
-            className={`px-3 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-1 ${
-              location.pathname.startsWith("/forum")
-                ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:text-foreground hover:bg-muted"
-            }`}
-          >
-            <MessageSquare className="h-4 w-4" />
-            Форум
-          </Link>
+          {/* Форум и Избранное с подсказками */}
+          <TooltipProvider delayDuration={300}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link
+                  to="/forum"
+                  className={`px-3 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-1 ${
+                    location.pathname.startsWith("/forum")
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  }`}
+                >
+                  <MessageSquare className="h-4 w-4" />
+                  Форум
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Обсуждение с сообществом</p>
+              </TooltipContent>
+            </Tooltip>
 
-          {/* Избранное */}
-          <Link
-            to="/favorites"
-            className={`px-3 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-1 ${
-              location.pathname === "/favorites"
-                ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:text-foreground hover:bg-muted"
-            }`}
-          >
-            <Bookmark className="h-4 w-4" />
-          </Link>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link
+                  to="/favorites"
+                  className={`px-3 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-1 ${
+                    location.pathname === "/favorites"
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  }`}
+                >
+                  <Bookmark className="h-4 w-4" />
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Сохранённые статьи</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </nav>
 
         <div className="flex items-center gap-2">
@@ -228,26 +307,76 @@ export function Header() {
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-72">
-              <nav className="flex flex-col gap-2 mt-8">
-                {allMobileItems.map((item) => {
-                  const IconComponent = (item as any).icon;
-                  return (
-                    <Link
-                      key={item.path}
-                      to={item.path}
-                      onClick={() => setIsOpen(false)}
-                      className={`px-4 py-3 text-base font-medium rounded-lg transition-colors flex items-center gap-2 ${
-                        location.pathname === item.path || location.pathname.startsWith(item.path + '/')
-                          ? "bg-primary text-primary-foreground"
-                          : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                      }`}
-                    >
-                      {IconComponent && <IconComponent className="h-4 w-4" />}
-                      {item.label}
-                    </Link>
-                  );
-                })}
+            <SheetContent side="right" className="w-80 overflow-y-auto">
+              <nav className="flex flex-col gap-4 mt-8">
+                {/* Главная */}
+                <Link
+                  to="/"
+                  onClick={() => setIsOpen(false)}
+                  className={`px-4 py-3 text-base font-medium rounded-lg transition-colors flex items-center gap-3 ${
+                    location.pathname === "/"
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  }`}
+                >
+                  <Home className="h-5 w-5" />
+                  Главная
+                </Link>
+
+                {/* Кодексы */}
+                <MobileMenuGroup 
+                  title="Кодексы" 
+                  icon={BookOpen}
+                  items={codeItems}
+                  location={location}
+                  onClose={() => setIsOpen(false)}
+                />
+
+                {/* Инструменты */}
+                <MobileMenuGroup 
+                  title="Инструменты" 
+                  icon={Wrench}
+                  items={toolItems}
+                  location={location}
+                  onClose={() => setIsOpen(false)}
+                />
+
+                {/* Справка */}
+                <MobileMenuGroup 
+                  title="Справка" 
+                  icon={HelpCircle}
+                  items={referenceItems}
+                  location={location}
+                  onClose={() => setIsOpen(false)}
+                />
+
+                {/* Форум */}
+                <Link
+                  to="/forum"
+                  onClick={() => setIsOpen(false)}
+                  className={`px-4 py-3 text-base font-medium rounded-lg transition-colors flex items-center gap-3 ${
+                    location.pathname.startsWith("/forum")
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  }`}
+                >
+                  <MessageSquare className="h-5 w-5" />
+                  Форум
+                </Link>
+
+                {/* Избранное */}
+                <Link
+                  to="/favorites"
+                  onClick={() => setIsOpen(false)}
+                  className={`px-4 py-3 text-base font-medium rounded-lg transition-colors flex items-center gap-3 ${
+                    location.pathname === "/favorites"
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  }`}
+                >
+                  <Bookmark className="h-5 w-5" />
+                  Избранное
+                </Link>
               </nav>
             </SheetContent>
           </Sheet>
