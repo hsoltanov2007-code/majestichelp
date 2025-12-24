@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Menu, Moon, Sun, Bookmark, MessageSquare, User, LogOut, Crown, Brain, Scale, BookOpen, Wrench, ChevronDown } from "lucide-react";
+import { Menu, Moon, Sun, Bookmark, MessageSquare, User, LogOut, Crown, Brain, Scale, BookOpen, Wrench, ChevronDown, Gavel, FileWarning, Car, ScrollText, Building2, LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useState, useEffect } from "react";
@@ -13,12 +13,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-const codeItems = [
-  { path: "/criminal-code", label: "Уголовный кодекс", short: "УК" },
-  { path: "/administrative-code", label: "Административный кодекс", short: "АК" },
-  { path: "/traffic-code", label: "Дорожный кодекс", short: "ДК" },
-  { path: "/procedural-code", label: "Процессуальный кодекс", short: "ПК" },
-  { path: "/government-rules", label: "Правила гос. органов", short: "ПГО" },
+const codeItems: { path: string; label: string; short: string; icon: LucideIcon }[] = [
+  { path: "/criminal-code", label: "Уголовный кодекс", short: "УК", icon: Gavel },
+  { path: "/administrative-code", label: "Административный кодекс", short: "АК", icon: FileWarning },
+  { path: "/traffic-code", label: "Дорожный кодекс", short: "ДК", icon: Car },
+  { path: "/procedural-code", label: "Процессуальный кодекс", short: "ПК", icon: ScrollText },
+  { path: "/government-rules", label: "Правила гос. органов", short: "ПГО", icon: Building2 },
 ];
 
 const toolItems = [
@@ -101,13 +101,14 @@ export function Header() {
                 <DropdownMenuItem key={item.path} asChild>
                   <Link 
                     to={item.path} 
-                    className={`w-full cursor-pointer ${
+                    className={`w-full cursor-pointer flex items-center gap-2 ${
                       location.pathname.startsWith(item.path)
                         ? "bg-primary/10 text-primary"
                         : ""
                     }`}
                   >
-                    <span className="font-medium mr-2">{item.short}</span>
+                    <item.icon className="h-4 w-4" />
+                    <span className="font-medium">{item.short}</span>
                     <span className="text-muted-foreground text-xs">{item.label}</span>
                   </Link>
                 </DropdownMenuItem>
