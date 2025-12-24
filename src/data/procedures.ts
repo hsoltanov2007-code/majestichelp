@@ -85,3 +85,28 @@ export const bailTable = [
   { stars: 4, amount: "$100,000" },
   { stars: 5, amount: "$125,000" }
 ];
+
+export const detentionGrounds = [
+  "Застигнуто в момент совершения правонарушения или после",
+  "Есть явные следы правонарушения",
+  "Когда 3 и более свидетелей указывают на данное лицо",
+  "Когда есть фото/видео совершенного правонарушения",
+  "Если имеется ордер",
+  "Требование Губера, ГП и/или ЗГП",
+  "Когда имеется ориентировка на ТС или данное лицо",
+  "Если лицо находится в боло-розыске"
+];
+
+export const licenseTypes = [
+  { code: "HF", name: "Hunting/Fishing", description: "На рыбалку/охоту" },
+  { code: "CDWL", name: "Concealed Deadly Weapon License", description: "На оружие" },
+  { code: "Drive D", name: "Driver License D", description: "Лёгкий т/с" },
+  { code: "Drive M", name: "Driver License M", description: "Мото т/с" },
+  { code: "CDL B", name: "Commercial Driver License B", description: "Пикапы и грузовики" },
+  { code: "CDL A", name: "Commercial Driver License A", description: "Седельные тягачи" }
+];
+
+export const bailInfo = {
+  description: "Лицо, заключенное под стражу, может быть освобождено под залог по статьям уголовного кодекса, не влекущим судимость. Залог устанавливается пропорционально количеству месяцев, на которые назначено лишение свободы, в соотношении 10 к $25,000.",
+  courtNote: "При аресте на срок сорок месяцев и более, в протоколе ареста ставится отметка о судимости."
+};
