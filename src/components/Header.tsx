@@ -82,16 +82,31 @@ export function Header() {
           {/* Кодексы */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="gap-1 text-muted-foreground hover:text-foreground">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className={`gap-1 ${
+                  codeItems.some(item => location.pathname.startsWith(item.path))
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
                 <BookOpen className="h-4 w-4" />
                 Кодексы
                 <ChevronDown className="h-3 w-3" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start">
+            <DropdownMenuContent align="start" className="bg-popover">
               {codeItems.map((item) => (
                 <DropdownMenuItem key={item.path} asChild>
-                  <Link to={item.path} className="w-full cursor-pointer">
+                  <Link 
+                    to={item.path} 
+                    className={`w-full cursor-pointer ${
+                      location.pathname.startsWith(item.path)
+                        ? "bg-primary/10 text-primary"
+                        : ""
+                    }`}
+                  >
                     <span className="font-medium mr-2">{item.short}</span>
                     <span className="text-muted-foreground text-xs">{item.label}</span>
                   </Link>
@@ -103,16 +118,31 @@ export function Header() {
           {/* Инструменты */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="gap-1 text-muted-foreground hover:text-foreground">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className={`gap-1 ${
+                  toolItems.some(item => location.pathname.startsWith(item.path))
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
                 <Wrench className="h-4 w-4" />
                 Инструменты
                 <ChevronDown className="h-3 w-3" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start">
+            <DropdownMenuContent align="start" className="bg-popover">
               {toolItems.map((item) => (
                 <DropdownMenuItem key={item.path} asChild>
-                  <Link to={item.path} className="w-full cursor-pointer flex items-center gap-2">
+                  <Link 
+                    to={item.path} 
+                    className={`w-full cursor-pointer flex items-center gap-2 ${
+                      location.pathname.startsWith(item.path)
+                        ? "bg-primary/10 text-primary"
+                        : ""
+                    }`}
+                  >
                     <item.icon className="h-4 w-4" />
                     {item.label}
                   </Link>
