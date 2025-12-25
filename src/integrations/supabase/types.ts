@@ -85,6 +85,7 @@ export type Database = {
           topic_id: string | null
           type: string
           user_id: string
+          video_id: string | null
         }
         Insert: {
           comment_id?: string | null
@@ -94,6 +95,7 @@ export type Database = {
           topic_id?: string | null
           type: string
           user_id: string
+          video_id?: string | null
         }
         Update: {
           comment_id?: string | null
@@ -103,6 +105,7 @@ export type Database = {
           topic_id?: string | null
           type?: string
           user_id?: string
+          video_id?: string | null
         }
         Relationships: [
           {
@@ -117,6 +120,13 @@ export type Database = {
             columns: ["topic_id"]
             isOneToOne: false
             referencedRelation: "forum_topics"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "forum_notifications_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
+            referencedRelation: "media_videos"
             referencedColumns: ["id"]
           },
         ]

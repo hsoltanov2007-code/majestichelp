@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Bell, Check, Trash2, MessageCircle } from 'lucide-react';
+import { Bell, Check, Trash2, MessageCircle, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Popover,
@@ -19,6 +19,24 @@ export function NotificationBell() {
     markAllAsRead,
     deleteNotification,
   } = useNotifications();
+
+  const getNotificationContent = (notification: typeof notifications[0]) => {
+    if (notification.type === 'new_video') {
+      return {
+        icon: <Play className="h-5 w-5 text-primary shrink-0 mt-0.5" />,
+        title: 'Новое видео',
+        subtitle: notification.video?.title || 'Видео',
+        link: '/media',
+      };
+    }
+    
+    return {
+      icon: <MessageCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />,
+      title: 'Новый комментарий',
+      subtitle: notification.topic?.title || 'Тема',
+      link: `/forum/topic/${notification.topic_id}`,
+    };
+  };
 
   return (
     <Popover>
@@ -50,46 +68,50 @@ export function NotificationBell() {
             </div>
           ) : (
             <div className="divide-y">
-              {notifications.map((notification) => (
-                <div
-                  key={notification.id}
-                  className={`p-3 hover:bg-muted/50 transition-colors ${
-                    !notification.is_read ? 'bg-primary/5' : ''
-                  }`}
-                >
-                  <div className="flex items-start gap-3">
-                    <MessageCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                    <div className="flex-1 min-w-0">
-                      <Link
-                        to={`/forum/topic/${notification.topic_id}`}
-                        onClick={() => markAsRead(notification.id)}
-                        className="block"
+              {notifications.map((notification) => {
+                const content = getNotificationContent(notification);
+                
+                return (
+                  <div
+                    key={notification.id}
+                    className={`p-3 hover:bg-muted/50 transition-colors ${
+                      !notification.is_read ? 'bg-primary/5' : ''
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      {content.icon}
+                      <div className="flex-1 min-w-0">
+                        <Link
+                          to={content.link}
+                          onClick={() => markAsRead(notification.id)}
+                          className="block"
+                        >
+                          <p className="text-sm font-medium truncate">
+                            {content.title}
+                          </p>
+                          <p className="text-sm text-muted-foreground truncate">
+                            {content.subtitle}
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {formatDistanceToNow(new Date(notification.created_at), {
+                              addSuffix: true,
+                              locale: ru,
+                            })}
+                          </p>
+                        </Link>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="shrink-0 h-8 w-8"
+                        onClick={() => deleteNotification(notification.id)}
                       >
-                        <p className="text-sm font-medium truncate">
-                          Новый комментарий
-                        </p>
-                        <p className="text-sm text-muted-foreground truncate">
-                          {notification.topic?.title || 'Тема'}
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {formatDistanceToNow(new Date(notification.created_at), {
-                            addSuffix: true,
-                            locale: ru,
-                          })}
-                        </p>
-                      </Link>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="shrink-0 h-8 w-8"
-                      onClick={() => deleteNotification(notification.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </ScrollArea>
