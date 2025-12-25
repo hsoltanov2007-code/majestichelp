@@ -7,10 +7,14 @@ interface Notification {
   user_id: string;
   topic_id: string | null;
   comment_id: string | null;
+  video_id: string | null;
   type: string;
   is_read: boolean;
   created_at: string;
   topic?: {
+    title: string;
+  };
+  video?: {
     title: string;
   };
 }
@@ -39,23 +43,47 @@ export function useNotifications() {
 
       if (error) throw error;
 
-      // Fetch topic titles
-      const notificationsWithTopics = await Promise.all(
+      // Fetch topic/video titles
+      const notificationsWithDetails: Notification[] = await Promise.all(
         (data || []).map(async (notification) => {
+          let topic: { title: string } | undefined;
+          let video: { title: string } | undefined;
+          
           if (notification.topic_id) {
-            const { data: topic } = await supabase
+            const { data: topicData } = await supabase
               .from('forum_topics')
               .select('title')
               .eq('id', notification.topic_id)
               .maybeSingle();
-            return { ...notification, topic };
+            topic = topicData || undefined;
           }
-          return notification;
+          
+          if (notification.video_id) {
+            const { data: videoData } = await supabase
+              .from('media_videos')
+              .select('title')
+              .eq('id', notification.video_id)
+              .maybeSingle();
+            video = videoData || undefined;
+          }
+          
+          return {
+            id: notification.id,
+            user_id: notification.user_id,
+            topic_id: notification.topic_id,
+            comment_id: notification.comment_id,
+            video_id: notification.video_id,
+            type: notification.type,
+            is_read: notification.is_read || false,
+            created_at: notification.created_at || '',
+            topic,
+            video,
+          };
         })
       );
 
-      setNotifications(notificationsWithTopics);
-      setUnreadCount(notificationsWithTopics.filter((n) => !n.is_read).length);
+      setNotifications(notificationsWithDetails);
+      setUnreadCount(notificationsWithDetails.filter((n) => !n.is_read).length);
     } catch (error) {
       console.error('Error fetching notifications:', error);
     } finally {
