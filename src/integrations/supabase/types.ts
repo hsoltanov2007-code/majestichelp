@@ -168,6 +168,109 @@ export type Database = {
           },
         ]
       }
+      media_video_likes: {
+        Row: {
+          created_at: string
+          id: string
+          user_id: string
+          video_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          user_id: string
+          video_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          user_id?: string
+          video_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_video_likes_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
+            referencedRelation: "media_videos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      media_video_views: {
+        Row: {
+          created_at: string
+          id: string
+          session_id: string | null
+          user_id: string | null
+          video_id: string
+          view_type: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          session_id?: string | null
+          user_id?: string | null
+          video_id: string
+          view_type?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          session_id?: string | null
+          user_id?: string | null
+          video_id?: string
+          view_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_video_views_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
+            referencedRelation: "media_videos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      media_videos: {
+        Row: {
+          author_id: string
+          clicks_count: number
+          created_at: string
+          description: string | null
+          id: string
+          thumbnail_url: string | null
+          title: string
+          updated_at: string
+          video_url: string
+          views_count: number
+        }
+        Insert: {
+          author_id: string
+          clicks_count?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string
+          video_url: string
+          views_count?: number
+        }
+        Update: {
+          author_id?: string
+          clicks_count?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string
+          video_url?: string
+          views_count?: number
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -242,6 +345,14 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      increment_video_click: {
+        Args: { p_session_id: string; p_video_id: string }
+        Returns: undefined
+      }
+      increment_video_view: {
+        Args: { p_session_id: string; p_video_id: string }
+        Returns: undefined
       }
     }
     Enums: {

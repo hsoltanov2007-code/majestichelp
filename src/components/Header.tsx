@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Menu, Moon, Sun, Bookmark, MessageSquare, User, LogOut, Crown, Brain, Scale, BookOpen, Wrench, ChevronDown, Gavel, FileWarning, Car, ScrollText, Building2, LucideIcon, Home, HelpCircle, FileText } from "lucide-react";
+import { Menu, Moon, Sun, Bookmark, MessageSquare, User, LogOut, Crown, Brain, Scale, BookOpen, Wrench, ChevronDown, Gavel, FileWarning, Car, ScrollText, Building2, LucideIcon, Home, HelpCircle, FileText, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useState, useEffect } from "react";
@@ -41,6 +41,7 @@ const toolItems = [
 const referenceItems: { path: string; label: string; tooltip: string; icon: LucideIcon }[] = [
   { path: "/glossary", label: "Глоссарий", tooltip: "Словарь терминов", icon: FileText },
   { path: "/faq", label: "FAQ", tooltip: "Частые вопросы", icon: HelpCircle },
+  { path: "/media", label: "Медиа", tooltip: "Видео контент", icon: Play },
 ];
 
 // Mobile menu group component
