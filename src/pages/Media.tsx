@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Play, Heart, Eye, ExternalLink, Plus, Trash2, Loader2 } from "lucide-react";
+import { Play, Heart, Eye, ExternalLink, Plus, Trash2, Loader2, Edit, Sparkles } from "lucide-react";
 import { Layout } from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { toast as sonnerToast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { ru } from "date-fns/locale";
 
@@ -57,6 +58,9 @@ export default function Media() {
   const [selectedVideo, setSelectedVideo] = useState<VideoWithLikes | null>(null);
   const [newVideo, setNewVideo] = useState({ title: "", description: "", video_url: "" });
   const [submitting, setSubmitting] = useState(false);
+  const [editingVideo, setEditingVideo] = useState<VideoWithLikes | null>(null);
+  const [editForm, setEditForm] = useState({ title: "", description: "", video_url: "" });
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   const sessionId = localStorage.getItem("session_id") || crypto.randomUUID();
   if (!localStorage.getItem("session_id")) {
@@ -65,6 +69,69 @@ export default function Media() {
 
   useEffect(() => {
     fetchVideos();
+
+    // Subscribe to realtime updates for new videos
+    const channel = supabase
+      .channel('media-videos-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'media_videos'
+        },
+        (payload) => {
+          console.log('New video added:', payload);
+          const newVideo = payload.new as MediaVideo;
+          
+          // Show toast notification
+          sonnerToast(
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-accent" />
+              <span>Новое видео: {newVideo.title}</span>
+            </div>,
+            {
+              action: {
+                label: "Смотреть",
+                onClick: () => {
+                  // Scroll to top and refresh
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+              }
+            }
+          );
+          
+          // Refresh the video list
+          fetchVideos();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'media_videos'
+        },
+        () => {
+          fetchVideos();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'media_videos'
+        },
+        () => {
+          fetchVideos();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user]);
 
   const fetchVideos = async () => {
@@ -151,6 +218,49 @@ export default function Media() {
       fetchVideos();
     } catch (error: any) {
       toast({ title: "Ошибка при удалении", description: error.message, variant: "destructive" });
+    }
+  };
+
+  const handleEditVideo = (video: VideoWithLikes) => {
+    setEditingVideo(video);
+    setEditForm({
+      title: video.title,
+      description: video.description || "",
+      video_url: video.video_url,
+    });
+    setIsEditDialogOpen(true);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingVideo || !editForm.title || !editForm.video_url) {
+      toast({ title: "Заполните обязательные поля", variant: "destructive" });
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const thumbnail = getVideoThumbnail(editForm.video_url);
+      
+      const { error } = await supabase
+        .from("media_videos")
+        .update({
+          title: editForm.title,
+          description: editForm.description || null,
+          video_url: editForm.video_url,
+          thumbnail_url: thumbnail,
+        })
+        .eq("id", editingVideo.id);
+
+      if (error) throw error;
+
+      toast({ title: "Видео обновлено!" });
+      setIsEditDialogOpen(false);
+      setEditingVideo(null);
+      fetchVideos();
+    } catch (error: any) {
+      toast({ title: "Ошибка при обновлении", description: error.message, variant: "destructive" });
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -348,14 +458,24 @@ export default function Media() {
                           <ExternalLink className="h-4 w-4" />
                         </Button>
                         {isAdmin && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleDeleteVideo(video.id)}
-                            className="text-destructive hover:text-destructive"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          <>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleEditVideo(video)}
+                              title="Редактировать"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleDeleteVideo(video.id)}
+                              className="text-destructive hover:text-destructive"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </>
                         )}
                       </div>
                     </div>
@@ -419,6 +539,48 @@ export default function Media() {
                 </div>
               </>
             )}
+          </DialogContent>
+        </Dialog>
+        {/* Edit Video Dialog */}
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Редактировать видео</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-title">Название *</Label>
+                <Input
+                  id="edit-title"
+                  value={editForm.title}
+                  onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                  placeholder="Введите название видео"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-url">Ссылка на видео *</Label>
+                <Input
+                  id="edit-url"
+                  value={editForm.video_url}
+                  onChange={(e) => setEditForm({ ...editForm, video_url: e.target.value })}
+                  placeholder="https://youtube.com/watch?v=..."
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-description">Описание</Label>
+                <Textarea
+                  id="edit-description"
+                  value={editForm.description}
+                  onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                  placeholder="Краткое описание видео..."
+                  rows={3}
+                />
+              </div>
+              <Button onClick={handleSaveEdit} disabled={submitting} className="w-full">
+                {submitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                Сохранить
+              </Button>
+            </div>
           </DialogContent>
         </Dialog>
       </div>
