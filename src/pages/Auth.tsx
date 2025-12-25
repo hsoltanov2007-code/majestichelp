@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { Loader2, Shield, Mail, CheckCircle, ArrowLeft, KeyRound } from 'lucide-react';
+import { Loader2, Shield, Mail, CheckCircle, ArrowLeft, KeyRound, Lock } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 export default function Auth() {
@@ -18,8 +18,13 @@ export default function Auth() {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showResetPassword, setShowResetPassword] = useState(false);
   const [showResetSent, setShowResetSent] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
   const [pendingEmail, setPendingEmail] = useState('');
   const [resetEmail, setResetEmail] = useState('');
+  
+  // New password fields
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
   
   // Login fields
   const [loginEmail, setLoginEmail] = useState('');
@@ -30,11 +35,40 @@ export default function Auth() {
   const [signupPassword, setSignupPassword] = useState('');
   const [signupConfirmPassword, setSignupConfirmPassword] = useState('');
 
+  // Check if user came from password reset link
   useEffect(() => {
-    if (user && !authLoading) {
+    const handlePasswordRecovery = async () => {
+      // Check URL hash for recovery token (Supabase uses hash-based routing for auth)
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const accessToken = hashParams.get('access_token');
+      const type = hashParams.get('type');
+      
+      if (type === 'recovery' && accessToken) {
+        // Set the session with the recovery token
+        const { error } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: hashParams.get('refresh_token') || '',
+        });
+        
+        if (!error) {
+          setShowNewPassword(true);
+          // Clean up the URL
+          window.history.replaceState(null, '', window.location.pathname);
+        } else {
+          toast.error('Ссылка для сброса пароля недействительна или устарела');
+        }
+      }
+    };
+
+    handlePasswordRecovery();
+  }, []);
+
+  useEffect(() => {
+    // Don't redirect if showing new password form
+    if (user && !authLoading && !showNewPassword) {
       navigate('/forum');
     }
-  }, [user, authLoading, navigate]);
+  }, [user, authLoading, navigate, showNewPassword]);
 
   // Check for confirmation success from URL
   useEffect(() => {
@@ -123,10 +157,98 @@ export default function Auth() {
     }
   };
 
+  const handleUpdatePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!newPassword || !confirmNewPassword) {
+      toast.error('Заполните все поля');
+      return;
+    }
+
+    if (newPassword !== confirmNewPassword) {
+      toast.error('Пароли не совпадают');
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      toast.error('Пароль должен быть не менее 6 символов');
+      return;
+    }
+
+    setIsLoading(true);
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    setIsLoading(false);
+
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success('Пароль успешно изменён!');
+      setShowNewPassword(false);
+      setNewPassword('');
+      setConfirmNewPassword('');
+      navigate('/forum');
+    }
+  };
+
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // New password form (after clicking reset link)
+  if (showNewPassword) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-background to-muted/30 px-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-500/10">
+              <Lock className="h-6 w-6 text-green-500" />
+            </div>
+            <CardTitle className="text-2xl">Новый пароль</CardTitle>
+            <CardDescription>
+              Придумайте новый надёжный пароль для вашего аккаунта
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleUpdatePassword} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="new-password">Новый пароль</Label>
+                <Input
+                  id="new-password"
+                  type="password"
+                  placeholder="Минимум 6 символов"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  disabled={isLoading}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirm-new-password">Подтвердите пароль</Label>
+                <Input
+                  id="confirm-new-password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={confirmNewPassword}
+                  onChange={(e) => setConfirmNewPassword(e.target.value)}
+                  disabled={isLoading}
+                />
+              </div>
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Сохранение...
+                  </>
+                ) : (
+                  'Сохранить новый пароль'
+                )}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
       </div>
     );
   }
