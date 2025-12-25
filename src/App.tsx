@@ -27,6 +27,7 @@ import ForumTopic from "./pages/ForumTopic";
 import NewTopic from "./pages/NewTopic";
 import Admin from "./pages/Admin";
 import Profile from "./pages/Profile";
+import Media from "./pages/Media";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -58,6 +59,7 @@ const App = () => (
           <Route path="/forum/new-topic" element={<NewTopic />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/media" element={<Media />} />
           
           <Route path="*" element={<NotFound />} />
         </Routes>
