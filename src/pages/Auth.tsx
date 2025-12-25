@@ -35,32 +35,41 @@ export default function Auth() {
   const [signupPassword, setSignupPassword] = useState('');
   const [signupConfirmPassword, setSignupConfirmPassword] = useState('');
 
-  // Check if user came from password reset link
+  // Listen for PASSWORD_RECOVERY event from Supabase
   useEffect(() => {
-    const handlePasswordRecovery = async () => {
-      // Check URL hash for recovery token (Supabase uses hash-based routing for auth)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('Auth event:', event);
+      if (event === 'PASSWORD_RECOVERY') {
+        setShowNewPassword(true);
+      }
+    });
+
+    // Also check URL hash for recovery token on initial load
+    const checkHashForRecovery = async () => {
       const hashParams = new URLSearchParams(window.location.hash.substring(1));
       const accessToken = hashParams.get('access_token');
       const type = hashParams.get('type');
       
       if (type === 'recovery' && accessToken) {
-        // Set the session with the recovery token
+        const refreshToken = hashParams.get('refresh_token') || '';
         const { error } = await supabase.auth.setSession({
           access_token: accessToken,
-          refresh_token: hashParams.get('refresh_token') || '',
+          refresh_token: refreshToken,
         });
         
         if (!error) {
           setShowNewPassword(true);
-          // Clean up the URL
           window.history.replaceState(null, '', window.location.pathname);
         } else {
+          console.log('Session error:', error);
           toast.error('Ссылка для сброса пароля недействительна или устарела');
         }
       }
     };
 
-    handlePasswordRecovery();
+    checkHashForRecovery();
+
+    return () => subscription.unsubscribe();
   }, []);
 
   useEffect(() => {
