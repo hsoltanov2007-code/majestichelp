@@ -7,7 +7,8 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { Loader2, Shield, Mail, CheckCircle } from 'lucide-react';
+import { Loader2, Shield, Mail, CheckCircle, ArrowLeft, KeyRound } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -15,7 +16,10 @@ export default function Auth() {
   const { user, isLoading: authLoading, signIn, signUp } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [showResetPassword, setShowResetPassword] = useState(false);
+  const [showResetSent, setShowResetSent] = useState(false);
   const [pendingEmail, setPendingEmail] = useState('');
+  const [resetEmail, setResetEmail] = useState('');
   
   // Login fields
   const [loginEmail, setLoginEmail] = useState('');
@@ -98,10 +102,134 @@ export default function Auth() {
     }
   };
 
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!resetEmail) {
+      toast.error('Введите email');
+      return;
+    }
+
+    setIsLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+      redirectTo: `${window.location.origin}/auth?reset=true`,
+    });
+    setIsLoading(false);
+
+    if (error) {
+      toast.error(error.message);
+    } else {
+      setPendingEmail(resetEmail);
+      setShowResetSent(true);
+    }
+  };
+
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // Password reset sent confirmation
+  if (showResetSent) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-background to-muted/30 px-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-500/10">
+              <Mail className="h-6 w-6 text-blue-500" />
+            </div>
+            <CardTitle className="text-2xl">Проверьте почту</CardTitle>
+            <CardDescription>
+              Мы отправили ссылку для сброса пароля на
+            </CardDescription>
+            <p className="font-medium text-foreground mt-2">{pendingEmail}</p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="bg-muted/50 rounded-lg p-4 text-sm text-muted-foreground">
+              <p className="flex items-start gap-2">
+                <CheckCircle className="h-4 w-4 mt-0.5 text-blue-500 shrink-0" />
+                Перейдите по ссылке в письме для сброса пароля
+              </p>
+              <p className="flex items-start gap-2 mt-2">
+                <CheckCircle className="h-4 w-4 mt-0.5 text-blue-500 shrink-0" />
+                Ссылка действительна в течение 1 часа
+              </p>
+            </div>
+            
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => {
+                setShowResetSent(false);
+                setShowResetPassword(false);
+                setPendingEmail('');
+                setResetEmail('');
+              }}
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Вернуться к входу
+            </Button>
+            
+            <p className="text-xs text-center text-muted-foreground">
+              Не получили письмо? Проверьте папку "Спам"
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Password reset form
+  if (showResetPassword) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-background to-muted/30 px-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+              <KeyRound className="h-6 w-6 text-primary" />
+            </div>
+            <CardTitle className="text-2xl">Сброс пароля</CardTitle>
+            <CardDescription>
+              Введите email для получения ссылки сброса пароля
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleResetPassword} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="reset-email">Email</Label>
+                <Input
+                  id="reset-email"
+                  type="email"
+                  placeholder="your@email.com"
+                  value={resetEmail}
+                  onChange={(e) => setResetEmail(e.target.value)}
+                  disabled={isLoading}
+                />
+              </div>
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Отправка...
+                  </>
+                ) : (
+                  'Отправить ссылку'
+                )}
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                className="w-full"
+                onClick={() => setShowResetPassword(false)}
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Назад к входу
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -186,7 +314,16 @@ export default function Auth() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="login-password">Пароль</Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="login-password">Пароль</Label>
+                    <button
+                      type="button"
+                      onClick={() => setShowResetPassword(true)}
+                      className="text-xs text-primary hover:underline"
+                    >
+                      Забыли пароль?
+                    </button>
+                  </div>
                   <Input
                     id="login-password"
                     type="password"
