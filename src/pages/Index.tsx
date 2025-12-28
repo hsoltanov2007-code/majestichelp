@@ -114,6 +114,10 @@ export default function Index() {
               </div>
             </form>
 
+            <div className="flex justify-center opacity-0 animate-fade-up stagger-3">
+              <VisitorCounter />
+            </div>
+
           </div>
         </div>
       </section>

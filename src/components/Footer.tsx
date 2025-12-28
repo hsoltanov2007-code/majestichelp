@@ -47,36 +47,6 @@ export function Footer() {
             <p className="text-sm text-muted-foreground leading-relaxed">
               Ваш надёжный источник информации о законах, правилах и процедурах штата Denver для Majestic RP.
             </p>
-            {/* Social links placeholder */}
-            <div className="flex items-center gap-3 pt-2">
-              <a 
-                href="https://discord.gg/majestic" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="w-9 h-9 rounded-lg bg-muted/50 flex items-center justify-center text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-all hover:scale-110"
-                title="Discord"
-              >
-                <MessageSquare className="h-4 w-4" />
-              </a>
-              <a 
-                href="https://youtube.com/@majestic" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="w-9 h-9 rounded-lg bg-muted/50 flex items-center justify-center text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-all hover:scale-110"
-                title="YouTube"
-              >
-                <Play className="h-4 w-4" />
-              </a>
-              <a 
-                href="https://forum.majestic-rp.ru" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="w-9 h-9 rounded-lg bg-muted/50 flex items-center justify-center text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-all hover:scale-110"
-                title="Официальный форум"
-              >
-                <ExternalLink className="h-4 w-4" />
-              </a>
-            </div>
           </div>
 
           {/* Navigation links */}
