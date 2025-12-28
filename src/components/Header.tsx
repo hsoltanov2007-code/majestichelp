@@ -44,7 +44,6 @@ const referenceItems: { path: string; label: string; tooltip: string; icon: Luci
   { path: "/media", label: "Медиа", tooltip: "Видео контент", icon: Play },
 ];
 
-// Mobile menu group component
 function MobileMenuGroup({ 
   title, 
   icon: Icon, 
@@ -65,12 +64,12 @@ function MobileMenuGroup({
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
       <CollapsibleTrigger asChild>
-        <button className="w-full px-4 py-3 text-base font-medium rounded-lg transition-colors flex items-center justify-between text-muted-foreground hover:text-foreground hover:bg-muted">
+        <button className="w-full px-4 py-3 text-base font-medium rounded-xl transition-all flex items-center justify-between text-muted-foreground hover:text-foreground hover:bg-muted/80">
           <span className="flex items-center gap-3">
             <Icon className="h-5 w-5" />
             {title}
           </span>
-          <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+          <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
         </button>
       </CollapsibleTrigger>
       <CollapsibleContent className="pl-6 space-y-1 animate-accordion-down">
@@ -81,10 +80,10 @@ function MobileMenuGroup({
               key={item.path}
               to={item.path}
               onClick={onClose}
-              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors flex items-center gap-2 ${
+              className={`px-4 py-2.5 text-sm font-medium rounded-lg transition-all flex items-center gap-2 ${
                 location.pathname.startsWith(item.path)
-                  ? "bg-primary/10 text-primary"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  ? "bg-accent/10 text-accent"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
               }`}
             >
               {ItemIcon && <ItemIcon className="h-4 w-4" />}
@@ -102,11 +101,20 @@ export function Header() {
   const { user, profile, isAdmin, signOut } = useAuth();
   const [isDark, setIsDark] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
     const dark = localStorage.getItem("theme") === "dark";
     setIsDark(dark);
     document.documentElement.classList.toggle("dark", dark);
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 10);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const toggleTheme = () => {
@@ -117,7 +125,11 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
+    <header className={`sticky top-0 z-50 w-full transition-all duration-300 ${
+      scrolled 
+        ? 'glass-strong shadow-lg shadow-background/5' 
+        : 'bg-transparent border-b border-transparent'
+    }`}>
       <div className="container flex h-16 items-center justify-between">
         <div className="hidden lg:block">
           <GlobalSearch />
@@ -126,10 +138,10 @@ export function Header() {
         <nav className="hidden md:flex items-center gap-1">
           <Link
             to="/"
-            className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+            className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
               location.pathname === "/"
-                ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                ? "bg-accent text-accent-foreground shadow-md"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/80"
             }`}
           >
             Главная
@@ -141,9 +153,9 @@ export function Header() {
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className={`gap-1 ${
+                className={`gap-1.5 rounded-lg ${
                   codeItems.some(item => location.pathname.startsWith(item.path))
-                    ? "bg-primary/10 text-primary"
+                    ? "bg-accent/10 text-accent"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
@@ -152,20 +164,20 @@ export function Header() {
                 <ChevronDown className="h-3 w-3" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="bg-popover">
+            <DropdownMenuContent align="start" className="glass-strong min-w-[220px]">
               {codeItems.map((item) => (
                 <DropdownMenuItem key={item.path} asChild>
                   <Link 
                     to={item.path} 
-                    className={`w-full cursor-pointer flex items-center gap-2 ${
+                    className={`w-full cursor-pointer flex items-center gap-3 py-2.5 ${
                       location.pathname.startsWith(item.path)
-                        ? "bg-primary/10 text-primary"
+                        ? "bg-accent/10 text-accent"
                         : ""
                     }`}
                   >
                     <item.icon className="h-4 w-4" />
-                    <span className="font-medium">{item.short}</span>
-                    <span className="text-muted-foreground text-xs">{item.label}</span>
+                    <span className="font-semibold">{item.short}</span>
+                    <span className="text-muted-foreground text-xs ml-auto">{item.label}</span>
                   </Link>
                 </DropdownMenuItem>
               ))}
@@ -178,9 +190,9 @@ export function Header() {
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className={`gap-1 ${
+                className={`gap-1.5 rounded-lg ${
                   toolItems.some(item => location.pathname.startsWith(item.path))
-                    ? "bg-primary/10 text-primary"
+                    ? "bg-accent/10 text-accent"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
@@ -189,14 +201,14 @@ export function Header() {
                 <ChevronDown className="h-3 w-3" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="bg-popover">
+            <DropdownMenuContent align="start" className="glass-strong">
               {toolItems.map((item) => (
                 <DropdownMenuItem key={item.path} asChild>
                   <Link 
                     to={item.path} 
-                    className={`w-full cursor-pointer flex items-center gap-2 ${
+                    className={`w-full cursor-pointer flex items-center gap-3 py-2.5 ${
                       location.pathname.startsWith(item.path)
-                        ? "bg-primary/10 text-primary"
+                        ? "bg-accent/10 text-accent"
                         : ""
                     }`}
                   >
@@ -215,40 +227,40 @@ export function Header() {
                 <TooltipTrigger asChild>
                   <Link
                     to={item.path}
-                    className={`px-3 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-1 ${
+                    className={`px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 flex items-center gap-1.5 ${
                       location.pathname === item.path
-                        ? "bg-primary text-primary-foreground"
-                        : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                        ? "bg-accent text-accent-foreground shadow-md"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted/80"
                     }`}
                   >
                     <item.icon className="h-4 w-4" />
                     {item.label}
                   </Link>
                 </TooltipTrigger>
-                <TooltipContent>
+                <TooltipContent className="glass-strong">
                   <p>{item.tooltip}</p>
                 </TooltipContent>
               </Tooltip>
             ))}
           </TooltipProvider>
 
-          {/* Форум и Избранное с подсказками */}
+          {/* Форум и Избранное */}
           <TooltipProvider delayDuration={300}>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Link
                   to="/forum"
-                  className={`px-3 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-1 ${
+                  className={`px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 flex items-center gap-1.5 ${
                     location.pathname.startsWith("/forum")
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                      ? "bg-accent text-accent-foreground shadow-md"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/80"
                   }`}
                 >
                   <MessageSquare className="h-4 w-4" />
                   Форум
                 </Link>
               </TooltipTrigger>
-              <TooltipContent>
+              <TooltipContent className="glass-strong">
                 <p>Обсуждение с сообществом</p>
               </TooltipContent>
             </Tooltip>
@@ -257,16 +269,16 @@ export function Header() {
               <TooltipTrigger asChild>
                 <Link
                   to="/favorites"
-                  className={`px-3 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-1 ${
+                  className={`px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 flex items-center gap-1.5 ${
                     location.pathname === "/favorites"
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                      ? "bg-accent text-accent-foreground shadow-md"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/80"
                   }`}
                 >
                   <Bookmark className="h-4 w-4" />
                 </Link>
               </TooltipTrigger>
-              <TooltipContent>
+              <TooltipContent className="glass-strong">
                 <p>Сохранённые статьи</p>
               </TooltipContent>
             </Tooltip>
@@ -276,26 +288,31 @@ export function Header() {
         <div className="flex items-center gap-2">
           {user && <NotificationBell />}
           
-          <Button variant="ghost" size="icon" onClick={toggleTheme}>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={toggleTheme}
+            className="rounded-lg hover:bg-muted/80"
+          >
             {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
           </Button>
           
           {user ? (
             <>
-              <Button asChild variant="ghost" size="sm" className="gap-2" title="Мой профиль">
+              <Button asChild variant="ghost" size="sm" className="gap-2 rounded-lg hover:bg-muted/80" title="Мой профиль">
                 <Link to="/profile">
-                  {isAdmin && <Crown className="h-4 w-4 text-red-500" />}
-                  <span className={isAdmin ? "text-red-500" : ""}>
+                  {isAdmin && <Crown className="h-4 w-4 text-accent" />}
+                  <span className={isAdmin ? "text-accent font-semibold" : ""}>
                     {profile?.username || 'Профиль'}
                   </span>
                 </Link>
               </Button>
-              <Button variant="ghost" size="icon" onClick={signOut} title="Выйти">
+              <Button variant="ghost" size="icon" onClick={signOut} title="Выйти" className="rounded-lg hover:bg-destructive/10 hover:text-destructive">
                 <LogOut className="h-5 w-5" />
               </Button>
             </>
           ) : (
-            <Button asChild variant="ghost" size="icon" title="Войти">
+            <Button asChild variant="ghost" size="icon" title="Войти" className="rounded-lg hover:bg-muted/80">
               <Link to="/auth">
                 <User className="h-5 w-5" />
               </Link>
@@ -304,23 +321,23 @@ export function Header() {
 
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild className="md:hidden">
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" className="rounded-lg">
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-80 overflow-y-auto">
+            <SheetContent side="right" className="w-80 overflow-y-auto glass-strong border-l-border/50">
               <div className="mt-4 mb-6">
                 <GlobalSearch onResultClick={() => setIsOpen(false)} />
               </div>
-              <nav className="flex flex-col gap-4">
+              <nav className="flex flex-col gap-2">
                 {/* Главная */}
                 <Link
                   to="/"
                   onClick={() => setIsOpen(false)}
-                  className={`px-4 py-3 text-base font-medium rounded-lg transition-colors flex items-center gap-3 ${
+                  className={`px-4 py-3 text-base font-medium rounded-xl transition-all flex items-center gap-3 ${
                     location.pathname === "/"
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                      ? "bg-accent text-accent-foreground shadow-md"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/80"
                   }`}
                 >
                   <Home className="h-5 w-5" />
@@ -358,10 +375,10 @@ export function Header() {
                 <Link
                   to="/forum"
                   onClick={() => setIsOpen(false)}
-                  className={`px-4 py-3 text-base font-medium rounded-lg transition-colors flex items-center gap-3 ${
+                  className={`px-4 py-3 text-base font-medium rounded-xl transition-all flex items-center gap-3 ${
                     location.pathname.startsWith("/forum")
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                      ? "bg-accent text-accent-foreground shadow-md"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/80"
                   }`}
                 >
                   <MessageSquare className="h-5 w-5" />
@@ -372,10 +389,10 @@ export function Header() {
                 <Link
                   to="/favorites"
                   onClick={() => setIsOpen(false)}
-                  className={`px-4 py-3 text-base font-medium rounded-lg transition-colors flex items-center gap-3 ${
+                  className={`px-4 py-3 text-base font-medium rounded-xl transition-all flex items-center gap-3 ${
                     location.pathname === "/favorites"
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                      ? "bg-accent text-accent-foreground shadow-md"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/80"
                   }`}
                 >
                   <Bookmark className="h-5 w-5" />
