@@ -1,4 +1,5 @@
 import { Header } from "./Header";
+import { Footer } from "./Footer";
 import { ScrollToTop } from "./ScrollToTop";
 
 interface LayoutProps {
@@ -7,9 +8,10 @@ interface LayoutProps {
 
 export function Layout({ children }: LayoutProps) {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Header />
-      <main>{children}</main>
+      <main className="flex-1">{children}</main>
+      <Footer />
       <ScrollToTop />
     </div>
   );
