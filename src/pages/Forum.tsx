@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { MessageCircle, Users, Clock, Shield, LogIn } from 'lucide-react';
+import { MessageCircle, Clock, Shield, LogIn, ArrowRight, MessageSquare } from 'lucide-react';
 
 interface Category {
   id: string;
@@ -40,7 +40,6 @@ export default function Forum() {
 
       if (error) throw error;
 
-      // Fetch topic counts for each category
       const categoriesWithCounts = await Promise.all(
         (categoriesData || []).map(async (category) => {
           const { count } = await supabase
@@ -84,19 +83,25 @@ export default function Forum() {
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Форум</h1>
-            <p className="text-muted-foreground mt-1">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-10">
+          <div className="opacity-0 animate-fade-up">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-accent/20 to-primary/20 flex items-center justify-center">
+                <MessageSquare className="h-6 w-6 text-accent" />
+              </div>
+              <h1 className="text-4xl font-bold text-foreground">Форум</h1>
+            </div>
+            <p className="text-muted-foreground text-lg">
               Обсуждайте законы, делитесь опытом и задавайте вопросы
             </p>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex gap-2 opacity-0 animate-fade-up stagger-1">
             {authLoading ? null : user ? (
               <>
                 {isAdmin && (
-                  <Button asChild variant="outline">
+                  <Button asChild variant="outline" className="glass">
                     <Link to="/admin">
                       <Shield className="mr-2 h-4 w-4" />
                       Админ-панель
@@ -105,7 +110,7 @@ export default function Forum() {
                 )}
               </>
             ) : (
-              <Button asChild>
+              <Button asChild className="bg-accent hover:bg-accent/90">
                 <Link to="/auth">
                   <LogIn className="mr-2 h-4 w-4" />
                   Войти
@@ -115,10 +120,11 @@ export default function Forum() {
           </div>
         </div>
 
+        {/* Categories */}
         {isLoading ? (
           <div className="space-y-4">
             {[1, 2, 3, 4, 5].map((i) => (
-              <Card key={i}>
+              <Card key={i} className="glass">
                 <CardHeader>
                   <Skeleton className="h-6 w-1/3" />
                   <Skeleton className="h-4 w-2/3" />
@@ -128,36 +134,41 @@ export default function Forum() {
           </div>
         ) : (
           <div className="space-y-4">
-            {categories.map((category) => (
-              <Link key={category.id} to={`/forum/category/${category.id}`}>
-                <Card className="hover:bg-muted/50 transition-colors cursor-pointer">
+            {categories.map((category, index) => (
+              <Link 
+                key={category.id} 
+                to={`/forum/category/${category.id}`}
+                className={`block opacity-0 animate-fade-up stagger-${Math.min(index + 1, 7)}`}
+              >
+                <Card className="glass hover-lift card-hover-gradient group cursor-pointer border-0">
                   <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-xl">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex items-start gap-4">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center text-2xl shrink-0 transition-transform duration-300 group-hover:scale-110">
                           {category.name.split(' ')[0]}
                         </div>
-                        <div>
-                          <CardTitle className="text-lg">
+                        <div className="space-y-1">
+                          <CardTitle className="text-xl group-hover:text-accent transition-colors flex items-center gap-2">
                             {category.name.split(' ').slice(1).join(' ') || category.name}
+                            <ArrowRight className="h-4 w-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
                           </CardTitle>
-                          <CardDescription>{category.description}</CardDescription>
+                          <CardDescription className="text-base">{category.description}</CardDescription>
                         </div>
                       </div>
-                      <Badge variant="secondary" className="shrink-0">
-                        <MessageCircle className="mr-1 h-3 w-3" />
+                      <Badge variant="secondary" className="shrink-0 glass">
+                        <MessageCircle className="mr-1.5 h-3.5 w-3.5" />
                         {category.topics_count} тем
                       </Badge>
                     </div>
                   </CardHeader>
                   {category.last_topic && (
                     <CardContent className="pt-0">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Clock className="h-3 w-3" />
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground pl-16">
+                        <Clock className="h-3.5 w-3.5" />
                         <span className="truncate">
-                          Последнее: {category.last_topic.title}
+                          Последнее: <span className="text-foreground/80">{category.last_topic.title}</span>
                         </span>
-                        <span>•</span>
+                        <span className="text-muted-foreground/50">•</span>
                         <span>{formatDate(category.last_topic.created_at)}</span>
                       </div>
                     </CardContent>
