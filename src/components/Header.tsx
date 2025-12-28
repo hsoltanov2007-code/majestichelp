@@ -5,6 +5,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useState, useEffect } from "react";
 import { GlobalSearch } from "@/components/GlobalSearch";
 import { NotificationBell } from "@/components/NotificationBell";
+import { Logo } from "@/components/Logo";
 import { useAuth } from "@/hooks/useAuth";
 import {
   DropdownMenu,
@@ -130,12 +131,14 @@ export function Header() {
         ? 'glass-strong shadow-lg shadow-background/5' 
         : 'bg-transparent border-b border-transparent'
     }`}>
-      <div className="container flex h-16 items-center justify-between">
-        <div className="hidden lg:block">
-          <GlobalSearch />
+      <div className="container flex h-16 items-center justify-between gap-4">
+        {/* Logo */}
+        <div className="flex items-center gap-4">
+          <Logo size="sm" showText={true} />
         </div>
 
-        <nav className="hidden md:flex items-center gap-1">
+        {/* Desktop Navigation */}
+        <nav className="hidden lg:flex items-center gap-1">
           <Link
             to="/"
             className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
@@ -285,7 +288,18 @@ export function Header() {
           </TooltipProvider>
         </nav>
 
+        {/* Search (tablet) */}
+        <div className="hidden md:block lg:hidden flex-1 max-w-xs">
+          <GlobalSearch />
+        </div>
+
+        {/* Right side actions */}
         <div className="flex items-center gap-2">
+          {/* Search (desktop) */}
+          <div className="hidden lg:block">
+            <GlobalSearch />
+          </div>
+
           {user && <NotificationBell />}
           
           <Button 
@@ -299,7 +313,7 @@ export function Header() {
           
           {user ? (
             <>
-              <Button asChild variant="ghost" size="sm" className="gap-2 rounded-lg hover:bg-muted/80" title="Мой профиль">
+              <Button asChild variant="ghost" size="sm" className="gap-2 rounded-lg hover:bg-muted/80 hidden sm:flex" title="Мой профиль">
                 <Link to="/profile">
                   {isAdmin && <Crown className="h-4 w-4 text-accent" />}
                   <span className={isAdmin ? "text-accent font-semibold" : ""}>
@@ -320,7 +334,7 @@ export function Header() {
           )}
 
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
-            <SheetTrigger asChild className="md:hidden">
+            <SheetTrigger asChild className="lg:hidden">
               <Button variant="ghost" size="icon" className="rounded-lg">
                 <Menu className="h-5 w-5" />
               </Button>
@@ -398,6 +412,23 @@ export function Header() {
                   <Bookmark className="h-5 w-5" />
                   Избранное
                 </Link>
+
+                {/* Profile link for mobile */}
+                {user && (
+                  <Link
+                    to="/profile"
+                    onClick={() => setIsOpen(false)}
+                    className={`px-4 py-3 text-base font-medium rounded-xl transition-all flex items-center gap-3 ${
+                      location.pathname === "/profile"
+                        ? "bg-accent text-accent-foreground shadow-md"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted/80"
+                    }`}
+                  >
+                    <User className="h-5 w-5" />
+                    {profile?.username || 'Профиль'}
+                    {isAdmin && <Crown className="h-4 w-4 text-accent ml-auto" />}
+                  </Link>
+                )}
               </nav>
             </SheetContent>
           </Sheet>
