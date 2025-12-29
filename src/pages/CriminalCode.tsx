@@ -225,7 +225,7 @@ export default function CriminalCode() {
                       <Bookmark className={`h-4 w-4 ${isFavorite(article.id, "criminal") ? "fill-current" : ""}`} />
                     </Button>
                     <Badge variant="outline" className="gap-1 bg-background/50">
-                      <Star className="h-3 w-3" /> {article.starsRange || (article.stars > 0 ? "⭐".repeat(article.stars) : "1-5⭐")}
+                      <Star className="h-3 w-3" /> Розыск: {article.starsRange || `${article.stars}⭐`}
                     </Badge>
                     <Badge variant={article.court ? "destructive" : "secondary"} className={article.court ? "" : "bg-background/50"}>
                       <Gavel className="h-3 w-3 mr-1" /> {article.court ? "Суд" : "Без суда"}
