@@ -85,13 +85,13 @@ export default function Index() {
         <div className="container relative">
           <div className="max-w-3xl mx-auto text-center space-y-8">
             <div className="opacity-0 animate-fade-up">
-              <h1 className="text-5xl md:text-7xl font-bold tracking-tight">
-                Портал <span className="gradient-text-accent">Denver</span>
+            <h1 className="text-5xl md:text-7xl font-bold tracking-tight">
+                Портал <span className="gradient-text-accent">HARDY</span>
               </h1>
             </div>
             
             <p className="text-xl md:text-2xl text-muted-foreground opacity-0 animate-fade-up stagger-1">
-              Majestic RP — законы, правила и процедуры штата
+              Majestic RP — законы, правила и процедуры
             </p>
             
             <form onSubmit={handleSearch} className="opacity-0 animate-fade-up stagger-2">

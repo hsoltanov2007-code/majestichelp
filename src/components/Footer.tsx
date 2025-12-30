@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Scale, FileText, Car, Users, BookOpen, Shield, MessageSquare, Play, HelpCircle, Heart, ExternalLink } from "lucide-react";
+import hardyLogo from "@/assets/hardy-logo.png";
 
 const navigationLinks = [
   { label: "Уголовный кодекс", path: "/criminal-code" },
@@ -36,16 +37,14 @@ export function Footer() {
           {/* Brand section */}
           <div className="space-y-4">
             <Link to="/" className="flex items-center gap-3 group">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-accent to-accent/70 flex items-center justify-center shadow-lg shadow-accent/20 group-hover:shadow-accent/40 transition-shadow">
-                <span className="text-accent-foreground font-bold text-lg">D</span>
-              </div>
-              <span className="text-xl font-bold">
-                <span className="text-foreground">Denver</span>
+              <img src={hardyLogo} alt="HARDY" className="w-10 h-10 object-contain" />
+              <span className="text-xl font-bold tracking-wider">
+                <span className="text-foreground">HARDY</span>
                 <span className="text-accent"> Portal</span>
               </span>
             </Link>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Ваш надёжный источник информации о законах, правилах и процедурах штата Denver для Majestic RP.
+              Ваш надёжный источник информации о законах, правилах и процедурах для Majestic RP.
             </p>
           </div>
 
@@ -114,7 +113,7 @@ export function Footer() {
         <div className="mt-12 pt-8 border-t border-border/50">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
             <p className="text-sm text-muted-foreground">
-              © {currentYear} Denver Portal. Все права защищены.
+              © {currentYear} HARDY Portal. Все права защищены.
             </p>
             <p className="text-sm text-muted-foreground flex items-center gap-1">
               Сделано с <Heart className="h-3.5 w-3.5 text-accent fill-accent" /> для Majestic RP
