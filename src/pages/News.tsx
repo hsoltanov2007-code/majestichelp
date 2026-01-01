@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ThumbsUp, ThumbsDown, MessageSquare, Calendar, Newspaper } from "lucide-react";
+import { ThumbsUp, ThumbsDown, MessageSquare, Calendar, Newspaper, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { ru } from "date-fns/locale";
@@ -18,6 +18,7 @@ interface NewsItem {
   author_name: string;
   author_avatar: string | null;
   image_url: string | null;
+  image_urls: string[] | null;
   source_channel: string | null;
   likes_count: number;
   dislikes_count: number;
@@ -132,6 +133,81 @@ const YouTubeEmbed = ({ videoId }: { videoId: string }) => (
     />
   </div>
 );
+
+// Image Gallery Component for multiple images
+const ImageGallery = ({ images, title }: { images: string[], title?: string | null }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  
+  if (images.length === 0) return null;
+  
+  if (images.length === 1) {
+    return (
+      <div className="aspect-video overflow-hidden">
+        <img
+          src={images[0]}
+          alt={title || 'Новость'}
+          className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+        />
+      </div>
+    );
+  }
+  
+  const goToPrevious = () => {
+    setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+  };
+  
+  const goToNext = () => {
+    setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+  };
+  
+  return (
+    <div className="relative aspect-video overflow-hidden group">
+      <img
+        src={images[currentIndex]}
+        alt={`${title || 'Новость'} - изображение ${currentIndex + 1}`}
+        className="w-full h-full object-cover transition-transform duration-500"
+      />
+      
+      {/* Navigation buttons */}
+      <button
+        onClick={goToPrevious}
+        className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black/80 text-white rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity"
+        aria-label="Предыдущее изображение"
+      >
+        <ChevronLeft className="h-5 w-5" />
+      </button>
+      
+      <button
+        onClick={goToNext}
+        className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black/80 text-white rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity"
+        aria-label="Следующее изображение"
+      >
+        <ChevronRight className="h-5 w-5" />
+      </button>
+      
+      {/* Dots indicator */}
+      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+        {images.map((_, idx) => (
+          <button
+            key={idx}
+            onClick={() => setCurrentIndex(idx)}
+            className={`w-2 h-2 rounded-full transition-all ${
+              idx === currentIndex 
+                ? 'bg-white scale-110' 
+                : 'bg-white/50 hover:bg-white/75'
+            }`}
+            aria-label={`Перейти к изображению ${idx + 1}`}
+          />
+        ))}
+      </div>
+      
+      {/* Counter */}
+      <div className="absolute top-3 right-3 bg-black/60 text-white text-xs px-2 py-1 rounded-full">
+        {currentIndex + 1} / {images.length}
+      </div>
+    </div>
+  );
+};
 
 export default function News() {
   const { user } = useAuth();
@@ -339,17 +415,15 @@ export default function News() {
             {news.map((item) => {
               const userReaction = userReactions.get(item.id);
               const youtubeId = extractYouTubeId(item.content);
+              // Use image_urls if available, fallback to image_url
+              const images = (item.image_urls && item.image_urls.length > 0) 
+                ? item.image_urls 
+                : (item.image_url ? [item.image_url] : []);
               
               return (
                 <Card key={item.id} className="glass-card overflow-hidden hover:shadow-lg hover:shadow-accent/10 transition-all duration-300">
-                  {item.image_url && (
-                    <div className="aspect-video overflow-hidden">
-                      <img
-                        src={item.image_url}
-                        alt={item.title || 'Новость'}
-                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-                      />
-                    </div>
+                  {images.length > 0 && (
+                    <ImageGallery images={images} title={item.title} />
                   )}
                   
                   <CardHeader className="pb-3">
