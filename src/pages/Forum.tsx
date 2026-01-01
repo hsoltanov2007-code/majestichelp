@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Layout } from '@/components/Layout';
@@ -23,6 +23,7 @@ interface Category {
 }
 
 export default function Forum() {
+  const location = useLocation();
   const { user, isAdmin, isLoading: authLoading } = useAuth();
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -111,7 +112,7 @@ export default function Forum() {
               </>
             ) : (
               <Button asChild className="bg-accent hover:bg-accent/90">
-                <Link to="/auth">
+                <Link to="/auth" state={{ from: location.pathname }}>
                   <LogIn className="mr-2 h-4 w-4" />
                   Войти
                 </Link>

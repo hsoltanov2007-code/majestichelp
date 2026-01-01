@@ -1,5 +1,5 @@
 import { useState, useEffect, type ReactNode, type FormEvent } from 'react';
-import { useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -47,6 +47,7 @@ function AuthBackground({ children }: { children: ReactNode }) {
 
 export default function Auth() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const { user, isLoading: authLoading, signIn, signUp } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
@@ -66,6 +67,9 @@ export default function Auth() {
   const [signupEmail, setSignupEmail] = useState('');
   const [signupPassword, setSignupPassword] = useState('');
   const [signupConfirmPassword, setSignupConfirmPassword] = useState('');
+
+  // Get redirect path from state or default to home
+  const from = (location.state as { from?: string })?.from || '/';
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
@@ -104,9 +108,9 @@ export default function Auth() {
 
   useEffect(() => {
     if (user && !authLoading && !showNewPassword) {
-      navigate('/forum');
+      navigate(from, { replace: true });
     }
-  }, [user, authLoading, navigate, showNewPassword]);
+  }, [user, authLoading, navigate, showNewPassword, from]);
 
   useEffect(() => {
     const confirmed = searchParams.get('confirmed');
@@ -136,7 +140,7 @@ export default function Auth() {
       }
     } else {
       toast.success('Успешный вход!');
-      navigate('/forum');
+      navigate(from, { replace: true });
     }
   };
 

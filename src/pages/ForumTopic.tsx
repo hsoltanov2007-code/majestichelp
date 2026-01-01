@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import { Link, useParams, useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Layout } from '@/components/Layout';
@@ -42,6 +42,7 @@ interface Topic {
 export default function ForumTopic() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, isAdmin } = useAuth();
   const [topic, setTopic] = useState<Topic | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
@@ -546,7 +547,7 @@ export default function ForumTopic() {
                       Войдите, чтобы оставить комментарий
                     </p>
                     <Button asChild>
-                      <Link to="/auth">Войти</Link>
+                      <Link to="/auth" state={{ from: location.pathname }}>Войти</Link>
                     </Button>
                   </CardContent>
                 </Card>
