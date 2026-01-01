@@ -14,6 +14,83 @@ export type Database = {
   }
   public: {
     Tables: {
+      discord_news: {
+        Row: {
+          author_avatar: string | null
+          author_name: string
+          content: string
+          created_at: string
+          discord_message_id: string | null
+          dislikes_count: number
+          id: string
+          image_url: string | null
+          likes_count: number
+          source_channel: string | null
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          author_avatar?: string | null
+          author_name?: string
+          content: string
+          created_at?: string
+          discord_message_id?: string | null
+          dislikes_count?: number
+          id?: string
+          image_url?: string | null
+          likes_count?: number
+          source_channel?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          author_avatar?: string | null
+          author_name?: string
+          content?: string
+          created_at?: string
+          discord_message_id?: string | null
+          dislikes_count?: number
+          id?: string
+          image_url?: string | null
+          likes_count?: number
+          source_channel?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      discord_news_reactions: {
+        Row: {
+          created_at: string
+          id: string
+          news_id: string
+          reaction_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          news_id: string
+          reaction_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          news_id?: string
+          reaction_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discord_news_reactions_news_id_fkey"
+            columns: ["news_id"]
+            isOneToOne: false
+            referencedRelation: "discord_news"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       forum_categories: {
         Row: {
           created_at: string
