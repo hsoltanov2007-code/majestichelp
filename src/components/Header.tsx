@@ -5,6 +5,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useState, useEffect } from "react";
 import { GlobalSearch } from "@/components/GlobalSearch";
 import { NotificationBell } from "@/components/NotificationBell";
+import { NewsNotificationBell } from "@/components/NewsNotificationBell";
 import { Logo } from "@/components/Logo";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -41,8 +42,6 @@ const toolItems = [
 
 const referenceItems: { path: string; label: string; tooltip: string; icon: LucideIcon }[] = [
   { path: "/news", label: "Новости", tooltip: "Новости сервера", icon: Newspaper },
-  { path: "/glossary", label: "Глоссарий", tooltip: "Словарь терминов", icon: FileText },
-  { path: "/faq", label: "FAQ", tooltip: "Частые вопросы", icon: HelpCircle },
   { path: "/media", label: "Медиа", tooltip: "Видео контент", icon: Play },
 ];
 
@@ -301,6 +300,7 @@ export function Header() {
             <GlobalSearch />
           </div>
 
+          <NewsNotificationBell />
           {user && <NotificationBell />}
           
           <Button 

@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Layout } from "@/components/Layout";
 import { Card, CardDescription, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Scale, FileText, Car, Users, BookOpen, HelpCircle, Search, Shield, Play, Sparkles, ArrowRight } from "lucide-react";
+import { Scale, FileText, Car, Users, BookOpen, HelpCircle, Search, Shield, Play, Sparkles, ArrowRight, MessageSquare } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
 import { VisitorCounter } from "@/components/VisitorCounter";
@@ -15,6 +15,8 @@ const sections = [
   { icon: Users, title: "Процедуры", description: "Инструкции для госслужащих", path: "/procedures", gradient: "from-emerald-500/20 to-emerald-500/5", iconColor: "text-emerald-500" },
   { icon: Shield, title: "Правила ГО", description: "Правила государственных организаций", path: "/government-rules", gradient: "from-blue-500/20 to-blue-500/5", iconColor: "text-blue-500" },
   { icon: BookOpen, title: "Юридическая справка", description: "Теория уголовного права", path: "/legal-reference", gradient: "from-accent/20 to-accent/5", iconColor: "text-accent" },
+  { icon: HelpCircle, title: "FAQ", description: "Частые вопросы и ответы", path: "/faq", gradient: "from-violet-500/20 to-violet-500/5", iconColor: "text-violet-500" },
+  { icon: MessageSquare, title: "Глоссарий", description: "Словарь юридических терминов", path: "/glossary", gradient: "from-cyan-500/20 to-cyan-500/5", iconColor: "text-cyan-500" },
   { icon: HelpCircle, title: "Инструкции", description: "Как пользоваться порталом", path: "/instructions", gradient: "from-muted to-muted/50", iconColor: "text-muted-foreground" },
 ];
 
