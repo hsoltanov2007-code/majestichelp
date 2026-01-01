@@ -27,6 +27,7 @@ export function NewsNotificationBell() {
   const [news, setNews] = useState<NewsItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
+  const [hasAutoOpened, setHasAutoOpened] = useState(false);
 
   const fetchNews = async () => {
     const { data } = await supabase
@@ -45,6 +46,15 @@ export function NewsNotificationBell() {
         setUnreadCount(unread);
       } else {
         setUnreadCount(data.length > 0 ? data.length : 0);
+      }
+      // Auto-open on first load if there are unread news
+      if (!hasAutoOpened && data.length > 0) {
+        const lastSeen = localStorage.getItem(LAST_SEEN_KEY);
+        const hasUnread = !lastSeen || data.some(item => new Date(item.created_at) > new Date(lastSeen));
+        if (hasUnread) {
+          setTimeout(() => setIsOpen(true), 500);
+        }
+        setHasAutoOpened(true);
       }
     }
   };
