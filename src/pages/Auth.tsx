@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type ReactNode, type FormEvent } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,41 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { Loader2, Shield, Mail, CheckCircle, ArrowLeft, KeyRound, Lock, Home, Sparkles } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+
+function AuthBackground({ children }: { children: ReactNode }) {
+  return (
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Background gradients */}
+      <div className="absolute inset-0 bg-hero-pattern" />
+      <div className="absolute inset-0 bg-dots-pattern opacity-20" />
+
+      {/* Animated orbs */}
+      <div className="absolute top-20 left-1/4 w-96 h-96 bg-accent/20 rounded-full blur-3xl animate-float" />
+      <div
+        className="absolute bottom-20 right-1/4 w-72 h-72 bg-primary/10 rounded-full blur-3xl animate-float"
+        style={{ animationDelay: '2s' }}
+      />
+      <div
+        className="absolute top-1/2 left-10 w-48 h-48 bg-accent/10 rounded-full blur-2xl animate-float"
+        style={{ animationDelay: '1s' }}
+      />
+
+      {/* Content */}
+      <div className="relative flex items-center justify-center min-h-screen px-4 py-12">
+        {children}
+      </div>
+
+      {/* Home link */}
+      <Link
+        to="/"
+        className="absolute top-6 left-6 flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors glass px-4 py-2 rounded-xl"
+      >
+        <Home className="h-4 w-4" />
+        <span className="text-sm font-medium">На главную</span>
+      </Link>
+    </div>
+  );
+}
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -80,7 +115,7 @@ export default function Auth() {
     }
   }, [searchParams]);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
     if (!loginEmail || !loginPassword) {
       toast.error('Заполните все поля');
@@ -105,7 +140,7 @@ export default function Auth() {
     }
   };
 
-  const handleSignup = async (e: React.FormEvent) => {
+  const handleSignup = async (e: FormEvent) => {
     e.preventDefault();
     if (!signupEmail || !signupPassword || !signupConfirmPassword) {
       toast.error('Заполните все поля');
@@ -138,7 +173,7 @@ export default function Auth() {
     }
   };
 
-  const handleResetPassword = async (e: React.FormEvent) => {
+  const handleResetPassword = async (e: FormEvent) => {
     e.preventDefault();
     if (!resetEmail) {
       toast.error('Введите email');
@@ -159,7 +194,7 @@ export default function Auth() {
     }
   };
 
-  const handleUpdatePassword = async (e: React.FormEvent) => {
+  const handleUpdatePassword = async (e: FormEvent) => {
     e.preventDefault();
     
     if (!newPassword || !confirmNewPassword) {
@@ -203,33 +238,8 @@ export default function Auth() {
     );
   }
 
-  // Background component for all auth screens
-  const AuthBackground = ({ children }: { children: React.ReactNode }) => (
-    <div className="min-h-screen relative overflow-hidden">
-      {/* Background gradients */}
-      <div className="absolute inset-0 bg-hero-pattern" />
-      <div className="absolute inset-0 bg-dots-pattern opacity-20" />
-      
-      {/* Animated orbs */}
-      <div className="absolute top-20 left-1/4 w-96 h-96 bg-accent/20 rounded-full blur-3xl animate-float" />
-      <div className="absolute bottom-20 right-1/4 w-72 h-72 bg-primary/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }} />
-      <div className="absolute top-1/2 left-10 w-48 h-48 bg-accent/10 rounded-full blur-2xl animate-float" style={{ animationDelay: '1s' }} />
-      
-      {/* Content */}
-      <div className="relative flex items-center justify-center min-h-screen px-4 py-12">
-        {children}
-      </div>
-      
-      {/* Home link */}
-      <Link 
-        to="/" 
-        className="absolute top-6 left-6 flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors glass px-4 py-2 rounded-xl"
-      >
-        <Home className="h-4 w-4" />
-        <span className="text-sm font-medium">На главную</span>
-      </Link>
-    </div>
-  );
+  // Background component moved outside (AuthBackground) to prevent remount on every keystroke
+
 
   // New password form
   if (showNewPassword) {
