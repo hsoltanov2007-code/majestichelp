@@ -7,7 +7,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ThumbsUp, ThumbsDown, MessageSquare, ChevronLeft, ChevronRight, X, Pencil, Trash2, Save } from "lucide-react";
+import { ThumbsUp, ThumbsDown, MessageSquare, ChevronLeft, ChevronRight, X, Pencil, Trash2, Save, Plus } from "lucide-react";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { ru } from "date-fns/locale";
@@ -318,6 +319,13 @@ export default function News() {
   const [editTitle, setEditTitle] = useState('');
   const [editContent, setEditContent] = useState('');
   const [saving, setSaving] = useState(false);
+  
+  // Create new news state
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [newTitle, setNewTitle] = useState('');
+  const [newContent, setNewContent] = useState('');
+  const [newImageUrls, setNewImageUrls] = useState('');
+  const [creating, setCreating] = useState(false);
 
   const openLightbox = (images: string[], index: number) => {
     setLightboxImages(images);
@@ -389,6 +397,46 @@ export default function News() {
     } catch (error) {
       console.error('Error deleting news:', error);
       toast.error('Ошибка при удалении');
+    }
+  };
+
+  const createNews = async () => {
+    if (!newContent.trim()) {
+      toast.error('Введите содержание новости');
+      return;
+    }
+    
+    setCreating(true);
+    try {
+      // Parse image URLs (comma or newline separated)
+      const imageUrlsArray = newImageUrls
+        .split(/[,\n]/)
+        .map(url => url.trim())
+        .filter(url => url.length > 0);
+      
+      const { error } = await supabase
+        .from('discord_news')
+        .insert({
+          title: newTitle.trim() || null,
+          content: newContent.trim(),
+          author_name: 'HARDY NEWS',
+          image_urls: imageUrlsArray.length > 0 ? imageUrlsArray : [],
+          image_url: imageUrlsArray[0] || null,
+        });
+      
+      if (error) throw error;
+      
+      toast.success('Новость опубликована!');
+      setShowCreateDialog(false);
+      setNewTitle('');
+      setNewContent('');
+      setNewImageUrls('');
+      fetchNews();
+    } catch (error) {
+      console.error('Error creating news:', error);
+      toast.error('Ошибка при создании новости');
+    } finally {
+      setCreating(false);
     }
   };
 
@@ -585,16 +633,91 @@ export default function News() {
         />
       )}
 
+      {/* Create News Dialog */}
+      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Создать новость</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
+            <div className="space-y-2">
+              <Label htmlFor="news-title">Заголовок (опционально)</Label>
+              <Input
+                id="news-title"
+                value={newTitle}
+                onChange={(e) => setNewTitle(e.target.value)}
+                placeholder="Введите заголовок..."
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="news-content">Содержание *</Label>
+              <Textarea
+                id="news-content"
+                value={newContent}
+                onChange={(e) => setNewContent(e.target.value)}
+                placeholder="Текст новости... (поддерживается **жирный** и *курсив*)"
+                rows={5}
+                className="resize-none"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="news-images">Ссылки на изображения</Label>
+              <Textarea
+                id="news-images"
+                value={newImageUrls}
+                onChange={(e) => setNewImageUrls(e.target.value)}
+                placeholder="Вставьте ссылки на изображения (каждая с новой строки или через запятую)"
+                rows={3}
+                className="resize-none text-sm"
+              />
+              <p className="text-xs text-muted-foreground">
+                Можно добавить несколько изображений
+              </p>
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button 
+                variant="ghost" 
+                onClick={() => setShowCreateDialog(false)}
+                disabled={creating}
+              >
+                Отмена
+              </Button>
+              <Button 
+                onClick={createNews}
+                disabled={creating || !newContent.trim()}
+                className="gap-1.5"
+              >
+                {creating ? 'Публикация...' : 'Опубликовать'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <div className="container py-6 max-w-2xl mx-auto">
         {/* Compact Header */}
-        <div className="mb-6 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full overflow-hidden ring-2 ring-accent/30 shadow-md">
-            <img src={hardyLogo} alt="HARDY" className="w-full h-full object-cover" />
+        <div className="mb-6 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full overflow-hidden ring-2 ring-accent/30 shadow-md">
+              <img src={hardyLogo} alt="HARDY" className="w-full h-full object-cover" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold gradient-text">HARDY NEWS</h1>
+              <p className="text-xs text-muted-foreground">Новости Majestic RP</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-xl font-bold gradient-text">HARDY NEWS</h1>
-            <p className="text-xs text-muted-foreground">Новости Majestic RP</p>
-          </div>
+          
+          {/* Create button for admins */}
+          {isAdmin && (
+            <Button 
+              onClick={() => setShowCreateDialog(true)}
+              className="gap-1.5"
+              size="sm"
+            >
+              <Plus className="h-4 w-4" />
+              Создать
+            </Button>
+          )}
         </div>
 
         {news.length === 0 ? (
