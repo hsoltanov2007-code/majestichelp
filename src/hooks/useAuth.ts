@@ -125,8 +125,24 @@ export function useAuth() {
   };
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    return { error };
+    // Always clear local state first, even if API call fails
+    setAuthState({
+      user: null,
+      session: null,
+      profile: null,
+      role: null,
+      isLoading: false,
+      isAdmin: false,
+    });
+    
+    // Try to sign out from server (ignore errors - session might already be invalid)
+    try {
+      await supabase.auth.signOut({ scope: 'local' });
+    } catch (error) {
+      console.log('Sign out error (ignored):', error);
+    }
+    
+    return { error: null };
   };
 
   return {
