@@ -28,6 +28,7 @@ import NewTopic from "./pages/NewTopic";
 import Admin from "./pages/Admin";
 import Profile from "./pages/Profile";
 import Media from "./pages/Media";
+import News from "./pages/News";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -60,6 +61,7 @@ const App = () => (
           <Route path="/admin" element={<Admin />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/media" element={<Media />} />
+          <Route path="/news" element={<News />} />
           
           <Route path="*" element={<NotFound />} />
         </Routes>
