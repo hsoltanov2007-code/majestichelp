@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, Moon, Sun, Bookmark, MessageSquare, User, LogOut, Crown, Brain, Scale, BookOpen, Wrench, ChevronDown, Gavel, FileWarning, Car, ScrollText, Building2, LucideIcon, Home, HelpCircle, FileText, Play, Newspaper } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -99,9 +99,23 @@ function MobileMenuGroup({
 
 export function Header() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { user, profile, isAdmin, signOut } = useAuth();
   const [isDark, setIsDark] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleSignOut = async () => {
+    setIsLoggingOut(true);
+    try {
+      await signOut();
+      navigate('/');
+    } catch (error) {
+      console.error('Error signing out:', error);
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -322,13 +336,20 @@ export function Header() {
                   </span>
                 </Link>
               </Button>
-              <Button variant="ghost" size="icon" onClick={signOut} title="Выйти" className="rounded-lg hover:bg-destructive/10 hover:text-destructive">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={handleSignOut} 
+                disabled={isLoggingOut}
+                title="Выйти" 
+                className="rounded-lg hover:bg-destructive/10 hover:text-destructive"
+              >
                 <LogOut className="h-5 w-5" />
               </Button>
             </>
           ) : (
             <Button asChild variant="ghost" size="icon" title="Войти" className="rounded-lg hover:bg-muted/80">
-              <Link to="/auth">
+              <Link to="/auth" state={{ from: location.pathname }}>
                 <User className="h-5 w-5" />
               </Link>
             </Button>
