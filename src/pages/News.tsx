@@ -5,10 +5,11 @@ import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ThumbsUp, ThumbsDown, MessageSquare, Calendar, User } from "lucide-react";
+import { ThumbsUp, ThumbsDown, MessageSquare, Calendar, Newspaper } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { ru } from "date-fns/locale";
+import hardyLogo from "@/assets/hardy-logo.png";
 
 interface NewsItem {
   id: string;
@@ -27,6 +28,110 @@ interface UserReaction {
   news_id: string;
   reaction_type: 'like' | 'dislike';
 }
+
+// Extract YouTube video ID from various URL formats
+const extractYouTubeId = (text: string): string | null => {
+  const patterns = [
+    /(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/,
+    /(?:https?:\/\/)?(?:www\.)?youtu\.be\/([a-zA-Z0-9_-]{11})/,
+    /(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/,
+    /(?:https?:\/\/)?(?:www\.)?youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/,
+  ];
+  
+  for (const pattern of patterns) {
+    const match = text.match(pattern);
+    if (match) return match[1];
+  }
+  return null;
+};
+
+// Format markdown-like text to JSX
+const formatContent = (text: string): React.ReactNode => {
+  // Split by lines to handle each line
+  const lines = text.split('\n');
+  
+  return lines.map((line, lineIndex) => {
+    // Process each line for formatting
+    const formattedLine = formatLine(line);
+    
+    return (
+      <span key={lineIndex}>
+        {formattedLine}
+        {lineIndex < lines.length - 1 && <br />}
+      </span>
+    );
+  });
+};
+
+const formatLine = (text: string): React.ReactNode => {
+  const parts: React.ReactNode[] = [];
+  let remaining = text;
+  let key = 0;
+  
+  while (remaining.length > 0) {
+    // Bold text **text**
+    const boldMatch = remaining.match(/\*\*(.+?)\*\*/);
+    if (boldMatch && boldMatch.index !== undefined) {
+      if (boldMatch.index > 0) {
+        parts.push(<span key={key++}>{remaining.slice(0, boldMatch.index)}</span>);
+      }
+      parts.push(<strong key={key++} className="font-bold text-primary">{boldMatch[1]}</strong>);
+      remaining = remaining.slice(boldMatch.index + boldMatch[0].length);
+      continue;
+    }
+    
+    // Italic text *text*
+    const italicMatch = remaining.match(/\*(.+?)\*/);
+    if (italicMatch && italicMatch.index !== undefined) {
+      if (italicMatch.index > 0) {
+        parts.push(<span key={key++}>{remaining.slice(0, italicMatch.index)}</span>);
+      }
+      parts.push(<em key={key++} className="italic">{italicMatch[1]}</em>);
+      remaining = remaining.slice(italicMatch.index + italicMatch[0].length);
+      continue;
+    }
+    
+    // URL links
+    const urlMatch = remaining.match(/(https?:\/\/[^\s]+)/);
+    if (urlMatch && urlMatch.index !== undefined) {
+      if (urlMatch.index > 0) {
+        parts.push(<span key={key++}>{remaining.slice(0, urlMatch.index)}</span>);
+      }
+      parts.push(
+        <a 
+          key={key++} 
+          href={urlMatch[1]} 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="text-accent hover:underline"
+        >
+          {urlMatch[1]}
+        </a>
+      );
+      remaining = remaining.slice(urlMatch.index + urlMatch[0].length);
+      continue;
+    }
+    
+    // No more matches, add remaining text
+    parts.push(<span key={key++}>{remaining}</span>);
+    break;
+  }
+  
+  return parts;
+};
+
+// YouTube Embed Component
+const YouTubeEmbed = ({ videoId }: { videoId: string }) => (
+  <div className="aspect-video rounded-lg overflow-hidden my-4 border border-border/50">
+    <iframe
+      src={`https://www.youtube.com/embed/${videoId}`}
+      title="YouTube video"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      allowFullScreen
+      className="w-full h-full"
+    />
+  </div>
+);
 
 export default function News() {
   const { user } = useAuth();
@@ -184,7 +289,7 @@ export default function News() {
     return (
       <Layout>
         <div className="container py-8">
-          <h1 className="text-3xl font-bold mb-8">Новости Majestic RP</h1>
+          <h1 className="text-3xl font-bold mb-8">HARDY NEWS</h1>
           <div className="grid gap-6">
             {[...Array(3)].map((_, i) => (
               <Card key={i} className="glass-card">
@@ -209,11 +314,16 @@ export default function News() {
   return (
     <Layout>
       <div className="container py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold gradient-text">Новости Majestic RP</h1>
-          <p className="text-muted-foreground mt-2">
-            Последние новости и обновления сервера
-          </p>
+        <div className="mb-8 flex items-center gap-4">
+          <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-accent/50 shadow-lg shadow-accent/20">
+            <img src={hardyLogo} alt="HARDY" className="w-full h-full object-cover" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold gradient-text">HARDY NEWS</h1>
+            <p className="text-muted-foreground">
+              Последние новости и обновления Majestic RP
+            </p>
+          </div>
         </div>
 
         {news.length === 0 ? (
@@ -228,34 +338,34 @@ export default function News() {
           <div className="grid gap-6">
             {news.map((item) => {
               const userReaction = userReactions.get(item.id);
+              const youtubeId = extractYouTubeId(item.content);
               
               return (
-                <Card key={item.id} className="glass-card overflow-hidden hover:shadow-lg transition-shadow">
+                <Card key={item.id} className="glass-card overflow-hidden hover:shadow-lg hover:shadow-accent/10 transition-all duration-300">
                   {item.image_url && (
                     <div className="aspect-video overflow-hidden">
                       <img
                         src={item.image_url}
                         alt={item.title || 'Новость'}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
                       />
                     </div>
                   )}
                   
                   <CardHeader className="pb-3">
                     <div className="flex items-center gap-3 mb-2">
-                      {item.author_avatar ? (
+                      <div className="w-10 h-10 rounded-full overflow-hidden border border-accent/30">
                         <img
-                          src={item.author_avatar}
-                          alt={item.author_name}
-                          className="w-10 h-10 rounded-full"
+                          src={hardyLogo}
+                          alt="HARDY NEWS"
+                          className="w-full h-full object-cover"
                         />
-                      ) : (
-                        <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center">
-                          <User className="h-5 w-5 text-accent" />
-                        </div>
-                      )}
+                      </div>
                       <div>
-                        <p className="font-semibold">{item.author_name}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="font-semibold text-accent">HARDY NEWS</p>
+                          <Newspaper className="h-4 w-4 text-accent/70" />
+                        </div>
                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
                           <Calendar className="h-3 w-3" />
                           {formatDistanceToNow(new Date(item.created_at), {
@@ -273,12 +383,16 @@ export default function News() {
                     </div>
                     
                     {item.title && (
-                      <h2 className="text-xl font-bold">{item.title}</h2>
+                      <h2 className="text-xl font-bold text-foreground">{item.title}</h2>
                     )}
                   </CardHeader>
                   
-                  <CardContent>
-                    <p className="whitespace-pre-wrap text-foreground/90">{item.content}</p>
+                  <CardContent className="space-y-3">
+                    <div className="text-foreground/90 leading-relaxed">
+                      {formatContent(item.content)}
+                    </div>
+                    
+                    {youtubeId && <YouTubeEmbed videoId={youtubeId} />}
                   </CardContent>
                   
                   <CardFooter className="border-t border-border/50 pt-4">
@@ -286,7 +400,7 @@ export default function News() {
                       <Button
                         variant={userReaction === 'like' ? 'default' : 'ghost'}
                         size="sm"
-                        className={`gap-2 ${userReaction === 'like' ? 'bg-green-600 hover:bg-green-700' : ''}`}
+                        className={`gap-2 transition-all ${userReaction === 'like' ? 'bg-green-600 hover:bg-green-700 scale-105' : 'hover:bg-green-600/20'}`}
                         onClick={() => handleReaction(item.id, 'like')}
                         disabled={reacting === item.id}
                       >
@@ -297,7 +411,7 @@ export default function News() {
                       <Button
                         variant={userReaction === 'dislike' ? 'default' : 'ghost'}
                         size="sm"
-                        className={`gap-2 ${userReaction === 'dislike' ? 'bg-red-600 hover:bg-red-700' : ''}`}
+                        className={`gap-2 transition-all ${userReaction === 'dislike' ? 'bg-red-600 hover:bg-red-700 scale-105' : 'hover:bg-red-600/20'}`}
                         onClick={() => handleReaction(item.id, 'dislike')}
                         disabled={reacting === item.id}
                       >
