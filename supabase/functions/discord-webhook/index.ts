@@ -137,12 +137,18 @@ Deno.serve(async (req) => {
       .replace(/<#\d+>/g, '') // Remove channel mentions
       .trim();
 
-    if (!content) {
-      console.error('Content is required after processing');
+    // Allow messages with images even without text content
+    if (!content && !image_url) {
+      console.error('Content or image is required');
       return new Response(
-        JSON.stringify({ error: 'Content is required', received: body }),
+        JSON.stringify({ error: 'Content or image is required', received: body }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
+    }
+
+    // If no text content but has image, use placeholder
+    if (!content && image_url) {
+      content = '📷 Изображение';
     }
 
     // Extract title from content if not provided (first line or first 100 chars)
