@@ -4,7 +4,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ThumbsUp, ThumbsDown, MessageSquare, ChevronLeft, ChevronRight } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ThumbsUp, ThumbsDown, MessageSquare, ChevronLeft, ChevronRight, X, Pencil, Trash2, Save } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { ru } from "date-fns/locale";
@@ -28,6 +31,83 @@ interface UserReaction {
   news_id: string;
   reaction_type: 'like' | 'dislike';
 }
+
+// Lightbox Component
+const Lightbox = ({ 
+  images, 
+  currentIndex, 
+  onClose, 
+  onPrev, 
+  onNext 
+}: { 
+  images: string[]; 
+  currentIndex: number; 
+  onClose: () => void;
+  onPrev: () => void;
+  onNext: () => void;
+}) => {
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+      if (e.key === 'ArrowLeft') onPrev();
+      if (e.key === 'ArrowRight') onNext();
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = '';
+    };
+  }, [onClose, onPrev, onNext]);
+
+  return (
+    <div 
+      className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center"
+      onClick={onClose}
+    >
+      {/* Close button */}
+      <button 
+        onClick={onClose}
+        className="absolute top-4 right-4 text-white/70 hover:text-white p-2 rounded-full bg-white/10 hover:bg-white/20 transition-all z-10"
+      >
+        <X className="h-6 w-6" />
+      </button>
+
+      {/* Navigation */}
+      {images.length > 1 && (
+        <>
+          <button
+            onClick={(e) => { e.stopPropagation(); onPrev(); }}
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-white/70 hover:text-white p-3 rounded-full bg-white/10 hover:bg-white/20 transition-all"
+          >
+            <ChevronLeft className="h-8 w-8" />
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); onNext(); }}
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-white/70 hover:text-white p-3 rounded-full bg-white/10 hover:bg-white/20 transition-all"
+          >
+            <ChevronRight className="h-8 w-8" />
+          </button>
+        </>
+      )}
+
+      {/* Image */}
+      <img
+        src={images[currentIndex]}
+        alt="Полноэкранный просмотр"
+        className="max-h-[90vh] max-w-[90vw] object-contain"
+        onClick={(e) => e.stopPropagation()}
+      />
+
+      {/* Counter */}
+      {images.length > 1 && (
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/70 text-sm bg-white/10 px-4 py-2 rounded-full">
+          {currentIndex + 1} / {images.length}
+        </div>
+      )}
+    </div>
+  );
+};
 
 // Extract YouTube video ID from various URL formats
 const extractYouTubeId = (text: string): string | null => {
@@ -133,41 +213,57 @@ const YouTubeEmbed = ({ videoId }: { videoId: string }) => (
   </div>
 );
 
-// Image Gallery Component for multiple images
-const ImageGallery = ({ images, title }: { images: string[], title?: string | null }) => {
+// Image Gallery Component for multiple images with lightbox support
+const ImageGallery = ({ 
+  images, 
+  title,
+  onImageClick 
+}: { 
+  images: string[]; 
+  title?: string | null;
+  onImageClick: (index: number) => void;
+}) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   
   if (images.length === 0) return null;
   
   if (images.length === 1) {
     return (
-      <div className="relative h-48 overflow-hidden">
+      <div 
+        className="relative h-48 overflow-hidden cursor-pointer"
+        onClick={() => onImageClick(0)}
+      >
         <img
           src={images[0]}
           alt={title || 'Новость'}
           className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent pointer-events-none" />
       </div>
     );
   }
   
-  const goToPrevious = () => {
+  const goToPrevious = (e: React.MouseEvent) => {
+    e.stopPropagation();
     setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
   };
   
-  const goToNext = () => {
+  const goToNext = (e: React.MouseEvent) => {
+    e.stopPropagation();
     setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
   };
   
   return (
-    <div className="relative h-48 overflow-hidden group">
+    <div 
+      className="relative h-48 overflow-hidden group cursor-pointer"
+      onClick={() => onImageClick(currentIndex)}
+    >
       <img
         src={images[currentIndex]}
         alt={`${title || 'Новость'} - изображение ${currentIndex + 1}`}
         className="w-full h-full object-cover transition-transform duration-700"
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent pointer-events-none" />
       
       {/* Navigation buttons */}
       <button
@@ -191,7 +287,7 @@ const ImageGallery = ({ images, title }: { images: string[], title?: string | nu
         {images.map((_, idx) => (
           <button
             key={idx}
-            onClick={() => setCurrentIndex(idx)}
+            onClick={(e) => { e.stopPropagation(); setCurrentIndex(idx); }}
             className={`w-1.5 h-1.5 rounded-full transition-all ${
               idx === currentIndex 
                 ? 'bg-accent w-4' 
@@ -206,11 +302,95 @@ const ImageGallery = ({ images, title }: { images: string[], title?: string | nu
 };
 
 export default function News() {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const [news, setNews] = useState<NewsItem[]>([]);
   const [userReactions, setUserReactions] = useState<Map<string, 'like' | 'dislike'>>(new Map());
   const [loading, setLoading] = useState(true);
   const [reacting, setReacting] = useState<string | null>(null);
+  
+  // Lightbox state
+  const [lightboxImages, setLightboxImages] = useState<string[]>([]);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  
+  // Edit state
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [editContent, setEditContent] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  const openLightbox = (images: string[], index: number) => {
+    setLightboxImages(images);
+    setLightboxIndex(index);
+    setLightboxOpen(true);
+  };
+
+  const closeLightbox = () => {
+    setLightboxOpen(false);
+  };
+
+  const lightboxPrev = () => {
+    setLightboxIndex((prev) => (prev === 0 ? lightboxImages.length - 1 : prev - 1));
+  };
+
+  const lightboxNext = () => {
+    setLightboxIndex((prev) => (prev === lightboxImages.length - 1 ? 0 : prev + 1));
+  };
+
+  const startEditing = (item: NewsItem) => {
+    setEditingId(item.id);
+    setEditTitle(item.title || '');
+    setEditContent(item.content);
+  };
+
+  const cancelEditing = () => {
+    setEditingId(null);
+    setEditTitle('');
+    setEditContent('');
+  };
+
+  const saveEdit = async (id: string) => {
+    setSaving(true);
+    try {
+      const { error } = await supabase
+        .from('discord_news')
+        .update({ 
+          title: editTitle || null, 
+          content: editContent 
+        })
+        .eq('id', id);
+      
+      if (error) throw error;
+      
+      toast.success('Новость обновлена');
+      cancelEditing();
+      fetchNews();
+    } catch (error) {
+      console.error('Error updating news:', error);
+      toast.error('Ошибка при сохранении');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const deleteNews = async (id: string) => {
+    if (!confirm('Удалить эту новость?')) return;
+    
+    try {
+      const { error } = await supabase
+        .from('discord_news')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+      
+      toast.success('Новость удалена');
+      setNews(prev => prev.filter(item => item.id !== id));
+    } catch (error) {
+      console.error('Error deleting news:', error);
+      toast.error('Ошибка при удалении');
+    }
+  };
 
   useEffect(() => {
     fetchNews();
@@ -394,6 +574,17 @@ export default function News() {
 
   return (
     <Layout>
+      {/* Lightbox */}
+      {lightboxOpen && (
+        <Lightbox
+          images={lightboxImages}
+          currentIndex={lightboxIndex}
+          onClose={closeLightbox}
+          onPrev={lightboxPrev}
+          onNext={lightboxNext}
+        />
+      )}
+
       <div className="container py-6 max-w-2xl mx-auto">
         {/* Compact Header */}
         <div className="mb-6 flex items-center gap-3">
@@ -422,6 +613,7 @@ export default function News() {
               const images = (item.image_urls && item.image_urls.length > 0) 
                 ? item.image_urls 
                 : (item.image_url ? [item.image_url] : []);
+              const isEditing = editingId === item.id;
               
               return (
                 <article 
@@ -429,68 +621,137 @@ export default function News() {
                   className="glass rounded-2xl overflow-hidden hover:shadow-xl hover:shadow-accent/5 transition-all duration-500 hover:-translate-y-0.5"
                 >
                   {images.length > 0 && (
-                    <ImageGallery images={images} title={item.title} />
+                    <ImageGallery 
+                      images={images} 
+                      title={item.title} 
+                      onImageClick={(index) => openLightbox(images, index)}
+                    />
                   )}
                   
                   <div className="p-4">
-                    {/* Author & Time - Compact */}
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-6 h-6 rounded-full overflow-hidden ring-1 ring-accent/20">
-                        <img src={hardyLogo} alt="HARDY" className="w-full h-full object-cover" />
+                    {/* Author & Time + Admin Actions */}
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-full overflow-hidden ring-1 ring-accent/20">
+                          <img src={hardyLogo} alt="HARDY" className="w-full h-full object-cover" />
+                        </div>
+                        <span className="text-xs font-medium text-accent">HARDY NEWS</span>
+                        <span className="text-muted-foreground/40">•</span>
+                        <span className="text-xs text-muted-foreground">
+                          {formatDistanceToNow(new Date(item.created_at), { addSuffix: true, locale: ru })}
+                        </span>
                       </div>
-                      <span className="text-xs font-medium text-accent">HARDY NEWS</span>
-                      <span className="text-muted-foreground/40">•</span>
-                      <span className="text-xs text-muted-foreground">
-                        {formatDistanceToNow(new Date(item.created_at), { addSuffix: true, locale: ru })}
-                      </span>
+                      
+                      {/* Admin actions */}
+                      {isAdmin && !isEditing && (
+                        <div className="flex items-center gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 w-7 p-0 text-muted-foreground hover:text-accent"
+                            onClick={() => startEditing(item)}
+                          >
+                            <Pencil className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
+                            onClick={() => deleteNews(item.id)}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      )}
                     </div>
                     
-                    {/* Title */}
-                    {item.title && (
-                      <h2 className="text-base font-semibold text-foreground mb-2 leading-snug">
-                        {item.title}
-                      </h2>
+                    {isEditing ? (
+                      /* Edit mode */
+                      <div className="space-y-3">
+                        <Input
+                          value={editTitle}
+                          onChange={(e) => setEditTitle(e.target.value)}
+                          placeholder="Заголовок (опционально)"
+                          className="text-sm"
+                        />
+                        <Textarea
+                          value={editContent}
+                          onChange={(e) => setEditContent(e.target.value)}
+                          placeholder="Содержание новости"
+                          rows={4}
+                          className="text-sm resize-none"
+                        />
+                        <div className="flex items-center gap-2">
+                          <Button
+                            size="sm"
+                            onClick={() => saveEdit(item.id)}
+                            disabled={saving || !editContent.trim()}
+                            className="gap-1.5"
+                          >
+                            <Save className="h-3.5 w-3.5" />
+                            Сохранить
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={cancelEditing}
+                            disabled={saving}
+                          >
+                            Отмена
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      /* View mode */
+                      <>
+                        {item.title && (
+                          <h2 className="text-base font-semibold text-foreground mb-2 leading-snug">
+                            {item.title}
+                          </h2>
+                        )}
+                        
+                        <div className="text-sm text-foreground/80 leading-relaxed mb-3">
+                          {formatContent(item.content)}
+                        </div>
+                        
+                        {youtubeId && <YouTubeEmbed videoId={youtubeId} />}
+                      </>
                     )}
                     
-                    {/* Content */}
-                    <div className="text-sm text-foreground/80 leading-relaxed mb-3">
-                      {formatContent(item.content)}
-                    </div>
-                    
-                    {youtubeId && <YouTubeEmbed videoId={youtubeId} />}
-                    
                     {/* Reactions - Minimal */}
-                    <div className="flex items-center gap-1 pt-2 border-t border-border/30">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className={`h-8 px-3 gap-1.5 rounded-full text-xs transition-all ${
-                          userReaction === 'like' 
-                            ? 'bg-emerald-500/15 text-emerald-500 hover:bg-emerald-500/25' 
-                            : 'text-muted-foreground hover:text-emerald-500 hover:bg-emerald-500/10'
-                        }`}
-                        onClick={() => handleReaction(item.id, 'like')}
-                        disabled={reacting === item.id}
-                      >
-                        <ThumbsUp className="h-3.5 w-3.5" />
-                        <span>{item.likes_count}</span>
-                      </Button>
-                      
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className={`h-8 px-3 gap-1.5 rounded-full text-xs transition-all ${
-                          userReaction === 'dislike' 
-                            ? 'bg-rose-500/15 text-rose-500 hover:bg-rose-500/25' 
-                            : 'text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10'
-                        }`}
-                        onClick={() => handleReaction(item.id, 'dislike')}
-                        disabled={reacting === item.id}
-                      >
-                        <ThumbsDown className="h-3.5 w-3.5" />
-                        <span>{item.dislikes_count}</span>
-                      </Button>
-                    </div>
+                    {!isEditing && (
+                      <div className="flex items-center gap-1 pt-2 border-t border-border/30">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className={`h-8 px-3 gap-1.5 rounded-full text-xs transition-all ${
+                            userReaction === 'like' 
+                              ? 'bg-emerald-500/15 text-emerald-500 hover:bg-emerald-500/25' 
+                              : 'text-muted-foreground hover:text-emerald-500 hover:bg-emerald-500/10'
+                          }`}
+                          onClick={() => handleReaction(item.id, 'like')}
+                          disabled={reacting === item.id}
+                        >
+                          <ThumbsUp className="h-3.5 w-3.5" />
+                          <span>{item.likes_count}</span>
+                        </Button>
+                        
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className={`h-8 px-3 gap-1.5 rounded-full text-xs transition-all ${
+                            userReaction === 'dislike' 
+                              ? 'bg-rose-500/15 text-rose-500 hover:bg-rose-500/25' 
+                              : 'text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10'
+                          }`}
+                          onClick={() => handleReaction(item.id, 'dislike')}
+                          disabled={reacting === item.id}
+                        >
+                          <ThumbsDown className="h-3.5 w-3.5" />
+                          <span>{item.dislikes_count}</span>
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </article>
               );
