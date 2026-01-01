@@ -444,18 +444,18 @@ export default function Auth() {
     <AuthBackground>
       <div className="w-full max-w-md space-y-6">
         {/* Logo/Brand */}
-        <div className="text-center opacity-0 animate-fade-up">
+        <div className="text-center animate-fade-up">
           <Link to="/" className="inline-flex items-center gap-3 group mb-6">
             <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-accent via-accent to-accent/80 flex items-center justify-center shadow-xl shadow-accent/30 group-hover:shadow-accent/50 transition-all group-hover:scale-105">
-              <span className="text-2xl text-accent-foreground font-bold">D</span>
+              <span className="text-2xl text-accent-foreground font-bold">H</span>
             </div>
           </Link>
-          <h1 className="text-3xl font-bold mb-2">Denver Portal</h1>
+          <h1 className="text-3xl font-bold mb-2">HARDY Portal</h1>
           <p className="text-muted-foreground">Войдите или создайте аккаунт</p>
         </div>
 
         {/* Auth Card */}
-        <Card className="glass border-0 opacity-0 animate-fade-up stagger-1">
+        <Card className="glass border-0 animate-fade-up stagger-1">
           <CardHeader className="text-center pb-2">
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-accent/20 to-accent/5">
               <Shield className="h-7 w-7 text-accent" />
@@ -585,7 +585,7 @@ export default function Auth() {
         </Card>
 
         {/* Footer text */}
-        <p className="text-xs text-center text-muted-foreground opacity-0 animate-fade-up stagger-2">
+        <p className="text-xs text-center text-muted-foreground animate-fade-up stagger-2">
           Регистрируясь, вы соглашаетесь с правилами сервера Majestic RP
         </p>
       </div>
