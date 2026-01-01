@@ -125,7 +125,27 @@ export function useAuth() {
   };
 
   const signOut = async () => {
-    // Always clear local state first, even if API call fails
+    // Best-effort: remove any persisted auth tokens so refresh won't restore the session
+    try {
+      for (let i = localStorage.length - 1; i >= 0; i--) {
+        const key = localStorage.key(i);
+        if (!key) continue;
+        if ((key.startsWith('sb-') && key.endsWith('-auth-token')) || key === 'supabase.auth.token') {
+          localStorage.removeItem(key);
+        }
+      }
+      for (let i = sessionStorage.length - 1; i >= 0; i--) {
+        const key = sessionStorage.key(i);
+        if (!key) continue;
+        if ((key.startsWith('sb-') && key.endsWith('-auth-token')) || key === 'supabase.auth.token') {
+          sessionStorage.removeItem(key);
+        }
+      }
+    } catch {
+      // ignore
+    }
+
+    // Clear local state immediately
     setAuthState({
       user: null,
       session: null,
@@ -134,14 +154,14 @@ export function useAuth() {
       isLoading: false,
       isAdmin: false,
     });
-    
-    // Try to sign out from server (ignore errors - session might already be invalid)
+
+    // Tell auth client to drop local session (ignore if it was already gone)
     try {
       await supabase.auth.signOut({ scope: 'local' });
-    } catch (error) {
-      console.log('Sign out error (ignored):', error);
+    } catch {
+      // ignore
     }
-    
+
     return { error: null };
   };
 
