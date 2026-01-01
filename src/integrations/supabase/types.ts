@@ -24,6 +24,7 @@ export type Database = {
           dislikes_count: number
           id: string
           image_url: string | null
+          image_urls: string[] | null
           likes_count: number
           source_channel: string | null
           title: string | null
@@ -38,6 +39,7 @@ export type Database = {
           dislikes_count?: number
           id?: string
           image_url?: string | null
+          image_urls?: string[] | null
           likes_count?: number
           source_channel?: string | null
           title?: string | null
@@ -52,6 +54,7 @@ export type Database = {
           dislikes_count?: number
           id?: string
           image_url?: string | null
+          image_urls?: string[] | null
           likes_count?: number
           source_channel?: string | null
           title?: string | null
