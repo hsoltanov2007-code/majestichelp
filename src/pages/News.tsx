@@ -325,6 +325,7 @@ export default function News() {
   const [newTitle, setNewTitle] = useState('');
   const [newContent, setNewContent] = useState('');
   const [newImageUrls, setNewImageUrls] = useState('');
+  const [newVideoUrl, setNewVideoUrl] = useState('');
   const [creating, setCreating] = useState(false);
 
   const openLightbox = (images: string[], index: number) => {
@@ -413,12 +414,17 @@ export default function News() {
         .split(/[,\n]/)
         .map(url => url.trim())
         .filter(url => url.length > 0);
+      // Append video URL to content if provided
+      let finalContent = newContent.trim();
+      if (newVideoUrl.trim()) {
+        finalContent += '\n\n' + newVideoUrl.trim();
+      }
       
       const { error } = await supabase
         .from('discord_news')
         .insert({
           title: newTitle.trim() || null,
-          content: newContent.trim(),
+          content: finalContent,
           author_name: 'HARDY NEWS',
           image_urls: imageUrlsArray.length > 0 ? imageUrlsArray : [],
           image_url: imageUrlsArray[0] || null,
@@ -431,6 +437,7 @@ export default function News() {
       setNewTitle('');
       setNewContent('');
       setNewImageUrls('');
+      setNewVideoUrl('');
       fetchNews();
     } catch (error) {
       console.error('Error creating news:', error);
@@ -667,11 +674,21 @@ export default function News() {
                 value={newImageUrls}
                 onChange={(e) => setNewImageUrls(e.target.value)}
                 placeholder="Вставьте ссылки на изображения (каждая с новой строки или через запятую)"
-                rows={3}
+                rows={2}
                 className="resize-none text-sm"
               />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="news-video">Ссылка на YouTube видео</Label>
+              <Input
+                id="news-video"
+                value={newVideoUrl}
+                onChange={(e) => setNewVideoUrl(e.target.value)}
+                placeholder="https://youtube.com/watch?v=..."
+                className="text-sm"
+              />
               <p className="text-xs text-muted-foreground">
-                Можно добавить несколько изображений
+                Видео будет встроено в новость
               </p>
             </div>
             <div className="flex justify-end gap-2 pt-2">
