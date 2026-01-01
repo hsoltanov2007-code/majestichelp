@@ -2,10 +2,9 @@ import { useState, useEffect } from "react";
 import { Layout } from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ThumbsUp, ThumbsDown, MessageSquare, Calendar, Newspaper, ChevronLeft, ChevronRight } from "lucide-react";
+import { ThumbsUp, ThumbsDown, MessageSquare, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { ru } from "date-fns/locale";
@@ -142,12 +141,13 @@ const ImageGallery = ({ images, title }: { images: string[], title?: string | nu
   
   if (images.length === 1) {
     return (
-      <div className="aspect-video overflow-hidden">
+      <div className="relative h-48 overflow-hidden">
         <img
           src={images[0]}
           alt={title || 'Новость'}
-          className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+          className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
         />
+        <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent" />
       </div>
     );
   }
@@ -161,49 +161,45 @@ const ImageGallery = ({ images, title }: { images: string[], title?: string | nu
   };
   
   return (
-    <div className="relative aspect-video overflow-hidden group">
+    <div className="relative h-48 overflow-hidden group">
       <img
         src={images[currentIndex]}
         alt={`${title || 'Новость'} - изображение ${currentIndex + 1}`}
-        className="w-full h-full object-cover transition-transform duration-500"
+        className="w-full h-full object-cover transition-transform duration-700"
       />
+      <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent" />
       
       {/* Navigation buttons */}
       <button
         onClick={goToPrevious}
-        className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black/80 text-white rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity"
+        className="absolute left-2 top-1/2 -translate-y-1/2 bg-background/80 backdrop-blur-sm hover:bg-background text-foreground rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-all shadow-lg"
         aria-label="Предыдущее изображение"
       >
-        <ChevronLeft className="h-5 w-5" />
+        <ChevronLeft className="h-4 w-4" />
       </button>
       
       <button
         onClick={goToNext}
-        className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black/80 text-white rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity"
+        className="absolute right-2 top-1/2 -translate-y-1/2 bg-background/80 backdrop-blur-sm hover:bg-background text-foreground rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-all shadow-lg"
         aria-label="Следующее изображение"
       >
-        <ChevronRight className="h-5 w-5" />
+        <ChevronRight className="h-4 w-4" />
       </button>
       
       {/* Dots indicator */}
-      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
         {images.map((_, idx) => (
           <button
             key={idx}
             onClick={() => setCurrentIndex(idx)}
-            className={`w-2 h-2 rounded-full transition-all ${
+            className={`w-1.5 h-1.5 rounded-full transition-all ${
               idx === currentIndex 
-                ? 'bg-white scale-110' 
-                : 'bg-white/50 hover:bg-white/75'
+                ? 'bg-accent w-4' 
+                : 'bg-foreground/40 hover:bg-foreground/60'
             }`}
             aria-label={`Перейти к изображению ${idx + 1}`}
           />
         ))}
-      </div>
-      
-      {/* Counter */}
-      <div className="absolute top-3 right-3 bg-black/60 text-white text-xs px-2 py-1 rounded-full">
-        {currentIndex + 1} / {images.length}
       </div>
     </div>
   );
@@ -364,22 +360,31 @@ export default function News() {
   if (loading) {
     return (
       <Layout>
-        <div className="container py-8">
-          <h1 className="text-3xl font-bold mb-8">HARDY NEWS</h1>
-          <div className="grid gap-6">
+        <div className="container py-6 max-w-2xl mx-auto">
+          <div className="mb-6 flex items-center gap-3">
+            <Skeleton className="w-10 h-10 rounded-full" />
+            <div>
+              <Skeleton className="h-5 w-28 mb-1" />
+              <Skeleton className="h-3 w-20" />
+            </div>
+          </div>
+          <div className="space-y-4">
             {[...Array(3)].map((_, i) => (
-              <Card key={i} className="glass-card">
-                <CardHeader>
-                  <Skeleton className="h-6 w-3/4" />
-                  <Skeleton className="h-4 w-1/4 mt-2" />
-                </CardHeader>
-                <CardContent>
-                  <Skeleton className="h-20 w-full" />
-                </CardContent>
-                <CardFooter>
-                  <Skeleton className="h-8 w-32" />
-                </CardFooter>
-              </Card>
+              <div key={i} className="glass rounded-2xl overflow-hidden">
+                <Skeleton className="h-48 w-full" />
+                <div className="p-4 space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="w-6 h-6 rounded-full" />
+                    <Skeleton className="h-3 w-20" />
+                  </div>
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-16 w-full" />
+                  <div className="flex gap-2 pt-2">
+                    <Skeleton className="h-8 w-16 rounded-full" />
+                    <Skeleton className="h-8 w-16 rounded-full" />
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
         </div>
@@ -389,112 +394,105 @@ export default function News() {
 
   return (
     <Layout>
-      <div className="container py-8">
-        <div className="mb-8 flex items-center gap-4">
-          <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-accent/50 shadow-lg shadow-accent/20">
+      <div className="container py-6 max-w-2xl mx-auto">
+        {/* Compact Header */}
+        <div className="mb-6 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full overflow-hidden ring-2 ring-accent/30 shadow-md">
             <img src={hardyLogo} alt="HARDY" className="w-full h-full object-cover" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold gradient-text">HARDY NEWS</h1>
-            <p className="text-muted-foreground">
-              Последние новости и обновления Majestic RP
-            </p>
+            <h1 className="text-xl font-bold gradient-text">HARDY NEWS</h1>
+            <p className="text-xs text-muted-foreground">Новости Majestic RP</p>
           </div>
         </div>
 
         {news.length === 0 ? (
-          <Card className="glass-card p-12 text-center">
-            <MessageSquare className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-            <h2 className="text-xl font-semibold mb-2">Новостей пока нет</h2>
-            <p className="text-muted-foreground">
+          <div className="glass rounded-2xl p-8 text-center">
+            <MessageSquare className="h-12 w-12 mx-auto text-muted-foreground/50 mb-3" />
+            <h2 className="text-lg font-medium mb-1">Новостей пока нет</h2>
+            <p className="text-sm text-muted-foreground">
               Новости появятся здесь, когда они будут опубликованы
             </p>
-          </Card>
+          </div>
         ) : (
-          <div className="grid gap-6">
+          <div className="space-y-4">
             {news.map((item) => {
               const userReaction = userReactions.get(item.id);
               const youtubeId = extractYouTubeId(item.content);
-              // Use image_urls if available, fallback to image_url
               const images = (item.image_urls && item.image_urls.length > 0) 
                 ? item.image_urls 
                 : (item.image_url ? [item.image_url] : []);
               
               return (
-                <Card key={item.id} className="glass-card overflow-hidden hover:shadow-lg hover:shadow-accent/10 transition-all duration-300">
+                <article 
+                  key={item.id} 
+                  className="glass rounded-2xl overflow-hidden hover:shadow-xl hover:shadow-accent/5 transition-all duration-500 hover:-translate-y-0.5"
+                >
                   {images.length > 0 && (
                     <ImageGallery images={images} title={item.title} />
                   )}
                   
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="w-10 h-10 rounded-full overflow-hidden border border-accent/30">
-                        <img
-                          src={hardyLogo}
-                          alt="HARDY NEWS"
-                          className="w-full h-full object-cover"
-                        />
+                  <div className="p-4">
+                    {/* Author & Time - Compact */}
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-6 h-6 rounded-full overflow-hidden ring-1 ring-accent/20">
+                        <img src={hardyLogo} alt="HARDY" className="w-full h-full object-cover" />
                       </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <p className="font-semibold text-accent">HARDY NEWS</p>
-                          <Newspaper className="h-4 w-4 text-accent/70" />
-                        </div>
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <Calendar className="h-3 w-3" />
-                          {formatDistanceToNow(new Date(item.created_at), {
-                            addSuffix: true,
-                            locale: ru,
-                          })}
-                          {item.source_channel && (
-                            <>
-                              <span>•</span>
-                              <span>{item.source_channel}</span>
-                            </>
-                          )}
-                        </div>
-                      </div>
+                      <span className="text-xs font-medium text-accent">HARDY NEWS</span>
+                      <span className="text-muted-foreground/40">•</span>
+                      <span className="text-xs text-muted-foreground">
+                        {formatDistanceToNow(new Date(item.created_at), { addSuffix: true, locale: ru })}
+                      </span>
                     </div>
                     
+                    {/* Title */}
                     {item.title && (
-                      <h2 className="text-xl font-bold text-foreground">{item.title}</h2>
+                      <h2 className="text-base font-semibold text-foreground mb-2 leading-snug">
+                        {item.title}
+                      </h2>
                     )}
-                  </CardHeader>
-                  
-                  <CardContent className="space-y-3">
-                    <div className="text-foreground/90 leading-relaxed">
+                    
+                    {/* Content */}
+                    <div className="text-sm text-foreground/80 leading-relaxed mb-3">
                       {formatContent(item.content)}
                     </div>
                     
                     {youtubeId && <YouTubeEmbed videoId={youtubeId} />}
-                  </CardContent>
-                  
-                  <CardFooter className="border-t border-border/50 pt-4">
-                    <div className="flex items-center gap-4">
+                    
+                    {/* Reactions - Minimal */}
+                    <div className="flex items-center gap-1 pt-2 border-t border-border/30">
                       <Button
-                        variant={userReaction === 'like' ? 'default' : 'ghost'}
+                        variant="ghost"
                         size="sm"
-                        className={`gap-2 transition-all ${userReaction === 'like' ? 'bg-green-600 hover:bg-green-700 scale-105' : 'hover:bg-green-600/20'}`}
+                        className={`h-8 px-3 gap-1.5 rounded-full text-xs transition-all ${
+                          userReaction === 'like' 
+                            ? 'bg-emerald-500/15 text-emerald-500 hover:bg-emerald-500/25' 
+                            : 'text-muted-foreground hover:text-emerald-500 hover:bg-emerald-500/10'
+                        }`}
                         onClick={() => handleReaction(item.id, 'like')}
                         disabled={reacting === item.id}
                       >
-                        <ThumbsUp className="h-4 w-4" />
+                        <ThumbsUp className="h-3.5 w-3.5" />
                         <span>{item.likes_count}</span>
                       </Button>
                       
                       <Button
-                        variant={userReaction === 'dislike' ? 'default' : 'ghost'}
+                        variant="ghost"
                         size="sm"
-                        className={`gap-2 transition-all ${userReaction === 'dislike' ? 'bg-red-600 hover:bg-red-700 scale-105' : 'hover:bg-red-600/20'}`}
+                        className={`h-8 px-3 gap-1.5 rounded-full text-xs transition-all ${
+                          userReaction === 'dislike' 
+                            ? 'bg-rose-500/15 text-rose-500 hover:bg-rose-500/25' 
+                            : 'text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10'
+                        }`}
                         onClick={() => handleReaction(item.id, 'dislike')}
                         disabled={reacting === item.id}
                       >
-                        <ThumbsDown className="h-4 w-4" />
+                        <ThumbsDown className="h-3.5 w-3.5" />
                         <span>{item.dislikes_count}</span>
                       </Button>
                     </div>
-                  </CardFooter>
-                </Card>
+                  </div>
+                </article>
               );
             })}
           </div>
