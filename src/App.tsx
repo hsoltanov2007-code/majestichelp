@@ -29,9 +29,6 @@ import Admin from "./pages/Admin";
 import Profile from "./pages/Profile";
 import Media from "./pages/Media";
 import News from "./pages/News";
-import AppMode from "./pages/AppMode";
-import Install from "./pages/Install";
-
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -65,8 +62,6 @@ const App = () => (
           <Route path="/profile" element={<Profile />} />
           <Route path="/media" element={<Media />} />
           <Route path="/news" element={<News />} />
-          <Route path="/app" element={<AppMode />} />
-          <Route path="/install" element={<Install />} />
           
           <Route path="*" element={<NotFound />} />
         </Routes>
