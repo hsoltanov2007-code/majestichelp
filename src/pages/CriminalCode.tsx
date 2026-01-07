@@ -101,9 +101,9 @@ export default function CriminalCode() {
             <div class="info"><span class="label">Штраф:</span> ${article.fine}</div>
             <h2>Расшифровка</h2>
             <p>${article.description}</p>
-            ${article.procedure.length > 0 ? `
+            ${article.procedure ? `
               <h2>Процедура задержания</h2>
-              <ol>${article.procedure.map(s => `<li>${s}</li>`).join("")}</ol>
+              <p>${article.procedure}</p>
             ` : ""}
             <hr/>
             <p style="color: #666; font-size: 12px;">Denver | Majestic RP</p>
@@ -245,14 +245,12 @@ export default function CriminalCode() {
                     <span>Штраф: <strong>{article.fine}</strong></span>
                   </div>
                 </div>
-                {article.procedure.length > 0 && (
+                {article.procedure && (
                   <Accordion type="single" collapsible className="mt-4">
                     <AccordionItem value="procedure" className="border-border/50">
                       <AccordionTrigger className="hover:text-accent">Процедура задержания</AccordionTrigger>
                       <AccordionContent>
-                        <ol className="list-decimal list-inside space-y-2 text-muted-foreground">
-                          {article.procedure.map((step, i) => <li key={i}>{step}</li>)}
-                        </ol>
+                        <p className="text-muted-foreground">{article.procedure}</p>
                       </AccordionContent>
                     </AccordionItem>
                   </Accordion>
