@@ -1,12 +1,13 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Layout } from "@/components/Layout";
 import { Card, CardDescription, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Scale, FileText, Car, Users, BookOpen, HelpCircle, Search, Shield, Play, Sparkles, ArrowRight, MessageSquare } from "lucide-react";
+import { Scale, FileText, Car, Users, BookOpen, HelpCircle, Search, Shield, Play, Sparkles, ArrowRight, MessageSquare, Download, Smartphone } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
 import { VisitorCounter } from "@/components/VisitorCounter";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { usePWA } from "@/hooks/usePWA";
 
 const sections = [
   { icon: Scale, title: "Уголовный кодекс", description: "Все статьи УК с розыском и штрафами", path: "/criminal-code", gradient: "from-destructive/20 to-destructive/5", iconColor: "text-destructive" },
@@ -32,6 +33,7 @@ export default function Index() {
   const [search, setSearch] = useState("");
   const [latestVideo, setLatestVideo] = useState<LatestVideo | null>(null);
   const navigate = useNavigate();
+  const { canInstall, installApp, isStandalone } = usePWA();
 
   useEffect(() => {
     const fetchLatestVideo = async () => {
@@ -116,8 +118,33 @@ export default function Index() {
               </div>
             </form>
 
-            <div className="flex justify-center opacity-0 animate-fade-up stagger-3">
+            <div className="flex justify-center gap-4 opacity-0 animate-fade-up stagger-3">
               <VisitorCounter />
+              
+              {/* Install App Button */}
+              {!isStandalone && (
+                canInstall ? (
+                  <Button 
+                    onClick={installApp} 
+                    variant="outline" 
+                    className="gap-2 glass hover:bg-accent/10"
+                  >
+                    <Download className="h-4 w-4" />
+                    Установить приложение
+                  </Button>
+                ) : (
+                  <Button 
+                    asChild
+                    variant="outline" 
+                    className="gap-2 glass hover:bg-accent/10"
+                  >
+                    <Link to="/install">
+                      <Smartphone className="h-4 w-4" />
+                      Скачать приложение
+                    </Link>
+                  </Button>
+                )
+              )}
             </div>
 
           </div>
