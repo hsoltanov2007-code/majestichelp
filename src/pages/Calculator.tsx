@@ -118,20 +118,14 @@ export default function Calculator() {
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
                       <span className="font-medium">{article.article}</span>
-                      {article.starsRange ? (
-                        <Badge variant="outline" className="text-xs">
-                          ⭐ {article.starsRange}
-                        </Badge>
-                      ) : (
-                        <div className="flex items-center gap-0.5">
-                          {Array.from({ length: article.stars }).map((_, i) => (
-                            <Star
-                              key={i}
-                              className="h-3 w-3 fill-yellow-500 text-yellow-500"
-                            />
-                          ))}
-                        </div>
-                      )}
+                      <div className="flex items-center gap-0.5">
+                        {Array.from({ length: article.stars }).map((_, i) => (
+                          <Star
+                            key={i}
+                            className="h-3 w-3 fill-yellow-500 text-yellow-500"
+                          />
+                        ))}
+                      </div>
                       {article.court && (
                         <Badge variant="destructive" className="text-xs">
                           Суд
