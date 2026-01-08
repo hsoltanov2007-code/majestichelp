@@ -8,6 +8,7 @@ import { VisitorCounter } from "@/components/VisitorCounter";
 import { InstallAppButton } from "@/components/InstallAppButton";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import AppView from "./AppView";
 
 const sections = [
   { icon: Scale, title: "Уголовный кодекс", description: "Все статьи УК с розыском и штрафами", path: "/criminal-code", gradient: "from-destructive/20 to-destructive/5", iconColor: "text-destructive" },
@@ -29,10 +30,28 @@ interface LatestVideo {
   created_at: string;
 }
 
+// Проверка, запущено ли приложение как PWA (установленное)
+const isPWA = () => {
+  return window.matchMedia("(display-mode: standalone)").matches ||
+         window.matchMedia("(display-mode: fullscreen)").matches ||
+         (window.navigator as any).standalone === true;
+};
+
 export default function Index() {
   const [search, setSearch] = useState("");
   const [latestVideo, setLatestVideo] = useState<LatestVideo | null>(null);
+  const [isStandalone, setIsStandalone] = useState(false);
   const navigate = useNavigate();
+
+  // Проверяем режим запуска при монтировании
+  useEffect(() => {
+    setIsStandalone(isPWA());
+  }, []);
+
+  // Если PWA - показываем AppView
+  if (isStandalone) {
+    return <AppView />;
+  }
 
   useEffect(() => {
     const fetchLatestVideo = async () => {
