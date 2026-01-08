@@ -128,14 +128,16 @@ export default function Index() {
             <div className="flex flex-wrap items-center justify-center gap-4 opacity-0 animate-fade-up stagger-3">
               <VisitorCounter />
               <InstallAppButton />
+            </div>
+            
+            <div className="flex justify-center opacity-0 animate-fade-up stagger-4">
               <Button
                 variant="outline"
-                size="sm"
                 onClick={() => setViewMode("app")}
-                className="gap-2 glass border-border/50 hover:bg-accent/10"
+                className="gap-2 glass border-accent/50 hover:bg-accent/20 hover:border-accent"
               >
                 <Smartphone className="h-4 w-4" />
-                Режим приложения
+                Открыть режим приложения
               </Button>
             </div>
           </div>
