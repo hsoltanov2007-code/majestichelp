@@ -29,6 +29,7 @@ import Admin from "./pages/Admin";
 import Profile from "./pages/Profile";
 import Media from "./pages/Media";
 import News from "./pages/News";
+import AppView from "./pages/AppView";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -62,6 +63,7 @@ const App = () => (
           <Route path="/profile" element={<Profile />} />
           <Route path="/media" element={<Media />} />
           <Route path="/news" element={<News />} />
+          <Route path="/app" element={<AppView />} />
           
           <Route path="*" element={<NotFound />} />
         </Routes>

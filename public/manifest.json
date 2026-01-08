@@ -1,8 +1,8 @@
 {
-  "name": "HARDY | Majestic RP",
+  "name": "HARDY Кодексы",
   "short_name": "HARDY",
-  "description": "Официальный портал HARDY - законы, правила и процедуры штата Majestic RP",
-  "start_url": "/",
+  "description": "Законы, правила и процедуры штата Majestic RP",
+  "start_url": "/app",
   "display": "standalone",
   "background_color": "#0a0a0f",
   "theme_color": "#e63946",
