@@ -2,7 +2,7 @@
   "name": "HARDY Кодексы",
   "short_name": "HARDY",
   "description": "Законы, правила и процедуры штата Majestic RP",
-  "start_url": "/app",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#0a0a0f",
   "theme_color": "#e63946",
