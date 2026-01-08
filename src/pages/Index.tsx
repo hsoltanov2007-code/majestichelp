@@ -1,13 +1,14 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Layout } from "@/components/Layout";
 import { Card, CardDescription, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Scale, FileText, Car, Users, BookOpen, HelpCircle, Search, Shield, Play, Sparkles, ArrowRight, MessageSquare } from "lucide-react";
+import { Scale, FileText, Car, Users, BookOpen, HelpCircle, Search, Shield, Play, Sparkles, ArrowRight, MessageSquare, Smartphone } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
 import { VisitorCounter } from "@/components/VisitorCounter";
 import { InstallAppButton } from "@/components/InstallAppButton";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { useViewMode } from "@/hooks/useViewMode";
 import AppView from "./AppView";
 
 const sections = [
@@ -30,28 +31,11 @@ interface LatestVideo {
   created_at: string;
 }
 
-// Проверка, запущено ли приложение как PWA (установленное)
-const isPWA = () => {
-  return window.matchMedia("(display-mode: standalone)").matches ||
-         window.matchMedia("(display-mode: fullscreen)").matches ||
-         (window.navigator as any).standalone === true;
-};
-
 export default function Index() {
   const [search, setSearch] = useState("");
   const [latestVideo, setLatestVideo] = useState<LatestVideo | null>(null);
-  const [isStandalone, setIsStandalone] = useState(false);
+  const { effectiveMode, setViewMode, viewMode } = useViewMode();
   const navigate = useNavigate();
-
-  // Проверяем режим запуска при монтировании
-  useEffect(() => {
-    setIsStandalone(isPWA());
-  }, []);
-
-  // Если PWA - показываем AppView
-  if (isStandalone) {
-    return <AppView />;
-  }
 
   useEffect(() => {
     const fetchLatestVideo = async () => {
@@ -69,6 +53,11 @@ export default function Index() {
 
     fetchLatestVideo();
   }, []);
+
+  // Если режим "app" — показываем AppView
+  if (effectiveMode === "app") {
+    return <AppView />;
+  }
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -139,6 +128,15 @@ export default function Index() {
             <div className="flex flex-wrap items-center justify-center gap-4 opacity-0 animate-fade-up stagger-3">
               <VisitorCounter />
               <InstallAppButton />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setViewMode("app")}
+                className="gap-2 glass border-border/50 hover:bg-accent/10"
+              >
+                <Smartphone className="h-4 w-4" />
+                Режим приложения
+              </Button>
             </div>
           </div>
         </div>
