@@ -1,12 +1,12 @@
 import { useState, useMemo } from "react";
-import { Link } from "react-router-dom";
-import { Scale, FileText, Car, ChevronRight, Search, Bookmark, Star, X, Gavel, Banknote, AlertTriangle } from "lucide-react";
+import { Scale, FileText, Car, ChevronRight, Search, Bookmark, X, Gavel, Banknote, AlertTriangle, Globe } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { criminalArticles, CriminalArticle } from "@/data/criminalCode";
 import { adminArticles, AdminArticle } from "@/data/administrativeCode";
 import { trafficArticles, TrafficArticle } from "@/data/trafficCode";
 import { useFavorites, FavoriteItem } from "@/hooks/useFavorites";
+import { useViewMode } from "@/hooks/useViewMode";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -43,6 +43,7 @@ export default function AppView() {
   const [activeTab, setActiveTab] = useState("criminal");
   const [selectedArticle, setSelectedArticle] = useState<ArticleDetail | null>(null);
   const { favorites, isFavorite, toggleFavorite } = useFavorites();
+  const { setViewMode } = useViewMode();
   const { toast } = useToast();
 
   // Фильтрация статей
@@ -380,13 +381,13 @@ export default function AppView() {
               </span>
             )}
           </button>
-          <Link
-            to="/"
+          <button
+            onClick={() => setViewMode("site")}
             className="flex flex-col items-center gap-1 px-3 py-2 text-muted-foreground"
           >
-            <ChevronRight className="h-5 w-5" />
+            <Globe className="h-5 w-5" />
             <span className="text-xs">Сайт</span>
-          </Link>
+          </button>
         </div>
       </nav>
 
