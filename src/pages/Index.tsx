@@ -5,6 +5,7 @@ import { Scale, FileText, Car, Users, BookOpen, HelpCircle, Search, Shield, Play
 import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
 import { VisitorCounter } from "@/components/VisitorCounter";
+import { InstallAppButton } from "@/components/InstallAppButton";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 
@@ -116,10 +117,10 @@ export default function Index() {
               </div>
             </form>
 
-            <div className="flex justify-center opacity-0 animate-fade-up stagger-3">
+            <div className="flex flex-wrap items-center justify-center gap-4 opacity-0 animate-fade-up stagger-3">
               <VisitorCounter />
+              <InstallAppButton />
             </div>
-
           </div>
         </div>
       </section>
