@@ -2,8 +2,9 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Bot, Send, X, Loader2, MessageCircle, Minimize2, Maximize2 } from "lucide-react";
+import { Bot, Send, X, Loader2, MessageCircle, Minimize2, Maximize2, Copy, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 interface Message {
   role: "user" | "assistant";
@@ -104,8 +105,20 @@ export function LegalChatBot() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const copyToClipboard = async (text: string, index: number) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedIndex(index);
+      toast.success("Скопировано!");
+      setTimeout(() => setCopiedIndex(null), 2000);
+    } catch {
+      toast.error("Не удалось скопировать");
+    }
+  };
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -235,13 +248,26 @@ export function LegalChatBot() {
               <div
                 key={i}
                 className={cn(
-                  "mb-3 p-3 rounded-xl text-sm whitespace-pre-wrap",
+                  "mb-3 p-3 rounded-xl text-sm whitespace-pre-wrap relative group",
                   msg.role === "user"
                     ? "bg-accent text-accent-foreground ml-8"
                     : "bg-muted mr-8"
                 )}
               >
                 {msg.content}
+                {msg.role === "assistant" && msg.content && !msg.content.startsWith("❌") && (
+                  <button
+                    onClick={() => copyToClipboard(msg.content, i)}
+                    className="absolute top-2 right-2 p-1 rounded opacity-0 group-hover:opacity-100 hover:bg-background/50 transition-opacity"
+                    title="Копировать"
+                  >
+                    {copiedIndex === i ? (
+                      <Check className="h-3.5 w-3.5 text-green-500" />
+                    ) : (
+                      <Copy className="h-3.5 w-3.5 text-muted-foreground" />
+                    )}
+                  </button>
+                )}
               </div>
             ))}
             
