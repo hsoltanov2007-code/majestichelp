@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ViewModeProvider } from "@/hooks/useViewMode";
+import { LegalChatBot } from "@/components/LegalChatBot";
 import Index from "./pages/Index";
 import CriminalCode from "./pages/CriminalCode";
 import AdministrativeCode from "./pages/AdministrativeCode";
@@ -68,7 +69,8 @@ const App = () => (
             <Route path="/app" element={<AppView />} />
             
             <Route path="*" element={<NotFound />} />
-          </Routes>
+        </Routes>
+          <LegalChatBot />
         </BrowserRouter>
       </TooltipProvider>
     </ViewModeProvider>
