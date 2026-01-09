@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Bot, Send, X, Loader2, MessageCircle, Minimize2, Maximize2, Copy, Check } from "lucide-react";
+import { Bot, Send, X, Loader2, MessageCircle, Minimize2, Maximize2, Copy, Check, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -98,16 +98,39 @@ async function streamChat({
     onError(error instanceof Error ? error : new Error("Unknown error"));
   }
 }
+const CHAT_HISTORY_KEY = "hardy-chat-history";
 
 export function LegalChatBot() {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>(() => {
+    try {
+      const saved = localStorage.getItem(CHAT_HISTORY_KEY);
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Save messages to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem(CHAT_HISTORY_KEY, JSON.stringify(messages));
+    } catch {
+      // Ignore storage errors
+    }
+  }, [messages]);
+
+  const clearHistory = () => {
+    setMessages([]);
+    localStorage.removeItem(CHAT_HISTORY_KEY);
+    toast.success("История очищена");
+  };
 
   const copyToClipboard = async (text: string, index: number) => {
     try {
@@ -199,6 +222,17 @@ export function LegalChatBot() {
           <span className="font-semibold text-sm">Юридический помощник</span>
         </div>
         <div className="flex items-center gap-1">
+          {messages.length > 0 && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={clearHistory}
+              title="Очистить историю"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
           <Button
             variant="ghost"
             size="icon"
