@@ -287,11 +287,12 @@ export function LegalChatBot() {
               <div
                 key={i}
                 className={cn(
-                  "mb-3 p-3 rounded-xl text-sm whitespace-pre-wrap relative group",
+                  "mb-3 p-3 rounded-xl text-sm whitespace-pre-wrap relative group animate-fade-in",
                   msg.role === "user"
                     ? "bg-accent text-accent-foreground ml-8"
                     : "bg-muted mr-8"
                 )}
+                style={{ animationDelay: `${Math.min(i * 50, 200)}ms` }}
               >
                 {msg.content}
                 {msg.role === "assistant" && msg.content && !msg.content.startsWith("❌") && (
@@ -311,7 +312,7 @@ export function LegalChatBot() {
             ))}
             
             {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
-              <div className="mb-3 p-3 rounded-xl bg-muted mr-8">
+              <div className="mb-3 p-3 rounded-xl bg-muted mr-8 animate-fade-in">
                 <Loader2 className="h-4 w-4 animate-spin" />
               </div>
             )}
