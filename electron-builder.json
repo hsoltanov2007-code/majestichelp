@@ -7,6 +7,9 @@
     "output": "release",
     "buildResources": "electron/resources"
   },
+  "extraMetadata": {
+    "main": "electron/main.js"
+  },
   "files": [
     "dist/**/*",
     "electron/**/*",
