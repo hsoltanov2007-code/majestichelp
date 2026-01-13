@@ -1,6 +1,7 @@
 name: Build and Release
 
 on:
+  workflow_dispatch:
   push:
     tags:
       - 'v*'
@@ -28,7 +29,14 @@ jobs:
       - name: Build web app
         run: npm run build
       
-      - name: Build and publish Electron app
+      - name: Build Electron app (publish only on tags)
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npx electron-builder --win --publish always
+        shell: pwsh
+        run: |
+          Write-Host "ref=${{ github.ref }}"
+          if ("${{ startsWith(github.ref, 'refs/tags/') }}" -eq "true") {
+            npx electron-builder --win --publish always
+          } else {
+            npx electron-builder --win --publish never
+          }
