@@ -10,7 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useViewMode } from "@/hooks/useViewMode";
 import AppView from "./AppView";
-import hardyLogo from "@/assets/hardy-logo.png";
+
 
 const sections = [
   { icon: Scale, title: "Уголовный кодекс", description: "Все статьи УК с розыском и штрафами", path: "/criminal-code", gradient: "from-destructive/20 to-destructive/5", iconColor: "text-destructive" },
@@ -88,8 +88,7 @@ export default function Index() {
       <section className="relative py-20 md:py-32 overflow-hidden">
         <div className="container relative">
           <div className="max-w-3xl mx-auto text-center space-y-8">
-            <div className="opacity-0 animate-fade-up flex flex-col items-center gap-4">
-              <img src={hardyLogo} alt="HARDY" className="w-20 h-20 md:w-28 md:h-28 object-contain" />
+            <div className="opacity-0 animate-fade-up">
               <h1 className="text-5xl md:text-7xl font-bold tracking-tight">
                 Портал <span className="gradient-text-accent">HARDY</span>
               </h1>
