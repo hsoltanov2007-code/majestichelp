@@ -87,7 +87,6 @@ export default function Index() {
       <section className="relative py-20 md:py-32 overflow-hidden">
         {/* Background Effects */}
         <div className="absolute inset-0 bg-hero-pattern" />
-        <div className="absolute inset-0 bg-dots-pattern opacity-30" />
         
         {/* Animated gradient orbs */}
         <div className="absolute top-20 left-1/4 w-72 h-72 bg-accent/20 rounded-full blur-3xl animate-float" />
