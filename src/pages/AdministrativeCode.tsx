@@ -5,10 +5,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Banknote, Bookmark, Printer, Link2 } from "lucide-react";
+import { Banknote, Bookmark, Printer, Link2, ExternalLink } from "lucide-react";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useToast } from "@/hooks/use-toast";
 import hardyLogo from "@/assets/hardy-logo.png";
+import { originalLinks } from "@/data/originalLinks";
 
 export default function AdministrativeCode() {
   const [searchParams] = useSearchParams();
@@ -87,12 +88,23 @@ export default function AdministrativeCode() {
   return (
     <Layout>
       <div className="container py-8">
-        <div className="mb-8 flex items-center gap-3">
-          <img src={hardyLogo} alt="HARDY" className="w-10 h-10 object-contain" />
-          <div>
-            <h1 className="text-3xl font-bold">Административный кодекс</h1>
-            <p className="text-muted-foreground">Всего статей: {adminArticles.length}</p>
+        <div className="mb-8 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <img src={hardyLogo} alt="HARDY" className="w-10 h-10 object-contain" />
+            <div>
+              <h1 className="text-3xl font-bold">Административный кодекс</h1>
+              <p className="text-muted-foreground">Всего статей: {adminArticles.length}</p>
+            </div>
           </div>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => window.open(originalLinks.administrativeCode, '_blank')}
+            className="gap-2"
+          >
+            <ExternalLink className="h-4 w-4" />
+            Оригинал
+          </Button>
         </div>
 
         <Input placeholder="Поиск..." value={search} onChange={(e) => setSearch(e.target.value)} className="mb-8 max-w-md" />
