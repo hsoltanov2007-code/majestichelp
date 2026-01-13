@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { HashRouter, Routes, Route } from "react-router-dom";
 import { ViewModeProvider } from "@/hooks/useViewMode";
 import { LegalChatBot } from "@/components/LegalChatBot";
 import AnimatedBackground from "@/components/AnimatedBackground";
@@ -39,7 +39,7 @@ import News from "./pages/News";
 import AppView from "./pages/AppView";
 const queryClient = new QueryClient();
 
-// Wrapper component to use hooks inside BrowserRouter
+// Wrapper component to use hooks inside HashRouter
 function AppContent() {
   useGlobalSearch(); // Activates Ctrl+F listener globally
   
@@ -88,9 +88,9 @@ const App = () => (
         <AnimatedBackground />
         <Toaster />
         <Sonner />
-        <BrowserRouter>
+        <HashRouter>
           <AppContent />
-        </BrowserRouter>
+        </HashRouter>
       </TooltipProvider>
     </ViewModeProvider>
   </QueryClientProvider>
