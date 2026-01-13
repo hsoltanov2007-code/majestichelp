@@ -1,0 +1,52 @@
+{
+  "$schema": "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
+  "appId": "app.hardy.majestic",
+  "productName": "HARDY Кодексы",
+  "copyright": "Copyright © 2024 HARDY",
+  "directories": {
+    "output": "release",
+    "buildResources": "electron/resources"
+  },
+  "files": [
+    "dist/**/*",
+    "electron/**/*",
+    "public/favicon.png"
+  ],
+  "win": {
+    "target": [
+      {
+        "target": "nsis",
+        "arch": ["x64"]
+      },
+      {
+        "target": "portable",
+        "arch": ["x64"]
+      }
+    ],
+    "icon": "public/favicon.png",
+    "artifactName": "${productName}-${version}-Setup.${ext}"
+  },
+  "nsis": {
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true,
+    "installerIcon": "public/favicon.png",
+    "uninstallerIcon": "public/favicon.png",
+    "installerHeaderIcon": "public/favicon.png",
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true,
+    "shortcutName": "HARDY Кодексы"
+  },
+  "portable": {
+    "artifactName": "${productName}-${version}-Portable.${ext}"
+  },
+  "mac": {
+    "target": ["dmg"],
+    "icon": "public/favicon.png",
+    "category": "public.app-category.reference"
+  },
+  "linux": {
+    "target": ["AppImage", "deb"],
+    "icon": "public/favicon.png",
+    "category": "Utility"
+  }
+}
