@@ -30,8 +30,7 @@
       }
     ],
     "icon": "public/favicon.png",
-    "artifactName": "${productName}-${version}-Setup.${ext}",
-    "publisherName": "HARDY"
+    "artifactName": "${productName}-${version}-Setup.${ext}"
   },
   "nsis": {
     "oneClick": false,
