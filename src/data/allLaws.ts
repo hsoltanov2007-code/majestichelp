@@ -3,7 +3,20 @@ import { proceduralCode } from "./proceduralCode";
 import { criminalArticles } from "./criminalCode";
 import { adminArticles } from "./administrativeCode";
 import { trafficArticles } from "./trafficCode";
-import { proceduralCodeFull, trafficCodeFull, constitutionFull, type FullLaw } from "./fullLaws";
+import { 
+  proceduralCodeFull, 
+  trafficCodeFull, 
+  constitutionFull, 
+  criminalCodeFull,
+  laborCodeFull,
+  adminCodeFull,
+  senateLawFull,
+  weaponsLawFull,
+  antiTerrorLawFull,
+  ordersLawFull,
+  nationalGuardLawFull,
+  type FullLaw 
+} from "./fullLaws";
 
 export interface LawListItem {
   id: string;
@@ -57,6 +70,22 @@ export function getFullLawById(id: string): FullLaw | undefined {
       return trafficCodeFull;
     case "constitution":
       return constitutionFull;
+    case "criminal-code":
+      return criminalCodeFull;
+    case "labor-code":
+      return laborCodeFull;
+    case "administrative-code":
+      return adminCodeFull;
+    case "senate-law":
+      return senateLawFull;
+    case "weapons-law":
+      return weaponsLawFull;
+    case "terrorism-law":
+      return antiTerrorLawFull;
+    case "warrant-law":
+      return ordersLawFull;
+    case "national-guard-law":
+      return nationalGuardLawFull;
     default:
       return undefined;
   }
