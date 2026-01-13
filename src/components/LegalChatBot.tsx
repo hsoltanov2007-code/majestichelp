@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, X, Loader2, Minimize2, Maximize2, Copy, Check, Trash2 } from "lucide-react";
+import { Send, X, Loader2, Minimize2, Maximize2, Copy, Check, Trash2, ArrowDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import hardyLogo from "@/assets/hardy-logo.png";
@@ -116,8 +116,35 @@ export function LegalChatBot() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const [showScrollButton, setShowScrollButton] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Scroll to bottom function
+  const scrollToBottom = useCallback(() => {
+    if (scrollRef.current) {
+      const viewport = scrollRef.current.querySelector('[data-radix-scroll-area-viewport]');
+      if (viewport) {
+        viewport.scrollTo({ top: viewport.scrollHeight, behavior: 'smooth' });
+      }
+    }
+  }, []);
+
+  // Check if scrolled up to show/hide button
+  useEffect(() => {
+    if (!scrollRef.current) return;
+    const viewport = scrollRef.current.querySelector('[data-radix-scroll-area-viewport]');
+    if (!viewport) return;
+
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = viewport;
+      const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
+      setShowScrollButton(!isNearBottom);
+    };
+
+    viewport.addEventListener('scroll', handleScroll);
+    return () => viewport.removeEventListener('scroll', handleScroll);
+  }, [isOpen, isMinimized]);
 
   // Open bot when Ctrl+F is pressed
   const handleOpenBot = useCallback(() => {
@@ -285,7 +312,8 @@ export function LegalChatBot() {
       {!isMinimized && (
         <>
           {/* Messages */}
-          <ScrollArea ref={scrollRef} className="flex-1 p-4 bg-gradient-to-b from-transparent to-denver-primary/5">
+          <div className="relative flex-1">
+          <ScrollArea ref={scrollRef} className="h-full p-4 bg-gradient-to-b from-transparent to-denver-primary/5">
             {messages.length === 0 && (
               <div className="text-center text-muted-foreground text-sm py-6">
                 <div className="relative inline-block mb-4">
@@ -362,6 +390,19 @@ export function LegalChatBot() {
               </div>
             )}
           </ScrollArea>
+          
+          {/* Scroll to bottom button */}
+          {showScrollButton && (
+            <Button
+              onClick={scrollToBottom}
+              size="icon"
+              className="absolute bottom-2 right-4 h-8 w-8 rounded-full bg-denver-primary/90 hover:bg-denver-primary shadow-lg animate-fade-in"
+              title="Вниз"
+            >
+              <ArrowDown className="h-4 w-4 text-white" />
+            </Button>
+          )}
+          </div>
 
           {/* Input */}
           <div className="p-3 border-t border-denver-primary/20 bg-card">
