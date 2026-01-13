@@ -28,28 +28,42 @@ const handler = async (req: Request): Promise<Response> => {
     let html = '';
 
     if (type === 'signup') {
-      subject = 'Подтверждение регистрации';
+      subject = 'HARDY — Подтверждение регистрации';
       html = `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <h1 style="color: #333; text-align: center;">Добро пожаловать!</h1>
-          <p style="color: #666; font-size: 16px;">Спасибо за регистрацию на нашем портале.</p>
-          <p style="color: #666; font-size: 16px;">Ваш код подтверждения:</p>
-          <div style="background: #f4f4f4; padding: 20px; text-align: center; border-radius: 8px; margin: 20px 0;">
-            <code style="font-size: 32px; font-weight: bold; color: #333; letter-spacing: 4px;">${token}</code>
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 30px; background: #1a1a2e; border-radius: 12px;">
+          <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="color: #ffffff; font-size: 28px; margin: 0;">🛡️ HARDY</h1>
+            <p style="color: #a0a0a0; margin-top: 8px;">Правовой портал</p>
           </div>
-          <p style="color: #999; font-size: 14px;">Если вы не регистрировались, просто проигнорируйте это письмо.</p>
+          <h2 style="color: #ffffff; text-align: center; font-size: 22px;">Добро пожаловать в HARDY!</h2>
+          <p style="color: #d0d0d0; font-size: 16px; text-align: center;">Спасибо за регистрацию на нашем правовом портале.</p>
+          <p style="color: #d0d0d0; font-size: 16px; text-align: center;">Ваш код подтверждения:</p>
+          <div style="background: #2a2a3e; padding: 25px; text-align: center; border-radius: 10px; margin: 25px 0; border: 1px solid #3a3a4e;">
+            <code style="font-size: 36px; font-weight: bold; color: #00d9ff; letter-spacing: 6px;">${token}</code>
+          </div>
+          <p style="color: #888888; font-size: 13px; text-align: center;">Если вы не регистрировались на HARDY, просто проигнорируйте это письмо.</p>
+          <div style="border-top: 1px solid #3a3a4e; margin-top: 30px; padding-top: 20px; text-align: center;">
+            <p style="color: #666666; font-size: 12px;">© HARDY — Ваш надёжный правовой помощник</p>
+          </div>
         </div>
       `;
     } else if (type === 'magiclink') {
-      subject = 'Вход в аккаунт';
+      subject = 'HARDY — Вход в аккаунт';
       html = `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <h1 style="color: #333; text-align: center;">Вход в аккаунт</h1>
-          <p style="color: #666; font-size: 16px;">Ваш код для входа:</p>
-          <div style="background: #f4f4f4; padding: 20px; text-align: center; border-radius: 8px; margin: 20px 0;">
-            <code style="font-size: 32px; font-weight: bold; color: #333; letter-spacing: 4px;">${token}</code>
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 30px; background: #1a1a2e; border-radius: 12px;">
+          <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="color: #ffffff; font-size: 28px; margin: 0;">🛡️ HARDY</h1>
+            <p style="color: #a0a0a0; margin-top: 8px;">Правовой портал</p>
           </div>
-          <p style="color: #999; font-size: 14px;">Код действителен 10 минут.</p>
+          <h2 style="color: #ffffff; text-align: center; font-size: 22px;">Вход в аккаунт</h2>
+          <p style="color: #d0d0d0; font-size: 16px; text-align: center;">Ваш код для входа:</p>
+          <div style="background: #2a2a3e; padding: 25px; text-align: center; border-radius: 10px; margin: 25px 0; border: 1px solid #3a3a4e;">
+            <code style="font-size: 36px; font-weight: bold; color: #00d9ff; letter-spacing: 6px;">${token}</code>
+          </div>
+          <p style="color: #888888; font-size: 13px; text-align: center;">Код действителен 10 минут.</p>
+          <div style="border-top: 1px solid #3a3a4e; margin-top: 30px; padding-top: 20px; text-align: center;">
+            <p style="color: #666666; font-size: 12px;">© HARDY — Ваш надёжный правовой помощник</p>
+          </div>
         </div>
       `;
     }

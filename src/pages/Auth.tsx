@@ -249,7 +249,7 @@ export default function Auth() {
   if (showNewPassword) {
     return (
       <AuthBackground>
-        <Card className="w-full max-w-md glass border-0 opacity-0 animate-scale-up">
+        <Card className="w-full max-w-md glass border-0 opacity-0 animate-scale-up bg-background/95">
           <CardHeader className="text-center pb-2">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500/20 to-emerald-500/5">
               <Lock className="h-8 w-8 text-emerald-500" />
@@ -306,7 +306,7 @@ export default function Auth() {
   if (showResetSent) {
     return (
       <AuthBackground>
-        <Card className="w-full max-w-md glass border-0 opacity-0 animate-scale-up">
+        <Card className="w-full max-w-md glass border-0 opacity-0 animate-scale-up bg-background/95">
           <CardHeader className="text-center pb-2">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500/20 to-blue-500/5">
               <Mail className="h-8 w-8 text-blue-500" />
@@ -356,7 +356,7 @@ export default function Auth() {
   if (showResetPassword) {
     return (
       <AuthBackground>
-        <Card className="w-full max-w-md glass border-0 opacity-0 animate-scale-up">
+        <Card className="w-full max-w-md glass border-0 opacity-0 animate-scale-up bg-background/95">
           <CardHeader className="text-center pb-2">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5">
               <KeyRound className="h-8 w-8 text-primary" />
@@ -410,7 +410,7 @@ export default function Auth() {
   if (showConfirmation) {
     return (
       <AuthBackground>
-        <Card className="w-full max-w-md glass border-0 opacity-0 animate-scale-up">
+        <Card className="w-full max-w-md glass border-0 opacity-0 animate-scale-up bg-background/95">
           <CardHeader className="text-center pb-2">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500/20 to-emerald-500/5 animate-pulse-glow">
               <Mail className="h-8 w-8 text-emerald-500" />
@@ -469,7 +469,7 @@ export default function Auth() {
         </div>
 
         {/* Auth Card */}
-        <Card className="glass border-0 animate-fade-up stagger-1">
+        <Card className="glass border-0 animate-fade-up stagger-1 bg-background/95">
           <CardHeader className="text-center pb-2">
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-accent/20 to-accent/5">
               <Shield className="h-7 w-7 text-accent" />
