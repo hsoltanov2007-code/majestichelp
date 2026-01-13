@@ -8,11 +8,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Star, Gavel, Banknote, AlertTriangle, Bookmark, Printer, Link2, Scale, Search, Filter, ExternalLink } from "lucide-react";
+import { Star, Gavel, Banknote, AlertTriangle, Bookmark, Printer, Link2, Scale, Search, Filter } from "lucide-react";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useToast } from "@/hooks/use-toast";
 import hardyLogo from "@/assets/hardy-logo.png";
-import { originalLinks } from "@/data/originalLinks";
 
 export default function CriminalCode() {
   const [searchParams] = useSearchParams();
@@ -122,23 +121,12 @@ export default function CriminalCode() {
       <div className="container py-8">
         {/* Header */}
         <div className="mb-10 opacity-0 animate-fade-up">
-          <div className="flex items-center justify-between gap-3 mb-2">
-            <div className="flex items-center gap-3">
-              <img src={hardyLogo} alt="HARDY" className="w-12 h-12 object-contain" />
-              <div>
-                <h1 className="text-4xl font-bold">Уголовный кодекс</h1>
-                <p className="text-muted-foreground">Всего статей: {criminalArticles.length}</p>
-              </div>
+          <div className="flex items-center gap-3 mb-2">
+            <img src={hardyLogo} alt="HARDY" className="w-12 h-12 object-contain" />
+            <div>
+              <h1 className="text-4xl font-bold">Уголовный кодекс</h1>
+              <p className="text-muted-foreground">Всего статей: {criminalArticles.length}</p>
             </div>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => window.open(originalLinks.criminalCode, '_blank')}
-              className="gap-2"
-            >
-              <ExternalLink className="h-4 w-4" />
-              Оригинал
-            </Button>
           </div>
         </div>
 

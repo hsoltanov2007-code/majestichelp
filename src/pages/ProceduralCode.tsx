@@ -7,9 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { proceduralCode, ProceduralArticle } from "@/data/proceduralCode";
-import { ScrollText, AlertCircle, FileText, Search, X, ChevronRight, List, BookOpen, ExternalLink } from "lucide-react";
+import { ScrollText, AlertCircle, FileText, Search, X, ChevronRight, List, BookOpen } from "lucide-react";
 import hardyLogo from "@/assets/hardy-logo.png";
-import { originalLinks } from "@/data/originalLinks";
 
 interface SearchResult {
   article: ProceduralArticle;
@@ -187,26 +186,15 @@ const ProceduralCode = () => {
             <img src={hardyLogo} alt="HARDY" className="w-10 h-10 object-contain" />
             <h1 className="text-3xl font-bold">Процессуальный кодекс</h1>
           </div>
-          <div className="flex items-center gap-2">
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => window.open(originalLinks.proceduralCode, '_blank')}
-              className="gap-2"
-            >
-              <ExternalLink className="h-4 w-4" />
-              Оригинал
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => setShowNavigation(!showNavigation)}
-              className="lg:hidden"
-            >
-              <List className="h-4 w-4 mr-2" />
-              Главы
-            </Button>
-          </div>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => setShowNavigation(!showNavigation)}
+            className="lg:hidden"
+          >
+            <List className="h-4 w-4 mr-2" />
+            Главы
+          </Button>
         </div>
 
         {/* Search Bar */}
