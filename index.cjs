@@ -2,4 +2,4 @@
 // electron-builder sometimes expects package.json "main" to point to index.js.
 // We delegate to our actual main process file.
 
-import './electron/main.js';
+require('./electron/main.cjs');
