@@ -2,9 +2,10 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Bot, Send, X, Loader2, MessageCircle, Minimize2, Maximize2, Copy, Check, Trash2 } from "lucide-react";
+import { Send, X, Loader2, MessageCircle, Minimize2, Maximize2, Copy, Check, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import hardyLogo from "@/assets/hardy-logo.png";
 
 interface Message {
   role: "user" | "assistant";
@@ -203,35 +204,50 @@ export function LegalChatBot() {
 
   if (!isOpen) {
     return (
-      <Button
+      <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full shadow-lg bg-accent hover:bg-accent/90"
-        size="icon"
+        className="fixed bottom-6 right-6 z-50 h-16 w-16 rounded-full shadow-2xl bg-gradient-to-br from-denver-primary via-denver-primary to-denver-secondary hover:scale-110 transition-all duration-300 flex items-center justify-center border-2 border-denver-primary/50 group"
+        title="Юридический помощник HARDY"
       >
-        <Bot className="h-6 w-6" />
-      </Button>
+        <img 
+          src={hardyLogo} 
+          alt="HARDY" 
+          className="h-10 w-10 object-contain group-hover:animate-pulse" 
+        />
+        <span className="absolute -top-1 -right-1 h-4 w-4 bg-green-500 rounded-full border-2 border-background animate-pulse" />
+      </button>
     );
   }
 
   return (
     <div
       className={cn(
-        "fixed bottom-6 right-6 z-50 flex flex-col bg-background border border-border rounded-2xl shadow-2xl transition-all duration-300",
-        isMinimized ? "w-72 h-14" : "w-[380px] h-[520px] max-h-[80vh]"
+        "fixed bottom-6 right-6 z-50 flex flex-col bg-card border border-denver-primary/30 rounded-2xl shadow-2xl transition-all duration-300 overflow-hidden",
+        isMinimized ? "w-80 h-16" : "w-[400px] h-[560px] max-h-[80vh]"
       )}
     >
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/50 rounded-t-2xl">
-        <div className="flex items-center gap-2">
-          <Bot className="h-5 w-5 text-accent" />
-          <span className="font-semibold text-sm">Юридический помощник</span>
+      {/* Header with Hardy branding */}
+      <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-denver-primary/20 via-denver-primary/10 to-transparent border-b border-denver-primary/30">
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <img 
+              src={hardyLogo} 
+              alt="HARDY" 
+              className="h-8 w-8 object-contain" 
+            />
+            <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 bg-green-500 rounded-full border border-card" />
+          </div>
+          <div className="flex flex-col">
+            <span className="font-bold text-sm text-foreground">HARDY AI</span>
+            <span className="text-[10px] text-muted-foreground">Юридический помощник</span>
+          </div>
         </div>
         <div className="flex items-center gap-1">
           {messages.length > 0 && (
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8"
+              className="h-8 w-8 hover:bg-denver-primary/20 hover:text-denver-primary"
               onClick={clearHistory}
               title="Очистить историю"
             >
@@ -241,7 +257,7 @@ export function LegalChatBot() {
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8"
+            className="h-8 w-8 hover:bg-denver-primary/20 hover:text-denver-primary"
             onClick={() => setIsMinimized(!isMinimized)}
           >
             {isMinimized ? <Maximize2 className="h-4 w-4" /> : <Minimize2 className="h-4 w-4" />}
@@ -249,7 +265,7 @@ export function LegalChatBot() {
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8"
+            className="h-8 w-8 hover:bg-destructive/20 hover:text-destructive"
             onClick={() => setIsOpen(false)}
           >
             <X className="h-4 w-4" />
@@ -260,13 +276,20 @@ export function LegalChatBot() {
       {!isMinimized && (
         <>
           {/* Messages */}
-          <ScrollArea ref={scrollRef} className="flex-1 p-4">
+          <ScrollArea ref={scrollRef} className="flex-1 p-4 bg-gradient-to-b from-transparent to-denver-primary/5">
             {messages.length === 0 && (
-              <div className="text-center text-muted-foreground text-sm py-8">
-                <MessageCircle className="h-10 w-10 mx-auto mb-3 opacity-50" />
-                <p className="font-medium">Привет! Я AI-юрист HARDY</p>
-                <p className="mt-1 text-xs">Задайте вопрос по законодательству Majestic RP</p>
-                <div className="mt-4 flex flex-wrap gap-2 justify-center">
+              <div className="text-center text-muted-foreground text-sm py-6">
+                <div className="relative inline-block mb-4">
+                  <img 
+                    src={hardyLogo} 
+                    alt="HARDY" 
+                    className="h-16 w-16 mx-auto object-contain opacity-80" 
+                  />
+                  <div className="absolute inset-0 bg-denver-primary/20 rounded-full blur-xl -z-10" />
+                </div>
+                <p className="font-bold text-base text-foreground">Привет! Я AI-юрист HARDY</p>
+                <p className="mt-1 text-xs text-muted-foreground">Задайте вопрос по законодательству Majestic RP</p>
+                <div className="mt-5 flex flex-wrap gap-2 justify-center">
                   {["За что 3 звезды?", "Статья 10.1?", "Штраф за наркотики?"].map((q) => (
                     <button
                       key={q}
@@ -274,7 +297,7 @@ export function LegalChatBot() {
                         setInput(q);
                         inputRef.current?.focus();
                       }}
-                      className="text-xs px-3 py-1.5 rounded-full bg-muted hover:bg-accent/20 transition-colors"
+                      className="text-xs px-3 py-2 rounded-lg bg-denver-primary/10 hover:bg-denver-primary/20 border border-denver-primary/20 transition-all hover:scale-105 text-foreground"
                     >
                       {q}
                     </button>
@@ -289,16 +312,22 @@ export function LegalChatBot() {
                 className={cn(
                   "mb-3 p-3 rounded-xl text-sm whitespace-pre-wrap relative group animate-fade-in",
                   msg.role === "user"
-                    ? "bg-accent text-accent-foreground ml-8"
-                    : "bg-muted mr-8"
+                    ? "bg-denver-primary/20 border border-denver-primary/30 text-foreground ml-8"
+                    : "bg-muted/80 border border-border mr-8"
                 )}
                 style={{ animationDelay: `${Math.min(i * 50, 200)}ms` }}
               >
+                {msg.role === "assistant" && (
+                  <div className="flex items-center gap-2 mb-2 pb-2 border-b border-border/50">
+                    <img src={hardyLogo} alt="HARDY" className="h-4 w-4" />
+                    <span className="text-[10px] font-medium text-denver-primary">HARDY AI</span>
+                  </div>
+                )}
                 {msg.content}
                 {msg.role === "assistant" && msg.content && !msg.content.startsWith("❌") && (
                   <button
                     onClick={() => copyToClipboard(msg.content, i)}
-                    className="absolute top-2 right-2 p-1 rounded opacity-0 group-hover:opacity-100 hover:bg-background/50 transition-opacity"
+                    className="absolute top-2 right-2 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-denver-primary/20 transition-all"
                     title="Копировать"
                   >
                     {copiedIndex === i ? (
@@ -312,14 +341,21 @@ export function LegalChatBot() {
             ))}
             
             {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
-              <div className="mb-3 p-3 rounded-xl bg-muted mr-8 animate-fade-in">
-                <Loader2 className="h-4 w-4 animate-spin" />
+              <div className="mb-3 p-3 rounded-xl bg-muted/80 border border-border mr-8 animate-fade-in">
+                <div className="flex items-center gap-2">
+                  <img src={hardyLogo} alt="HARDY" className="h-4 w-4 animate-pulse" />
+                  <div className="flex gap-1">
+                    <span className="w-2 h-2 bg-denver-primary rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                    <span className="w-2 h-2 bg-denver-primary rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                    <span className="w-2 h-2 bg-denver-primary rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                  </div>
+                </div>
               </div>
             )}
           </ScrollArea>
 
           {/* Input */}
-          <div className="p-3 border-t border-border">
+          <div className="p-3 border-t border-denver-primary/20 bg-card">
             <div className="flex gap-2">
               <Input
                 ref={inputRef}
@@ -328,13 +364,13 @@ export function LegalChatBot() {
                 onKeyDown={handleKeyDown}
                 placeholder="Задайте вопрос..."
                 disabled={isLoading}
-                className="flex-1"
+                className="flex-1 border-denver-primary/30 focus:border-denver-primary focus:ring-denver-primary/20"
               />
               <Button
                 onClick={sendMessage}
                 disabled={!input.trim() || isLoading}
                 size="icon"
-                className="bg-accent hover:bg-accent/90"
+                className="bg-gradient-to-r from-denver-primary to-denver-secondary hover:opacity-90 text-white shadow-lg shadow-denver-primary/30"
               >
                 {isLoading ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -343,6 +379,9 @@ export function LegalChatBot() {
                 )}
               </Button>
             </div>
+            <p className="text-[9px] text-center text-muted-foreground mt-2">
+              HARDY AI • Majestic RP Legal Assistant
+            </p>
           </div>
         </>
       )}
