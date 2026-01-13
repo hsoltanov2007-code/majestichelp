@@ -12,6 +12,12 @@
     "electron/**/*",
     "public/favicon.png"
   ],
+  "publish": {
+    "provider": "github",
+    "owner": "YOUR_GITHUB_USERNAME",
+    "repo": "YOUR_REPO_NAME",
+    "releaseType": "release"
+  },
   "win": {
     "target": [
       {
@@ -24,7 +30,8 @@
       }
     ],
     "icon": "public/favicon.png",
-    "artifactName": "${productName}-${version}-Setup.${ext}"
+    "artifactName": "${productName}-${version}-Setup.${ext}",
+    "publisherName": "HARDY"
   },
   "nsis": {
     "oneClick": false,
