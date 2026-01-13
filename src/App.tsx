@@ -20,7 +20,8 @@ import Scenarios from "./pages/Scenarios";
 import FAQ from "./pages/FAQ";
 import ProceduralCode from "./pages/ProceduralCode";
 import Quiz from "./pages/Quiz";
-import Laws from "./pages/Laws";
+import LawsList from "./pages/LawsList";
+import LawDetail from "./pages/LawDetail";
 
 import GovernmentRules from "./pages/GovernmentRules";
 import NotFound from "./pages/NotFound";
@@ -60,7 +61,8 @@ const App = () => (
             <Route path="/scenarios" element={<Scenarios />} />
             <Route path="/faq" element={<FAQ />} />
             <Route path="/quiz" element={<Quiz />} />
-            <Route path="/laws" element={<Laws />} />
+            <Route path="/laws" element={<LawsList />} />
+            <Route path="/laws/:lawId" element={<LawDetail />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/forum" element={<Forum />} />
             <Route path="/forum/category/:id" element={<ForumCategory />} />
