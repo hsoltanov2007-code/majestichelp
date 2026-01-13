@@ -107,6 +107,13 @@ export default {
           "0%, 100%": { transform: "translateY(0)" },
           "50%": { transform: "translateY(-10px)" },
         },
+        "float-orb": {
+          "0%": { transform: "translate(-50%, -50%) translate(0, 0)" },
+          "25%": { transform: "translate(-50%, -50%) translate(30px, -40px)" },
+          "50%": { transform: "translate(-50%, -50%) translate(-20px, 20px)" },
+          "75%": { transform: "translate(-50%, -50%) translate(40px, 30px)" },
+          "100%": { transform: "translate(-50%, -50%) translate(0, 0)" },
+        },
         "shimmer": {
           "0%": { backgroundPosition: "-200% 0" },
           "100%": { backgroundPosition: "200% 0" },
@@ -132,6 +139,7 @@ export default {
         "scale-up": "scale-up 0.3s ease-out forwards",
         "glow": "glow 2s ease-in-out infinite",
         "float": "float 3s ease-in-out infinite",
+        "float-orb": "float-orb ease-in-out infinite",
         "shimmer": "shimmer 2s linear infinite",
         "gradient-x": "gradient-x 3s ease infinite",
         "pulse-glow": "pulse-glow 2s ease-in-out infinite",
