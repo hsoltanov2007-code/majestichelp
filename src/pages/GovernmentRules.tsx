@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { AlertTriangle, Info, Shield, Search } from "lucide-react";
 import { governmentRules } from "@/data/governmentRules";
 import { useState } from "react";
+import hardyLogo from "@/assets/hardy-logo.png";
 
 export default function GovernmentRules() {
   const [search, setSearch] = useState("");
@@ -24,7 +25,7 @@ export default function GovernmentRules() {
     <Layout>
       <div className="container py-8">
         <div className="flex items-center gap-3 mb-6">
-          <Shield className="h-8 w-8 text-accent" />
+          <img src={hardyLogo} alt="HARDY" className="w-10 h-10 object-contain" />
           <h1 className="text-3xl font-bold">Правила государственных организаций</h1>
         </div>
 

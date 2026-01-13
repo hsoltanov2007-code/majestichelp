@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { proceduralCode, ProceduralArticle } from "@/data/proceduralCode";
 import { ScrollText, AlertCircle, FileText, Search, X, ChevronRight, List, BookOpen } from "lucide-react";
+import hardyLogo from "@/assets/hardy-logo.png";
 
 interface SearchResult {
   article: ProceduralArticle;
@@ -182,7 +183,7 @@ const ProceduralCode = () => {
         {/* Header */}
         <div className="flex items-center justify-between gap-3 mb-6">
           <div className="flex items-center gap-3">
-            <ScrollText className="h-8 w-8 text-primary" />
+            <img src={hardyLogo} alt="HARDY" className="w-10 h-10 object-contain" />
             <h1 className="text-3xl font-bold">Процессуальный кодекс</h1>
           </div>
           <Button 

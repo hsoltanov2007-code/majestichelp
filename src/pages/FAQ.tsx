@@ -8,6 +8,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { HelpCircle, Search } from "lucide-react";
+import hardyLogo from "@/assets/hardy-logo.png";
 
 interface FAQItem {
   question: string;
@@ -96,7 +97,7 @@ export default function FAQ() {
     <Layout>
       <div className="container py-8 space-y-6">
         <div className="flex items-center gap-3">
-          <HelpCircle className="h-8 w-8 text-primary" />
+          <img src={hardyLogo} alt="HARDY" className="w-10 h-10 object-contain" />
           <div>
             <h1 className="text-3xl font-bold">Частые вопросы (FAQ)</h1>
             <p className="text-muted-foreground">

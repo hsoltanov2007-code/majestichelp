@@ -6,6 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Calculator as CalcIcon, Trash2, Star, Gavel, DollarSign } from "lucide-react";
 import { criminalArticles, CriminalArticle } from "@/data/criminalCode";
+import hardyLogo from "@/assets/hardy-logo.png";
 
 interface SelectedArticle extends CriminalArticle {
   quantity: number;
@@ -80,7 +81,7 @@ export default function Calculator() {
     <Layout>
       <div className="container py-8 space-y-6">
         <div className="flex items-center gap-3">
-          <CalcIcon className="h-8 w-8 text-primary" />
+          <img src={hardyLogo} alt="HARDY" className="w-10 h-10 object-contain" />
           <div>
             <h1 className="text-3xl font-bold">Калькулятор наказаний</h1>
             <p className="text-muted-foreground">

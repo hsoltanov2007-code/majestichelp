@@ -11,6 +11,7 @@ import { useSearchParams } from "react-router-dom";
 import { Star, Gavel, Banknote, AlertTriangle, Bookmark, Printer, Link2, Scale, Search, Filter } from "lucide-react";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useToast } from "@/hooks/use-toast";
+import hardyLogo from "@/assets/hardy-logo.png";
 
 export default function CriminalCode() {
   const [searchParams] = useSearchParams();
@@ -121,9 +122,7 @@ export default function CriminalCode() {
         {/* Header */}
         <div className="mb-10 opacity-0 animate-fade-up">
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-destructive/20 to-destructive/5 flex items-center justify-center">
-              <Scale className="h-6 w-6 text-destructive" />
-            </div>
+            <img src={hardyLogo} alt="HARDY" className="w-12 h-12 object-contain" />
             <div>
               <h1 className="text-4xl font-bold">Уголовный кодекс</h1>
               <p className="text-muted-foreground">Всего статей: {criminalArticles.length}</p>

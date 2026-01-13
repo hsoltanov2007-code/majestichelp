@@ -4,12 +4,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { FileText, Shield, Clock, Users, DollarSign, AlertTriangle, Key, Scale } from "lucide-react";
+import hardyLogo from "@/assets/hardy-logo.png";
 
 export default function Procedures() {
   return (
     <Layout>
       <div className="container py-8">
-        <h1 className="text-3xl font-bold mb-8">Процедуры для госслужащих</h1>
+        <div className="flex items-center gap-3 mb-8">
+          <img src={hardyLogo} alt="HARDY" className="w-10 h-10 object-contain" />
+          <h1 className="text-3xl font-bold">Процедуры для госслужащих</h1>
+        </div>
 
         <div className="grid gap-6 lg:grid-cols-2">
           <Card>
