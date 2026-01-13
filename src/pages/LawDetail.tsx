@@ -1,6 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { Layout } from "@/components/Layout";
-import { ExternalLink, History, FileEdit, ChevronRight } from "lucide-react";
+import { ExternalLink, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -295,12 +295,8 @@ export default function LawDetail() {
         </nav>
         
         {/* Action links */}
-        <div className="flex items-center gap-4 text-sm text-muted-foreground mb-8">
-          <a href="#" className="flex items-center gap-1 hover:text-foreground transition-colors">
-            <History className="w-4 h-4" />
-            История изменений
-          </a>
-          {forumUrl && (
+        {forumUrl && (
+          <div className="flex items-center gap-4 text-sm text-muted-foreground mb-8">
             <a 
               href={forumUrl} 
               target="_blank" 
@@ -310,12 +306,8 @@ export default function LawDetail() {
               Открыть оригинал
               <ExternalLink className="w-3 h-3" />
             </a>
-          )}
-          <a href="#" className="flex items-center gap-1 hover:text-foreground transition-colors">
-            <FileEdit className="w-4 h-4" />
-            Создать законопроект
-          </a>
-        </div>
+          </div>
+        )}
         
         {/* Content */}
         <div className="max-w-4xl mx-auto">
