@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
-import { User, Crown, Save, Loader2, Mail, Eye, EyeOff, Shield, Calendar, Settings } from 'lucide-react';
+import { User, Crown, Save, Loader2, Mail, Eye, EyeOff, Shield, Calendar, Settings, Camera, Upload } from 'lucide-react';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 
@@ -20,6 +20,9 @@ export default function Profile() {
   const [username, setUsername] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [showEmail, setShowEmail] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -30,8 +33,68 @@ export default function Profile() {
   useEffect(() => {
     if (profile) {
       setUsername(profile.username);
+      setAvatarUrl(profile.avatar_url);
     }
   }, [profile]);
+
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !user) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Можно загружать только изображения');
+      return;
+    }
+
+    // Validate file size (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Максимальный размер файла — 2 МБ');
+      return;
+    }
+
+    setIsUploadingAvatar(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/avatar.${fileExt}`;
+
+      // Delete old avatar if exists
+      await supabase.storage
+        .from('avatars')
+        .remove([`${user.id}/avatar.png`, `${user.id}/avatar.jpg`, `${user.id}/avatar.jpeg`, `${user.id}/avatar.webp`]);
+
+      // Upload new avatar
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(fileName, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(fileName);
+
+      // Add cache buster
+      const urlWithCacheBuster = `${publicUrl}?t=${Date.now()}`;
+
+      // Update profile with new avatar URL
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ avatar_url: urlWithCacheBuster })
+        .eq('id', user.id);
+
+      if (updateError) throw updateError;
+
+      setAvatarUrl(urlWithCacheBuster);
+      toast.success('Аватар обновлён');
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+      toast.error('Ошибка при загрузке аватара');
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
 
   const handleSave = async () => {
     if (!user || !username.trim()) return;
@@ -158,10 +221,40 @@ export default function Profile() {
           <CardContent className="pt-0 -mt-14 space-y-6 pb-8">
             {/* Avatar */}
             <div className="flex flex-col items-center">
-              <div className="relative">
-                <div className="h-28 w-28 rounded-full bg-gradient-to-br from-card to-muted flex items-center justify-center border-4 border-card shadow-xl">
-                  {getRoleIcon()}
+              <div className="relative group">
+                <div className="h-28 w-28 rounded-full bg-gradient-to-br from-card to-muted flex items-center justify-center border-4 border-card shadow-xl overflow-hidden">
+                  {avatarUrl ? (
+                    <img 
+                      src={avatarUrl} 
+                      alt="Avatar" 
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    getRoleIcon()
+                  )}
                 </div>
+                
+                {/* Upload overlay */}
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploadingAvatar}
+                  className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer disabled:cursor-not-allowed"
+                >
+                  {isUploadingAvatar ? (
+                    <Loader2 className="h-8 w-8 text-white animate-spin" />
+                  ) : (
+                    <Camera className="h-8 w-8 text-white" />
+                  )}
+                </button>
+                
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleAvatarUpload}
+                  className="hidden"
+                />
+
                 {role === 'admin' && (
                   <div className="absolute -top-1 -right-1 h-8 w-8 rounded-full bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center shadow-lg shadow-red-500/30">
                     <Crown className="h-4 w-4 text-white" />
@@ -169,7 +262,17 @@ export default function Profile() {
                 )}
               </div>
               
-              <h1 className="mt-4 text-2xl font-bold text-foreground">
+              {/* Upload hint */}
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploadingAvatar}
+                className="mt-2 text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
+              >
+                <Upload className="h-3 w-3" />
+                Изменить аватар
+              </button>
+              
+              <h1 className="mt-3 text-2xl font-bold text-foreground">
                 {profile?.username || 'Пользователь'}
               </h1>
               
