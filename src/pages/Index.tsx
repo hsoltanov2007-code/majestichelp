@@ -85,13 +85,6 @@ export default function Index() {
     <Layout>
       {/* Hero Section */}
       <section className="relative py-20 md:py-32 overflow-hidden">
-        {/* Background Effects */}
-        <div className="absolute inset-0 bg-hero-pattern" />
-        
-        {/* Animated gradient orbs */}
-        <div className="absolute top-20 left-1/4 w-72 h-72 bg-accent/20 rounded-full blur-3xl animate-float" />
-        <div className="absolute bottom-20 right-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '1.5s' }} />
-        
         <div className="container relative">
           <div className="max-w-3xl mx-auto text-center space-y-8">
             <div className="opacity-0 animate-fade-up">
