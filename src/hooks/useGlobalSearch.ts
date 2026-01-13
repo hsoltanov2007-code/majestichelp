@@ -7,6 +7,21 @@ interface UseGlobalSearchResult {
   toggleSearch: () => void;
 }
 
+// Create a global event for Ctrl+F to open the bot
+const OPEN_BOT_EVENT = "open-hardy-bot";
+
+export function dispatchOpenBot() {
+  window.dispatchEvent(new CustomEvent(OPEN_BOT_EVENT));
+}
+
+export function useOpenBotListener(callback: () => void) {
+  useEffect(() => {
+    const handler = () => callback();
+    window.addEventListener(OPEN_BOT_EVENT, handler);
+    return () => window.removeEventListener(OPEN_BOT_EVENT, handler);
+  }, [callback]);
+}
+
 export function useGlobalSearch(): UseGlobalSearchResult {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
@@ -18,7 +33,8 @@ export function useGlobalSearch(): UseGlobalSearchResult {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.key.toLowerCase() === "f") {
         e.preventDefault();
-        setIsSearchOpen(true);
+        // Dispatch event to open Hardy bot instead
+        dispatchOpenBot();
       }
       if (e.key === "Escape") {
         setIsSearchOpen(false);

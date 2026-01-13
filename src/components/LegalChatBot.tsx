@@ -1,11 +1,12 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, X, Loader2, MessageCircle, Minimize2, Maximize2, Copy, Check, Trash2 } from "lucide-react";
+import { Send, X, Loader2, Minimize2, Maximize2, Copy, Check, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import hardyLogo from "@/assets/hardy-logo.png";
+import { useOpenBotListener } from "@/hooks/useGlobalSearch";
 
 interface Message {
   role: "user" | "assistant";
@@ -117,6 +118,14 @@ export function LegalChatBot() {
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Open bot when Ctrl+F is pressed
+  const handleOpenBot = useCallback(() => {
+    setIsOpen(true);
+    setIsMinimized(false);
+  }, []);
+  
+  useOpenBotListener(handleOpenBot);
 
   // Save messages to localStorage
   useEffect(() => {
