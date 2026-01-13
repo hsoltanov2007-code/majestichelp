@@ -106,7 +106,7 @@ function createWindow() {
     height: 800,
     minWidth: 800,
     minHeight: 600,
-    icon: path.join(__dirname, '../public/favicon.png'),
+    icon: path.join(__dirname, '../public/images/hardy-logo.png'),
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -139,7 +139,7 @@ function createWindow() {
 }
 
 function createTray() {
-  const iconPath = path.join(__dirname, '../public/favicon.png');
+  const iconPath = path.join(__dirname, '../public/images/hardy-logo.png');
   const icon = nativeImage.createFromPath(iconPath);
   tray = new Tray(icon.resize({ width: 16, height: 16 }));
 
