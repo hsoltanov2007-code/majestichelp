@@ -1,6 +1,14 @@
 const { app, BrowserWindow, globalShortcut, Tray, Menu, nativeImage, dialog } = require('electron');
-const { autoUpdater } = require('electron-updater');
 const path = require('path');
+
+let autoUpdater = null;
+try {
+  autoUpdater = require('electron-updater').autoUpdater;
+  autoUpdater.autoDownload = false;
+  autoUpdater.autoInstallOnAppQuit = true;
+} catch (e) {
+  console.log('electron-updater not available, auto-updates disabled');
+}
 
 let mainWindow;
 let tray;
@@ -8,11 +16,8 @@ let tray;
 const isDev = process.env.NODE_ENV === 'development';
 
 // ============ AUTO-UPDATER SETUP ============
-autoUpdater.autoDownload = false;
-autoUpdater.autoInstallOnAppQuit = true;
-
 function setupAutoUpdater() {
-  if (isDev) return; // Don't check for updates in dev mode
+  if (isDev || !autoUpdater) return; // Don't check for updates in dev mode or if updater not available
 
   // Check for updates on startup
   autoUpdater.checkForUpdates();
@@ -87,6 +92,16 @@ function showUpdateProgress() {
 }
 
 function checkForUpdatesManually() {
+  if (!autoUpdater) {
+    dialog.showMessageBox(mainWindow, {
+      type: 'info',
+      title: 'Обновления',
+      message: 'Автообновление недоступно в этой версии.',
+      buttons: ['OK']
+    });
+    return;
+  }
+  
   autoUpdater.checkForUpdates().then((result) => {
     if (!result || !result.updateInfo) {
       dialog.showMessageBox(mainWindow, {
