@@ -59,7 +59,7 @@
 
     /* Gradients */
     --gradient-hero: linear-gradient(135deg, hsl(351 80% 52% / 0.1) 0%, hsl(220 25% 6%) 50%, hsl(213 55% 30% / 0.1) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(351 80% 58%) 0%, hsl(351 80% 45%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(217 91% 60%) 0%, hsl(217 91% 45%) 100%);
     --gradient-primary: linear-gradient(135deg, hsl(210 40% 96%) 0%, hsl(210 40% 80%) 100%);
   }
 
@@ -113,7 +113,7 @@
 
     /* Dark gradients */
     --gradient-hero: linear-gradient(135deg, hsl(351 80% 52% / 0.1) 0%, hsl(220 25% 6%) 50%, hsl(213 55% 30% / 0.1) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(351 80% 58%) 0%, hsl(351 80% 45%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(217 91% 60%) 0%, hsl(217 91% 45%) 100%);
     --gradient-primary: linear-gradient(135deg, hsl(210 40% 96%) 0%, hsl(210 40% 80%) 100%);
   }
 }
