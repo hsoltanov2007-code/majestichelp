@@ -1,144 +1,97 @@
 import { useParams, Link } from "react-router-dom";
 import { Layout } from "@/components/Layout";
-import { allLawsList, constitution, immunityLaw, laborCode, lawEnforcementLaw, secretServiceLaw, proceduralCode } from "@/data/allLaws";
+import { allLawsList, getFullLawById, type FullLaw } from "@/data/allLaws";
 import { ChevronRight, ExternalLink, History, FileEdit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-// Компонент для отображения статьи закона
-function ArticlePart({ number, text, subparts }: { number: string; text: string; subparts?: { letter: string; text: string }[] }) {
-  return (
-    <div className="mb-4">
-      <p className="text-foreground">
-        <span className="text-primary font-medium">ч. {number}.</span> {text}
-      </p>
-      {subparts && subparts.length > 0 && (
-        <div className="pl-6 mt-2 space-y-1">
-          {subparts.map((sub, idx) => (
-            <p key={idx} className="text-muted-foreground">
-              <span className="font-medium">{sub.letter})</span> {sub.text}
-            </p>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-// Компонент для отображения Конституции и законов с главами
-function LawWithChapters({ law }: { law: typeof constitution }) {
+// Компонент для отображения полного текста закона
+function FullLawView({ law }: { law: FullLaw }) {
   return (
     <div className="space-y-8">
-      <h1 className="text-2xl md:text-3xl font-bold text-primary text-center mb-8">
+      <h1 className="text-2xl md:text-3xl font-bold text-primary text-center mb-4">
         {law.title}
       </h1>
       
-      {law.chapters.map((chapter) => (
-        <div key={chapter.id} className="space-y-6">
-          <h2 className="text-lg font-semibold text-primary text-center">
-            {chapter.title}
-          </h2>
-          
-          {chapter.articles.map((article) => (
-            <div key={article.number} className="space-y-3">
-              <h3 className="font-semibold text-foreground">
-                <span className="text-primary">Статья {article.number}.</span>{" "}
-                {article.title.replace(`Статья ${article.number}`, "").replace(/^[\.\s]+/, "")}
-              </h3>
-              
-              {article.parts.map((part, idx) => (
-                <ArticlePart 
-                  key={idx} 
-                  number={part.number} 
-                  text={part.text} 
-                  subparts={part.subparts} 
-                />
-              ))}
-              
-              {article.notes && article.notes.length > 0 && (
-                <div className="mt-3 p-3 bg-muted/50 rounded-lg border-l-2 border-primary">
-                  <p className="text-sm font-medium text-muted-foreground mb-1">Примечание:</p>
-                  {article.notes.map((note, idx) => (
-                    <p key={idx} className="text-sm text-muted-foreground">{note}</p>
-                  ))}
-                </div>
-              )}
-              
-              {article.exception && (
-                <div className="mt-3 p-3 bg-yellow-500/10 rounded-lg border-l-2 border-yellow-500">
-                  <p className="text-sm font-medium text-yellow-600 mb-1">Исключение:</p>
-                  <p className="text-sm">{article.exception}</p>
-                </div>
-              )}
-            </div>
-          ))}
+      {law.preamble && (
+        <div className="text-muted-foreground text-center italic mb-8 max-w-3xl mx-auto whitespace-pre-line">
+          {law.preamble}
         </div>
-      ))}
-    </div>
-  );
-}
-
-// Компонент для отображения Процессуального кодекса
-function ProceduralCodeView() {
-  return (
-    <div className="space-y-8">
-      <h1 className="text-2xl md:text-3xl font-bold text-primary text-center mb-8">
-        Процессуальный кодекс
-      </h1>
+      )}
       
-      {proceduralCode.map((section) => (
-        <div key={section.id} className="space-y-6">
-          <h2 className="text-lg font-semibold text-primary text-center">
+      {law.sections.map((section) => (
+        <div key={section.id} className="space-y-4">
+          <h2 className="text-xl font-semibold text-primary border-b border-primary/30 pb-2">
             {section.title}
           </h2>
           
-          {section.chapters.map((chapter) => (
-            <div key={chapter.id} className="space-y-6">
-              <h3 className="text-md font-medium text-primary text-center">
-                {chapter.title}
-              </h3>
-              
-              {chapter.articles.map((article) => (
-                <div key={article.id} className="space-y-3">
-                  <h4 className="font-semibold text-foreground">
-                    <span className="text-primary">{article.title.split('.')[0]}.</span>{" "}
-                    {article.title.split('.').slice(1).join('.').trim()}
-                  </h4>
-                  
-                  {article.parts.map((part, idx) => (
-                    <ArticlePart 
-                      key={idx} 
-                      number={part.number} 
-                      text={part.text} 
-                      subparts={part.subparts} 
-                    />
-                  ))}
-                  
-                  {article.notes && article.notes.length > 0 && (
-                    <div className="mt-3 p-3 bg-muted/50 rounded-lg border-l-2 border-primary">
-                      <p className="text-sm font-medium text-muted-foreground mb-1">Примечание:</p>
-                      {article.notes.map((note, idx) => (
-                        <p key={idx} className="text-sm text-muted-foreground">{note}</p>
-                      ))}
+          <div className="prose prose-sm dark:prose-invert max-w-none">
+            <div className="whitespace-pre-line text-foreground leading-relaxed">
+              {section.content.split('\n').map((line, idx) => {
+                // Заголовки статей
+                if (line.match(/^Статья \d+/)) {
+                  return (
+                    <p key={idx} className="font-semibold text-primary mt-4 mb-2">
+                      {line}
+                    </p>
+                  );
+                }
+                // Главы
+                if (line.match(/^Глава [IVX]+\.|^Глава \d+\./)) {
+                  return (
+                    <h3 key={idx} className="font-semibold text-foreground mt-6 mb-3 text-lg">
+                      {line}
+                    </h3>
+                  );
+                }
+                // Части статей
+                if (line.match(/^ч\. \d+\./)) {
+                  return (
+                    <p key={idx} className="ml-0 mb-2">
+                      <span className="text-primary font-medium">{line.split('.')[0]}.</span>
+                      {line.split('.').slice(1).join('.')}
+                    </p>
+                  );
+                }
+                // Пункты
+                if (line.match(/^[а-я]\)/)) {
+                  return (
+                    <p key={idx} className="ml-4 mb-1 text-muted-foreground">
+                      {line}
+                    </p>
+                  );
+                }
+                // Примечания
+                if (line.startsWith('Примечание:')) {
+                  return (
+                    <div key={idx} className="mt-3 p-3 bg-muted/50 rounded-lg border-l-2 border-primary">
+                      <p className="text-sm">{line}</p>
                     </div>
-                  )}
-                  
-                  {article.exception && (
-                    <div className="mt-3 p-3 bg-yellow-500/10 rounded-lg border-l-2 border-yellow-500">
-                      <p className="text-sm font-medium text-yellow-600 mb-1">Исключение:</p>
-                      <p className="text-sm">{article.exception}</p>
+                  );
+                }
+                // Исключения
+                if (line.startsWith('Исключение:')) {
+                  return (
+                    <div key={idx} className="mt-3 p-3 bg-yellow-500/10 rounded-lg border-l-2 border-yellow-500">
+                      <p className="text-sm">{line}</p>
                     </div>
-                  )}
-                  
-                  {article.comment && (
-                    <div className="mt-3 p-3 bg-blue-500/10 rounded-lg border-l-2 border-blue-500">
-                      <p className="text-sm font-medium text-blue-600 mb-1">Комментарий:</p>
-                      <p className="text-sm">{article.comment}</p>
-                    </div>
-                  )}
-                </div>
-              ))}
+                  );
+                }
+                // Штрафы
+                if (line.startsWith('Штраф:')) {
+                  return (
+                    <p key={idx} className="text-red-500 font-medium ml-4 mb-3">
+                      {line}
+                    </p>
+                  );
+                }
+                // Обычный текст
+                if (line.trim()) {
+                  return <p key={idx} className="mb-2">{line}</p>;
+                }
+                return null;
+              })}
             </div>
-          ))}
+          </div>
         </div>
       ))}
     </div>
@@ -187,24 +140,15 @@ export default function LawDetail() {
     );
   }
   
+  // Получаем полный закон
+  const fullLaw = lawId ? getFullLawById(lawId) : undefined;
+  
   // Определяем какой контент показывать
   const renderContent = () => {
-    switch (lawId) {
-      case "constitution":
-        return <LawWithChapters law={constitution} />;
-      case "immunity-law":
-        return <LawWithChapters law={immunityLaw} />;
-      case "labor-code":
-        return <LawWithChapters law={laborCode} />;
-      case "regional-law-enforcement":
-        return <LawWithChapters law={lawEnforcementLaw} />;
-      case "secret-service-law":
-        return <LawWithChapters law={secretServiceLaw} />;
-      case "procedural-code":
-        return <ProceduralCodeView />;
-      default:
-        return <PlaceholderLaw title={lawInfo.title} forumUrl={lawInfo.forumUrl} />;
+    if (fullLaw) {
+      return <FullLawView law={fullLaw} />;
     }
+    return <PlaceholderLaw title={lawInfo.title} forumUrl={lawInfo.forumUrl} />;
   };
   
   return (
