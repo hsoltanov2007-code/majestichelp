@@ -258,6 +258,48 @@ export type Database = {
           },
         ]
       }
+      laws: {
+        Row: {
+          content: string
+          created_at: string
+          forum_url: string | null
+          id: string
+          order_index: number
+          preamble: string | null
+          short_title: string
+          slug: string
+          title: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          forum_url?: string | null
+          id?: string
+          order_index?: number
+          preamble?: string | null
+          short_title: string
+          slug: string
+          title: string
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          forum_url?: string | null
+          id?: string
+          order_index?: number
+          preamble?: string | null
+          short_title?: string
+          slug?: string
+          title?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       media_video_likes: {
         Row: {
           created_at: string

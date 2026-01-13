@@ -22,6 +22,7 @@ import ProceduralCode from "./pages/ProceduralCode";
 import Quiz from "./pages/Quiz";
 import LawsList from "./pages/LawsList";
 import LawDetail from "./pages/LawDetail";
+import AdminLaws from "./pages/AdminLaws";
 
 import GovernmentRules from "./pages/GovernmentRules";
 import NotFound from "./pages/NotFound";
@@ -69,6 +70,7 @@ const App = () => (
             <Route path="/forum/topic/:id" element={<ForumTopic />} />
             <Route path="/forum/new-topic" element={<NewTopic />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/admin/laws" element={<AdminLaws />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/media" element={<Media />} />
             <Route path="/news" element={<News />} />
