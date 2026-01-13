@@ -10,10 +10,11 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { 
   ArrowLeft, Plus, Trash2, Users, FolderOpen, MessageSquare, 
-  Shield, Loader2, Pin, Lock, Unlock 
+  Shield, Loader2, Pin, Lock, Unlock, Crown, UserCog
 } from 'lucide-react';
 
 interface Category {
@@ -47,6 +48,7 @@ export default function Admin() {
   const [users, setUsers] = useState<UserWithRole[]>([]);
   const [topics, setTopics] = useState<Topic[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [updatingRoleFor, setUpdatingRoleFor] = useState<string | null>(null);
 
   // New category form
   const [newCategoryName, setNewCategoryName] = useState('');
@@ -212,6 +214,48 @@ export default function Admin() {
     } catch (error) {
       console.error('Error deleting topic:', error);
       toast.error('Ошибка при удалении');
+    }
+  };
+
+  const handleChangeRole = async (userId: string, newRole: 'admin' | 'moderator' | 'user') => {
+    if (userId === user?.id) {
+      toast.error('Вы не можете изменить свою роль');
+      return;
+    }
+
+    setUpdatingRoleFor(userId);
+    try {
+      // First check if user already has a role entry
+      const { data: existingRole } = await supabase
+        .from('user_roles')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
+
+      if (existingRole) {
+        // Update existing role
+        const { error } = await supabase
+          .from('user_roles')
+          .update({ role: newRole })
+          .eq('user_id', userId);
+
+        if (error) throw error;
+      } else {
+        // Insert new role
+        const { error } = await supabase
+          .from('user_roles')
+          .insert({ user_id: userId, role: newRole });
+
+        if (error) throw error;
+      }
+
+      toast.success(`Роль изменена на "${newRole === 'admin' ? 'Админ' : newRole === 'moderator' ? 'Модератор' : 'Пользователь'}"`);
+      fetchData();
+    } catch (error) {
+      console.error('Error changing role:', error);
+      toast.error('Ошибка при изменении роли');
+    } finally {
+      setUpdatingRoleFor(null);
     }
   };
 
@@ -401,19 +445,93 @@ export default function Admin() {
           </TabsContent>
 
           <TabsContent value="users">
+            <Card className="mb-4">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <UserCog className="h-5 w-5" />
+                  Управление ролями
+                </CardTitle>
+                <CardDescription>
+                  Выберите роль для пользователя. Админы имеют полный доступ ко всем функциям.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+            
             <div className="space-y-2">
               {users.map((u) => (
-                <Card key={u.id}>
-                  <CardContent className="py-3 flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">{u.username}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {new Date(u.created_at).toLocaleDateString('ru-RU')}
-                      </p>
+                <Card key={u.id} className={u.id === user?.id ? 'border-accent/50' : ''}>
+                  <CardContent className="py-4 flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                        u.role === 'admin' 
+                          ? 'bg-yellow-500/20 text-yellow-500' 
+                          : u.role === 'moderator' 
+                            ? 'bg-blue-500/20 text-blue-500' 
+                            : 'bg-muted text-muted-foreground'
+                      }`}>
+                        {u.role === 'admin' ? (
+                          <Crown className="h-5 w-5" />
+                        ) : u.role === 'moderator' ? (
+                          <Shield className="h-5 w-5" />
+                        ) : (
+                          <Users className="h-5 w-5" />
+                        )}
+                      </div>
+                      <div>
+                        <p className="font-medium flex items-center gap-2">
+                          {u.username}
+                          {u.id === user?.id && (
+                            <Badge variant="outline" className="text-xs">Вы</Badge>
+                          )}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {new Date(u.created_at).toLocaleDateString('ru-RU')}
+                        </p>
+                      </div>
                     </div>
-                    <Badge variant={u.role === 'admin' ? 'default' : 'secondary'}>
-                      {u.role === 'admin' ? 'Админ' : u.role === 'moderator' ? 'Модератор' : 'Пользователь'}
-                    </Badge>
+                    
+                    <div className="flex items-center gap-3">
+                      {u.id === user?.id ? (
+                        <Badge variant="default" className="bg-yellow-500/20 text-yellow-500 border-yellow-500/30">
+                          <Crown className="h-3 w-3 mr-1" />
+                          Админ
+                        </Badge>
+                      ) : (
+                        <Select
+                          value={u.role}
+                          onValueChange={(value: 'admin' | 'moderator' | 'user') => handleChangeRole(u.id, value)}
+                          disabled={updatingRoleFor === u.id}
+                        >
+                          <SelectTrigger className="w-[160px]">
+                            {updatingRoleFor === u.id ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <SelectValue />
+                            )}
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="user">
+                              <div className="flex items-center gap-2">
+                                <Users className="h-4 w-4" />
+                                Пользователь
+                              </div>
+                            </SelectItem>
+                            <SelectItem value="moderator">
+                              <div className="flex items-center gap-2">
+                                <Shield className="h-4 w-4 text-blue-500" />
+                                Модератор
+                              </div>
+                            </SelectItem>
+                            <SelectItem value="admin">
+                              <div className="flex items-center gap-2">
+                                <Crown className="h-4 w-4 text-yellow-500" />
+                                Админ
+                              </div>
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      )}
+                    </div>
                   </CardContent>
                 </Card>
               ))}
