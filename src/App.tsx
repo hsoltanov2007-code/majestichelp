@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ViewModeProvider } from "@/hooks/useViewMode";
 import { LegalChatBot } from "@/components/LegalChatBot";
+import AnimatedBackground from "@/components/AnimatedBackground";
 import Index from "./pages/Index";
 import CriminalCode from "./pages/CriminalCode";
 import AdministrativeCode from "./pages/AdministrativeCode";
@@ -38,6 +39,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <ViewModeProvider>
       <TooltipProvider>
+        <AnimatedBackground />
         <Toaster />
         <Sonner />
         <BrowserRouter>
