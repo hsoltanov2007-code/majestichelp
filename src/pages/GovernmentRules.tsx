@@ -3,10 +3,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { AlertTriangle, Info, Shield, Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { AlertTriangle, Info, Shield, Search, ExternalLink } from "lucide-react";
 import { governmentRules } from "@/data/governmentRules";
 import { useState } from "react";
 import hardyLogo from "@/assets/hardy-logo.png";
+import { originalLinks } from "@/data/originalLinks";
 
 export default function GovernmentRules() {
   const [search, setSearch] = useState("");
@@ -24,9 +26,20 @@ export default function GovernmentRules() {
   return (
     <Layout>
       <div className="container py-8">
-        <div className="flex items-center gap-3 mb-6">
-          <img src={hardyLogo} alt="HARDY" className="w-10 h-10 object-contain" />
-          <h1 className="text-3xl font-bold">Правила государственных организаций</h1>
+        <div className="flex items-center justify-between gap-3 mb-6">
+          <div className="flex items-center gap-3">
+            <img src={hardyLogo} alt="HARDY" className="w-10 h-10 object-contain" />
+            <h1 className="text-3xl font-bold">Правила государственных организаций</h1>
+          </div>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => window.open(originalLinks.governmentRules, '_blank')}
+            className="gap-2"
+          >
+            <ExternalLink className="h-4 w-4" />
+            Оригинал
+          </Button>
         </div>
 
         <div className="relative mb-6 max-w-md">
