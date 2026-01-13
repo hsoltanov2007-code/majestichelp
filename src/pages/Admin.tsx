@@ -42,7 +42,7 @@ interface Topic {
 
 export default function Admin() {
   const navigate = useNavigate();
-  const { user, isAdmin, isLoading: authLoading } = useAuth();
+  const { user, isAdmin, canManage, isLoading: authLoading } = useAuth();
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [users, setUsers] = useState<UserWithRole[]>([]);
@@ -59,14 +59,14 @@ export default function Admin() {
     if (!authLoading) {
       if (!user) {
         navigate('/auth');
-      } else if (!isAdmin) {
+      } else if (!canManage) {
         toast.error('Доступ запрещён');
         navigate('/forum');
       } else {
         fetchData();
       }
     }
-  }, [user, isAdmin, authLoading, navigate]);
+  }, [user, canManage, authLoading, navigate]);
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -337,7 +337,7 @@ export default function Admin() {
           <TabsList className="mb-4">
             <TabsTrigger value="categories">Категории</TabsTrigger>
             <TabsTrigger value="topics">Темы</TabsTrigger>
-            <TabsTrigger value="users">Пользователи</TabsTrigger>
+            {isAdmin && <TabsTrigger value="users">Пользователи</TabsTrigger>}
           </TabsList>
 
           <TabsContent value="categories">
@@ -444,6 +444,7 @@ export default function Admin() {
             </div>
           </TabsContent>
 
+          {isAdmin && (
           <TabsContent value="users">
             <Card className="mb-4">
               <CardHeader>
@@ -537,6 +538,7 @@ export default function Admin() {
               ))}
             </div>
           </TabsContent>
+          )}
         </Tabs>
       </div>
     </Layout>

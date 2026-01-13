@@ -48,7 +48,7 @@ function getEmbedUrl(url: string): string | null {
 }
 
 export default function Media() {
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, canManage } = useAuth();
   const { toast } = useToast();
   const [videos, setVideos] = useState<VideoWithLikes[]>([]);
   const [loading, setLoading] = useState(true);
@@ -323,7 +323,7 @@ export default function Media() {
             </p>
           </div>
 
-          {isAdmin && (
+          {canManage && (
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
                 <Button className="gap-2 bg-accent hover:bg-accent/90">
@@ -391,7 +391,7 @@ export default function Media() {
                 <Play className="h-10 w-10 text-muted-foreground" />
               </div>
               <p className="text-xl text-muted-foreground">Пока нет видео</p>
-              {isAdmin && (
+              {canManage && (
                 <p className="text-sm text-muted-foreground mt-2">
                   Нажмите "Добавить видео", чтобы начать
                 </p>
@@ -468,7 +468,7 @@ export default function Media() {
                         >
                           <ExternalLink className="h-4 w-4" />
                         </Button>
-                        {isAdmin && (
+                        {canManage && (
                           <>
                             <Button
                               variant="ghost"

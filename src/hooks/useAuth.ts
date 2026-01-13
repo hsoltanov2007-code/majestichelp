@@ -18,6 +18,8 @@ interface AuthState {
   role: AppRole | null;
   isLoading: boolean;
   isAdmin: boolean;
+  isModerator: boolean;
+  canManage: boolean; // admin or moderator
 }
 
 export function useAuth() {
@@ -28,6 +30,8 @@ export function useAuth() {
     role: null,
     isLoading: true,
     isAdmin: false,
+    isModerator: false,
+    canManage: false,
   });
 
   useEffect(() => {
@@ -51,6 +55,8 @@ export function useAuth() {
             profile: null,
             role: null,
             isAdmin: false,
+            isModerator: false,
+            canManage: false,
             isLoading: false,
           }));
         }
@@ -92,12 +98,16 @@ export function useAuth() {
         .single();
 
       const role = (roleData?.role as AppRole) || 'user';
+      const isAdmin = role === 'admin';
+      const isModerator = role === 'moderator';
 
       setAuthState(prev => ({
         ...prev,
         profile,
         role,
-        isAdmin: role === 'admin',
+        isAdmin,
+        isModerator,
+        canManage: isAdmin || isModerator,
         isLoading: false,
       }));
     } catch (error) {
@@ -153,6 +163,8 @@ export function useAuth() {
       role: null,
       isLoading: false,
       isAdmin: false,
+      isModerator: false,
+      canManage: false,
     });
 
     // Tell auth client to drop local session (ignore if it was already gone)

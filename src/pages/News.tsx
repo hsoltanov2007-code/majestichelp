@@ -303,7 +303,7 @@ const ImageGallery = ({
 };
 
 export default function News() {
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, canManage } = useAuth();
   const [news, setNews] = useState<NewsItem[]>([]);
   const [userReactions, setUserReactions] = useState<Map<string, 'like' | 'dislike'>>(new Map());
   const [loading, setLoading] = useState(true);
@@ -725,7 +725,7 @@ export default function News() {
           </div>
           
           {/* Create button for admins */}
-          {isAdmin && (
+          {canManage && (
             <Button 
               onClick={() => setShowCreateDialog(true)}
               className="gap-1.5"
@@ -783,7 +783,7 @@ export default function News() {
                       </div>
                       
                       {/* Admin actions */}
-                      {isAdmin && !isEditing && (
+                      {canManage && !isEditing && (
                         <div className="flex items-center gap-1">
                           <Button
                             variant="ghost"
