@@ -215,7 +215,7 @@ export function LegalChatBot() {
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-24 right-6 z-50 h-16 w-16 rounded-full shadow-2xl bg-gradient-to-br from-denver-primary via-denver-primary to-denver-secondary hover:scale-110 transition-all duration-300 flex items-center justify-center border-2 border-denver-primary/50 group"
+        className="fixed bottom-6 right-6 z-50 h-16 w-16 rounded-full shadow-2xl bg-gradient-to-br from-denver-primary via-denver-primary to-denver-secondary hover:scale-110 transition-all duration-300 flex items-center justify-center border-2 border-denver-primary/50 group"
         title="Юридический помощник HARDY"
       >
         <img 
