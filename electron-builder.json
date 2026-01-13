@@ -33,15 +33,15 @@
         "arch": ["x64"]
       }
     ],
-    "icon": "public/images/hardy-logo.png",
+    "icon": "public/favicon.ico",
     "artifactName": "${productName}-${version}-Setup.${ext}"
   },
   "nsis": {
     "oneClick": false,
     "allowToChangeInstallationDirectory": true,
-    "installerIcon": "public/images/hardy-logo.png",
-    "uninstallerIcon": "public/images/hardy-logo.png",
-    "installerHeaderIcon": "public/images/hardy-logo.png",
+    "installerIcon": "public/favicon.ico",
+    "uninstallerIcon": "public/favicon.ico",
+    "installerHeaderIcon": "public/favicon.ico",
     "createDesktopShortcut": true,
     "createStartMenuShortcut": true,
     "shortcutName": "HARDY Кодексы"
