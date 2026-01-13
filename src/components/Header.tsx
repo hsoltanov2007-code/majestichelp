@@ -42,6 +42,7 @@ const toolItems = [
 
 const referenceItems: { path: string; label: string; tooltip: string; icon: LucideIcon }[] = [
   { path: "/media", label: "Медиа", tooltip: "Видео контент", icon: Play },
+  { path: "/laws", label: "Законы", tooltip: "Нормативно-правовые акты", icon: FileText },
 ];
 
 function MobileMenuGroup({ 
