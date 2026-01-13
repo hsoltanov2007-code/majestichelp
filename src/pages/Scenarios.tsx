@@ -194,7 +194,7 @@ export default function Scenarios() {
 
   return (
     <Layout>
-      <div className="space-y-6">
+      <div className="container py-8 space-y-6">
         <div className="flex items-center gap-3">
           <Siren className="h-8 w-8 text-primary" />
           <div>
