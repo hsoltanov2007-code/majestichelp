@@ -1,10 +1,118 @@
 import { useParams, Link } from "react-router-dom";
 import { Layout } from "@/components/Layout";
-import { allLawsList, getFullLawById, type FullLaw } from "@/data/allLaws";
-import { ChevronRight, ExternalLink, History, FileEdit } from "lucide-react";
+import { ExternalLink, History, FileEdit, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { allLawsList, getFullLawById, type FullLaw } from "@/data/allLaws";
 
-// Компонент для отображения полного текста закона
+interface DbLaw {
+  id: string;
+  slug: string;
+  title: string;
+  short_title: string;
+  type: "law" | "code";
+  forum_url: string | null;
+  preamble: string | null;
+  content: string;
+  order_index: number;
+}
+
+// Компонент для отображения полного текста закона из БД
+function DbLawView({ law }: { law: DbLaw }) {
+  return (
+    <div className="space-y-8">
+      <h1 className="text-2xl md:text-3xl font-bold text-primary text-center mb-4">
+        {law.title}
+      </h1>
+      
+      {law.preamble && (
+        <div className="text-muted-foreground text-center italic mb-8 max-w-3xl mx-auto whitespace-pre-line">
+          {law.preamble}
+        </div>
+      )}
+      
+      <div className="prose prose-sm dark:prose-invert max-w-none">
+        <div className="whitespace-pre-line text-foreground leading-relaxed">
+          {law.content.split('\n').map((line, idx) => {
+            // Разделы
+            if (line.match(/^Раздел [IVX]+\.|^Раздел \d+\./i)) {
+              return (
+                <h2 key={idx} className="font-bold text-primary mt-8 mb-4 text-xl border-b border-primary/30 pb-2">
+                  {line}
+                </h2>
+              );
+            }
+            // Заголовки статей
+            if (line.match(/^Статья \d+/)) {
+              return (
+                <p key={idx} className="font-semibold text-primary mt-4 mb-2">
+                  {line}
+                </p>
+              );
+            }
+            // Главы
+            if (line.match(/^Глава [IVX]+\.|^Глава \d+\./i)) {
+              return (
+                <h3 key={idx} className="font-semibold text-foreground mt-6 mb-3 text-lg">
+                  {line}
+                </h3>
+              );
+            }
+            // Части статей
+            if (line.match(/^ч\. \d+\./)) {
+              return (
+                <p key={idx} className="ml-0 mb-2">
+                  <span className="text-primary font-medium">{line.split('.')[0]}.</span>
+                  {line.split('.').slice(1).join('.')}
+                </p>
+              );
+            }
+            // Пункты
+            if (line.match(/^[а-я]\)/)) {
+              return (
+                <p key={idx} className="ml-4 mb-1 text-muted-foreground">
+                  {line}
+                </p>
+              );
+            }
+            // Примечания
+            if (line.startsWith('Примечание:')) {
+              return (
+                <div key={idx} className="mt-3 p-3 bg-muted/50 rounded-lg border-l-2 border-primary">
+                  <p className="text-sm">{line}</p>
+                </div>
+              );
+            }
+            // Исключения
+            if (line.startsWith('Исключение:')) {
+              return (
+                <div key={idx} className="mt-3 p-3 bg-yellow-500/10 rounded-lg border-l-2 border-yellow-500">
+                  <p className="text-sm">{line}</p>
+                </div>
+              );
+            }
+            // Штрафы
+            if (line.startsWith('Штраф:')) {
+              return (
+                <p key={idx} className="text-red-500 font-medium ml-4 mb-3">
+                  {line}
+                </p>
+              );
+            }
+            // Обычный текст
+            if (line.trim()) {
+              return <p key={idx} className="mb-2">{line}</p>;
+            }
+            return null;
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Компонент для отображения полного текста закона из статических данных
 function FullLawView({ law }: { law: FullLaw }) {
   return (
     <div className="space-y-8">
@@ -27,7 +135,6 @@ function FullLawView({ law }: { law: FullLaw }) {
           <div className="prose prose-sm dark:prose-invert max-w-none">
             <div className="whitespace-pre-line text-foreground leading-relaxed">
               {section.content.split('\n').map((line, idx) => {
-                // Заголовки статей
                 if (line.match(/^Статья \d+/)) {
                   return (
                     <p key={idx} className="font-semibold text-primary mt-4 mb-2">
@@ -35,7 +142,6 @@ function FullLawView({ law }: { law: FullLaw }) {
                     </p>
                   );
                 }
-                // Главы
                 if (line.match(/^Глава [IVX]+\.|^Глава \d+\./)) {
                   return (
                     <h3 key={idx} className="font-semibold text-foreground mt-6 mb-3 text-lg">
@@ -43,7 +149,6 @@ function FullLawView({ law }: { law: FullLaw }) {
                     </h3>
                   );
                 }
-                // Части статей
                 if (line.match(/^ч\. \d+\./)) {
                   return (
                     <p key={idx} className="ml-0 mb-2">
@@ -52,7 +157,6 @@ function FullLawView({ law }: { law: FullLaw }) {
                     </p>
                   );
                 }
-                // Пункты
                 if (line.match(/^[а-я]\)/)) {
                   return (
                     <p key={idx} className="ml-4 mb-1 text-muted-foreground">
@@ -60,7 +164,6 @@ function FullLawView({ law }: { law: FullLaw }) {
                     </p>
                   );
                 }
-                // Примечания
                 if (line.startsWith('Примечание:')) {
                   return (
                     <div key={idx} className="mt-3 p-3 bg-muted/50 rounded-lg border-l-2 border-primary">
@@ -68,7 +171,6 @@ function FullLawView({ law }: { law: FullLaw }) {
                     </div>
                   );
                 }
-                // Исключения
                 if (line.startsWith('Исключение:')) {
                   return (
                     <div key={idx} className="mt-3 p-3 bg-yellow-500/10 rounded-lg border-l-2 border-yellow-500">
@@ -76,7 +178,6 @@ function FullLawView({ law }: { law: FullLaw }) {
                     </div>
                   );
                 }
-                // Штрафы
                 if (line.startsWith('Штраф:')) {
                   return (
                     <p key={idx} className="text-red-500 font-medium ml-4 mb-3">
@@ -84,7 +185,6 @@ function FullLawView({ law }: { law: FullLaw }) {
                     </p>
                   );
                 }
-                // Обычный текст
                 if (line.trim()) {
                   return <p key={idx} className="mb-2">{line}</p>;
                 }
@@ -125,9 +225,40 @@ function PlaceholderLaw({ title, forumUrl }: { title: string; forumUrl?: string 
 export default function LawDetail() {
   const { lawId } = useParams<{ lawId: string }>();
   
-  const lawInfo = allLawsList.find(l => l.id === lawId);
+  // Пытаемся получить закон из БД
+  const { data: dbLaw, isLoading } = useQuery({
+    queryKey: ["law", lawId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("laws")
+        .select("*")
+        .eq("slug", lawId)
+        .maybeSingle();
+      if (error) throw error;
+      return data as DbLaw | null;
+    },
+    enabled: !!lawId,
+  });
   
-  if (!lawInfo) {
+  // Fallback к статическим данным
+  const staticLawInfo = allLawsList.find(l => l.id === lawId);
+  const staticFullLaw = lawId ? getFullLawById(lawId) : undefined;
+  
+  // Определяем что показывать
+  const lawTitle = dbLaw?.title || staticLawInfo?.title;
+  const forumUrl = dbLaw?.forum_url || staticLawInfo?.forumUrl;
+  
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="container py-8">
+          <p className="text-center text-muted-foreground">Загрузка...</p>
+        </div>
+      </Layout>
+    );
+  }
+  
+  if (!dbLaw && !staticLawInfo) {
     return (
       <Layout>
         <div className="container py-8">
@@ -140,15 +271,15 @@ export default function LawDetail() {
     );
   }
   
-  // Получаем полный закон
-  const fullLaw = lawId ? getFullLawById(lawId) : undefined;
-  
-  // Определяем какой контент показывать
   const renderContent = () => {
-    if (fullLaw) {
-      return <FullLawView law={fullLaw} />;
+    // Приоритет: данные из БД > статические данные
+    if (dbLaw) {
+      return <DbLawView law={dbLaw} />;
     }
-    return <PlaceholderLaw title={lawInfo.title} forumUrl={lawInfo.forumUrl} />;
+    if (staticFullLaw) {
+      return <FullLawView law={staticFullLaw} />;
+    }
+    return <PlaceholderLaw title={lawTitle || ""} forumUrl={forumUrl} />;
   };
   
   return (
@@ -160,7 +291,7 @@ export default function LawDetail() {
             Законы
           </Link>
           <ChevronRight className="w-4 h-4 text-muted-foreground" />
-          <span className="text-foreground">{lawInfo.title}</span>
+          <span className="text-foreground">{lawTitle}</span>
         </nav>
         
         {/* Action links */}
@@ -169,9 +300,9 @@ export default function LawDetail() {
             <History className="w-4 h-4" />
             История изменений
           </a>
-          {lawInfo.forumUrl && (
+          {forumUrl && (
             <a 
-              href={lawInfo.forumUrl} 
+              href={forumUrl} 
               target="_blank" 
               rel="noopener noreferrer"
               className="flex items-center gap-1 hover:text-foreground transition-colors"
