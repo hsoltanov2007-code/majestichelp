@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -236,10 +237,47 @@ const formatTrafficArticles = () => {
   ).join('\n');
 };
 
-const SYSTEM_PROMPT = `Ты — AI-юрист портала HARDY для Majestic RP. Ты эксперт по законодательству Majestic RP и отвечаешь на вопросы по:
+// Function to fetch laws from database
+async function fetchLawsFromDB(): Promise<string> {
+  const supabaseUrl = Deno.env.get("SUPABASE_URL");
+  const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  
+  if (!supabaseUrl || !supabaseKey) {
+    console.log("Supabase credentials not found, skipping laws fetch");
+    return "";
+  }
+  
+  try {
+    const supabase = createClient(supabaseUrl, supabaseKey);
+    const { data: laws, error } = await supabase
+      .from("laws")
+      .select("title, short_title, type, content")
+      .order("order_index", { ascending: true });
+    
+    if (error) {
+      console.error("Error fetching laws:", error);
+      return "";
+    }
+    
+    if (!laws || laws.length === 0) {
+      return "";
+    }
+    
+    return laws.map(law => {
+      const typeLabel = law.type === "code" ? "Кодекс" : "Закон";
+      return `=== ${typeLabel}: ${law.title} (${law.short_title}) ===\n${law.content}`;
+    }).join('\n\n');
+  } catch (err) {
+    console.error("Failed to fetch laws:", err);
+    return "";
+  }
+}
+
+const buildSystemPrompt = (lawsContent: string) => `Ты — AI-юрист портала HARDY для Majestic RP. Ты эксперт по законодательству Majestic RP и отвечаешь на вопросы по:
 - Уголовному кодексу (УК)
 - Административному кодексу (КоАП/АК)
 - Дорожному кодексу (ПДД)
+- Законам штата Сан-Андреас
 - Процедурам для госслужащих
 - Правилам государственных организаций
 
@@ -261,6 +299,8 @@ ${formatAdminArticles()}
 === ПОЛНАЯ БАЗА ДОРОЖНОГО КОДЕКСА (ПДД) ===
 ${formatTrafficArticles()}
 
+${lawsContent ? `=== ЗАКОНЫ И КОДЕКСЫ ШТАТА САН-АНДРЕАС ===\n${lawsContent}` : ''}
+
 === СИСТЕМА ЗВЁЗД ===
 - 1 звезда: незначительные нарушения
 - 2 звезды: мелкие преступления
@@ -269,7 +309,8 @@ ${formatTrafficArticles()}
 - 5 звёзд: особо тяжкие преступления (терроризм, убийство и т.д.)
 
 При ответе на вопрос "за что могут дать X звёзд" — перечисли ВСЕ подходящие статьи из базы данных выше.
-При вопросе о конкретной статье — дай полную информацию: номер, описание, звёзды, штраф/срок, нужен ли суд.`;
+При вопросе о конкретной статье — дай полную информацию: номер, описание, звёзды, штраф/срок, нужен ли суд.
+При вопросе о законах штата — используй информацию из раздела "ЗАКОНЫ И КОДЕКСЫ ШТАТА САН-АНДРЕАС".`;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -286,6 +327,12 @@ serve(async (req) => {
 
     console.log("Received chat request with", messages.length, "messages");
 
+    // Fetch laws from database
+    const lawsContent = await fetchLawsFromDB();
+    console.log("Fetched laws content length:", lawsContent.length);
+    
+    const systemPrompt = buildSystemPrompt(lawsContent);
+
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -295,7 +342,7 @@ serve(async (req) => {
       body: JSON.stringify({
         model: "google/gemini-2.5-flash-lite",
         messages: [
-          { role: "system", content: SYSTEM_PROMPT },
+          { role: "system", content: systemPrompt },
           ...messages,
         ],
         stream: true,
