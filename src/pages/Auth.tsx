@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { Loader2, Shield, Mail, CheckCircle, ArrowLeft, KeyRound, Lock, Home, Sparkles } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import hardyLogo from '@/assets/hardy-logo.png';
 
 function AuthBackground({ children }: { children: ReactNode }) {
   return (
@@ -460,9 +461,7 @@ export default function Auth() {
         {/* Logo/Brand */}
         <div className="text-center animate-fade-up">
           <Link to="/" className="inline-flex items-center gap-3 group mb-6">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-accent via-accent to-accent/80 flex items-center justify-center shadow-xl shadow-accent/30 group-hover:shadow-accent/50 transition-all group-hover:scale-105">
-              <span className="text-2xl text-accent-foreground font-bold">H</span>
-            </div>
+            <img src={hardyLogo} alt="HARDY" className="w-20 h-20 object-contain" />
           </Link>
           <h1 className="text-3xl font-bold mb-2">HARDY Portal</h1>
           <p className="text-muted-foreground">Войдите или создайте аккаунт</p>
