@@ -3,6 +3,7 @@ import { Layout } from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { BookOpen, Search } from "lucide-react";
+import hardyLogo from "@/assets/hardy-logo.png";
 
 interface GlossaryTerm {
   term: string;
@@ -131,7 +132,7 @@ export default function Glossary() {
     <Layout>
       <div className="container py-8 space-y-6">
         <div className="flex items-center gap-3">
-          <BookOpen className="h-8 w-8 text-primary" />
+          <img src={hardyLogo} alt="HARDY" className="w-10 h-10 object-contain" />
           <div>
             <h1 className="text-3xl font-bold">Глоссарий</h1>
             <p className="text-muted-foreground">

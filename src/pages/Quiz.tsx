@@ -19,6 +19,7 @@ import {
   Download,
   FileText
 } from "lucide-react";
+import hardyLogo from "@/assets/hardy-logo.png";
 
 interface Question {
   id: string;
@@ -473,7 +474,7 @@ export default function Quiz() {
     <Layout>
       <div className="container py-8 max-w-4xl mx-auto">
         <div className="flex items-center gap-3 mb-8">
-          <Brain className="h-8 w-8 text-primary" />
+          <img src={hardyLogo} alt="HARDY" className="w-10 h-10 object-contain" />
           <div>
             <h1 className="text-3xl font-bold">Тест на знание УК</h1>
             <p className="text-muted-foreground">Проверьте свои знания уголовного кодекса</p>

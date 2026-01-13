@@ -8,6 +8,7 @@ import { useSearchParams } from "react-router-dom";
 import { Banknote, Car, Bookmark, Printer, Link2 } from "lucide-react";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useToast } from "@/hooks/use-toast";
+import hardyLogo from "@/assets/hardy-logo.png";
 
 export default function TrafficCode() {
   const [searchParams] = useSearchParams();
@@ -86,9 +87,12 @@ export default function TrafficCode() {
   return (
     <Layout>
       <div className="container py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Дорожный кодекс</h1>
-          <p className="text-muted-foreground">Всего статей: {trafficArticles.length}</p>
+        <div className="mb-8 flex items-center gap-3">
+          <img src={hardyLogo} alt="HARDY" className="w-10 h-10 object-contain" />
+          <div>
+            <h1 className="text-3xl font-bold">Дорожный кодекс</h1>
+            <p className="text-muted-foreground">Всего статей: {trafficArticles.length}</p>
+          </div>
         </div>
 
         <Input placeholder="Поиск..." value={search} onChange={(e) => setSearch(e.target.value)} className="mb-8 max-w-md" />

@@ -4,12 +4,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { CrimeCompositionDiagram } from "@/components/CrimeCompositionDiagram";
+import hardyLogo from "@/assets/hardy-logo.png";
 
 export default function LegalReference() {
   return (
     <Layout>
       <div className="container py-8">
-        <h1 className="text-3xl font-bold mb-8">Юридическая справка</h1>
+        <div className="flex items-center gap-3 mb-8">
+          <img src={hardyLogo} alt="HARDY" className="w-10 h-10 object-contain" />
+          <h1 className="text-3xl font-bold">Юридическая справка</h1>
+        </div>
 
         {/* Interactive Crime Composition Diagram */}
         <Card className="mb-6">
