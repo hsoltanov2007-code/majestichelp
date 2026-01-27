@@ -37,6 +37,7 @@ import Profile from "./pages/Profile";
 import Media from "./pages/Media";
 import News from "./pages/News";
 import AppView from "./pages/AppView";
+import CheatSheet from "./pages/CheatSheet";
 const queryClient = new QueryClient();
 
 // Wrapper component to use hooks inside HashRouter
