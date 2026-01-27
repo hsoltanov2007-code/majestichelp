@@ -341,6 +341,104 @@ const proceduralData = {
   mirandaRights: "Вы имеете право хранить молчание. Всё, что вы скажете, может и будет использовано против Вас. Вы имеете право на один телефонный звонок. Также Вы имеете право на одного адвоката. Вы понимаете свои права?"
 };
 
+// Законы штата Сан-Андреас
+const lawsData = {
+  constitution: {
+    title: "Конституция штата Сан-Андреас",
+    description: "Основной закон штата, имеющий высшую юридическую силу.",
+    keyPoints: [
+      "Статья 1: Права и свободы человека - высшая ценность",
+      "Статья 2: Все равны перед законом и судом",
+      "Статья 5: Свобода вероисповедания, слова и печати",
+      "Статья 6: Право на скорое судебное разбирательство, адвоката, не свидетельствовать против себя",
+      "Статья 7: Частная собственность неприкосновенна",
+      "Статья 10: Достоинство личности охраняется государством",
+      "Статья 14: Право на мирные собрания и митинги",
+      "Статья 17: Присяга Губернатора"
+    ]
+  },
+  immunity: {
+    title: "Закон о неприкосновенности государственных служащих",
+    description: "Регламентирует права неприкосновенных лиц.",
+    immunePersons: [
+      "Губернатор и советники",
+      "Вице-губернатор",
+      "Министры и их заместители",
+      "Судьи всех категорий",
+      "Генеральный прокурор и заместители",
+      "Руководители госорганов и их заместители",
+      "Глава коллегии адвокатов",
+      "Спикер Сената",
+      "Сенаторы (во время заседания)"
+    ],
+    keyPoints: [
+      "Неприкосновенное лицо не может быть привлечено к уголовной/административной ответственности без ордера",
+      "Приостановление неприкосновенности: во время суда, при отстранении, при ордере на арест",
+      "Досмотр и задержание только при угрозе жизни и здоровью людей",
+      "Для расследования требуется ордер AI (Access to Investigation)"
+    ]
+  },
+  laborCode: {
+    title: "Трудовой кодекс штата Сан-Андреас",
+    description: "Регулирует трудовые отношения между работодателем и работником.",
+    keyPoints: [
+      "Трудовой договор обязателен для госслужащих",
+      "Работодатель обязан выплачивать зарплату в срок",
+      "Работник обязан соблюдать дисциплину и субординацию",
+      "Дисциплинарные взыскания: замечание, выговор, увольнение",
+      "Запрещено увольнение без веских оснований"
+    ]
+  },
+  lawEnforcement: {
+    title: "Закон о правоохранительных органах штата Сан-Андреас",
+    description: "Определяет права, обязанности и принципы деятельности правоохранительных органов.",
+    agencies: [
+      "LSPD - Полиция Лос-Сантос",
+      "SAHP - Дорожный патруль",
+      "LSSD - Офис шерифа",
+      "FIB - Федеральное бюро расследований",
+      "USSS - Секретная служба"
+    ],
+    keyPoints: [
+      "Сотрудник обязан представиться при задержании",
+      "Сотрудник обязан зачитать права Миранды",
+      "Применение силы регламентировано (5 стадий)",
+      "Запрещено насилие и пытки"
+    ]
+  },
+  proceduralCode: {
+    title: "Процессуальный кодекс штата Сан-Андреас",
+    description: "Регулирует порядок расследования и судопроизводства.",
+    keyPoints: [
+      "Презумпция невиновности",
+      "Право на адвоката",
+      "Недопустимые доказательства не имеют силы",
+      "Задержание не более 1 часа без предъявления обвинения",
+      "Право на обжалование в течение 72 часов"
+    ],
+    chapters: [
+      "Глава I - Принципы кодекса",
+      "Глава II - Доказательства и доказывание",
+      "Глава III - Задержание",
+      "Глава IV - Арест",
+      "Глава V - Обыск",
+      "Глава VI - Расследование",
+      "Глава VII - Уголовное преследование",
+      "Глава VIII - Судопроизводство"
+    ]
+  },
+  forceStages: {
+    title: "Стадии применения силы",
+    stages: [
+      "1. Вербальное воздействие (команды, предупреждения)",
+      "2. Захват и удержание",
+      "3. Спецсредства (дубинка, электрошокер, газ)",
+      "4. Огнестрельное оружие на поражение ног",
+      "5. Огнестрельное оружие на поражение"
+    ]
+  }
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -444,18 +542,105 @@ serve(async (req) => {
       responseText += "\n";
     }
 
-    if (normalizedMessage.includes("миранд") || normalizedMessage.includes("права")) {
+    if (normalizedMessage.includes("миранд")) {
       responseText += "**Правило Миранды:**\n";
       responseText += `"${proceduralData.mirandaRights}"\n\n`;
+    }
+
+    // Законы - Конституция
+    if (normalizedMessage.includes("конституц") || normalizedMessage.includes("основной закон")) {
+      responseText += `**${lawsData.constitution.title}**\n`;
+      responseText += `${lawsData.constitution.description}\n\n`;
+      responseText += "📜 **Основные положения:**\n";
+      lawsData.constitution.keyPoints.forEach(point => {
+        responseText += `• ${point}\n`;
+      });
+      responseText += "\n";
+    }
+
+    // Законы - Неприкосновенность
+    if (normalizedMessage.includes("неприкосновен") || normalizedMessage.includes("иммунитет")) {
+      responseText += `**${lawsData.immunity.title}**\n`;
+      responseText += `${lawsData.immunity.description}\n\n`;
+      responseText += "👥 **Лица с неприкосновенностью:**\n";
+      lawsData.immunity.immunePersons.forEach(person => {
+        responseText += `• ${person}\n`;
+      });
+      responseText += "\n📋 **Ключевые положения:**\n";
+      lawsData.immunity.keyPoints.forEach(point => {
+        responseText += `• ${point}\n`;
+      });
+      responseText += "\n";
+    }
+
+    // Законы - Трудовой кодекс
+    if (normalizedMessage.includes("трудов") || normalizedMessage.includes("работник") || normalizedMessage.includes("увольнен") || normalizedMessage.includes("дисциплин")) {
+      responseText += `**${lawsData.laborCode.title}**\n`;
+      responseText += `${lawsData.laborCode.description}\n\n`;
+      responseText += "📋 **Ключевые положения:**\n";
+      lawsData.laborCode.keyPoints.forEach(point => {
+        responseText += `• ${point}\n`;
+      });
+      responseText += "\n";
+    }
+
+    // Законы - Правоохранительные органы
+    if (normalizedMessage.includes("правоохран") || normalizedMessage.includes("полиц") || normalizedMessage.includes("lspd") || normalizedMessage.includes("sahp") || normalizedMessage.includes("fib") || normalizedMessage.includes("usss") || normalizedMessage.includes("lssd")) {
+      responseText += `**${lawsData.lawEnforcement.title}**\n`;
+      responseText += `${lawsData.lawEnforcement.description}\n\n`;
+      responseText += "🏛️ **Правоохранительные органы:**\n";
+      lawsData.lawEnforcement.agencies.forEach(agency => {
+        responseText += `• ${agency}\n`;
+      });
+      responseText += "\n📋 **Ключевые положения:**\n";
+      lawsData.lawEnforcement.keyPoints.forEach(point => {
+        responseText += `• ${point}\n`;
+      });
+      responseText += "\n";
+    }
+
+    // Законы - Процессуальный кодекс
+    if (normalizedMessage.includes("процессуальн") || normalizedMessage.includes("судопроизвод") || normalizedMessage.includes("расследован")) {
+      responseText += `**${lawsData.proceduralCode.title}**\n`;
+      responseText += `${lawsData.proceduralCode.description}\n\n`;
+      responseText += "📋 **Ключевые положения:**\n";
+      lawsData.proceduralCode.keyPoints.forEach(point => {
+        responseText += `• ${point}\n`;
+      });
+      responseText += "\n📚 **Главы кодекса:**\n";
+      lawsData.proceduralCode.chapters.forEach(chapter => {
+        responseText += `• ${chapter}\n`;
+      });
+      responseText += "\n";
+    }
+
+    // Стадии применения силы
+    if (normalizedMessage.includes("сил") && (normalizedMessage.includes("примен") || normalizedMessage.includes("стад"))) {
+      responseText += `**${lawsData.forceStages.title}**\n\n`;
+      lawsData.forceStages.stages.forEach(stage => {
+        responseText += `${stage}\n`;
+      });
+      responseText += "\n";
     }
 
     // Если ничего не найдено
     if (!responseText) {
       responseText = "К сожалению, я не нашел информацию по вашему запросу. Попробуйте уточнить:\n\n";
-      responseText += "- Номер статьи (например: '6.1', '15.1.1 ч.2', '2.1 АК')\n";
-      responseText += "- Ключевые слова (например: 'убийство', 'кража', 'хулиганство')\n";
-      responseText += "- Процедурные вопросы (например: 'порядок задержания', 'права Миранды', 'основания для задержания')\n\n";
-      responseText += "Я могу помочь с информацией по Уголовному и Административному кодексам, а также по процессуальным нормам.";
+      responseText += "**📖 Кодексы и статьи:**\n";
+      responseText += "- Номер статьи УК (например: '6.1', '15.1.1 ч.2')\n";
+      responseText += "- Номер статьи АК (например: '2.1 АК', '8.1 АК')\n";
+      responseText += "- Ключевые слова (убийство, кража, хулиганство)\n\n";
+      responseText += "**📜 Законы:**\n";
+      responseText += "- Конституция\n";
+      responseText += "- Неприкосновенность\n";
+      responseText += "- Трудовой кодекс\n";
+      responseText += "- Правоохранительные органы\n";
+      responseText += "- Процессуальный кодекс\n\n";
+      responseText += "**⚖️ Процедуры:**\n";
+      responseText += "- Порядок задержания\n";
+      responseText += "- Основания для задержания\n";
+      responseText += "- Права Миранды\n";
+      responseText += "- Стадии применения силы\n";
     }
 
     return new Response(
