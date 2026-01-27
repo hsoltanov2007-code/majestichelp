@@ -105,12 +105,12 @@ const ProcedureBlock = ({ title, items }: ProcedureBlockProps) => (
 );
 
 export default function CheatSheet() {
-  const { articles, loading } = useArticles();
+  const { data, isLoading } = useArticles();
   const { isFavorite, toggleFavorite } = useFavorites();
 
   // Prepare criminal articles - group by parent
-  const criminalArticles = articles?.criminalArticles || [];
-  const adminArticles = articles?.adminArticles || [];
+  const criminalArticles = data?.criminalArticles || [];
+  const adminArticles = data?.adminArticles || [];
 
   return (
     <Layout>
@@ -121,7 +121,7 @@ export default function CheatSheet() {
           <p className="text-muted-foreground">Быстрый справочник по всем кодексам</p>
         </div>
 
-        {loading ? (
+        {isLoading ? (
           <div className="flex items-center justify-center py-20">
             <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
           </div>

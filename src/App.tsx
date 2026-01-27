@@ -75,6 +75,7 @@ function AppContent() {
         <Route path="/media" element={<Media />} />
         <Route path="/news" element={<News />} />
         <Route path="/app" element={<AppView />} />
+        <Route path="/cheat-sheet" element={<CheatSheet />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <LegalChatBot />
