@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Layout } from "@/components/Layout";
 import { Card, CardDescription, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Scale, FileText, Car, Users, BookOpen, HelpCircle, Search, Shield, Play, Sparkles, ArrowRight, MessageSquare, Smartphone } from "lucide-react";
+import { Scale, FileText, Car, Users, BookOpen, HelpCircle, Search, Shield, Play, Sparkles, ArrowRight, MessageSquare, Smartphone, ClipboardList } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
 import { VisitorCounter } from "@/components/VisitorCounter";
@@ -13,14 +13,15 @@ import AppView from "./AppView";
 
 
 const sections = [
+  { icon: ClipboardList, title: "Шпаргалка", description: "Быстрый справочник по всем кодексам", path: "/cheat-sheet", gradient: "from-accent/20 to-accent/5", iconColor: "text-accent" },
   { icon: Scale, title: "Уголовный кодекс", description: "Все статьи УК с розыском и штрафами", path: "/criminal-code", gradient: "from-destructive/20 to-destructive/5", iconColor: "text-destructive" },
-  { icon: FileText, title: "Административный кодекс", description: "Административные правонарушения", path: "/administrative-code", gradient: "from-orange-500/20 to-orange-500/5", iconColor: "text-orange-500" },
+  { icon: FileText, title: "Административный кодекс", description: "Административные правонарушения", path: "/administrative-code", gradient: "from-accent/20 to-accent/5", iconColor: "text-accent" },
   { icon: Car, title: "Дорожный кодекс", description: "Правила дорожного движения", path: "/traffic-code", gradient: "from-primary/20 to-primary/5", iconColor: "text-primary" },
   { icon: Users, title: "Процедуры", description: "Инструкции для госслужащих", path: "/procedures", gradient: "from-emerald-500/20 to-emerald-500/5", iconColor: "text-emerald-500" },
-  { icon: Shield, title: "Правила ГО", description: "Правила государственных организаций", path: "/government-rules", gradient: "from-blue-500/20 to-blue-500/5", iconColor: "text-blue-500" },
+  { icon: Shield, title: "Правила ГО", description: "Правила государственных организаций", path: "/government-rules", gradient: "from-primary/20 to-primary/5", iconColor: "text-primary" },
   { icon: BookOpen, title: "Юридическая справка", description: "Теория уголовного права", path: "/legal-reference", gradient: "from-accent/20 to-accent/5", iconColor: "text-accent" },
-  { icon: HelpCircle, title: "FAQ", description: "Частые вопросы и ответы", path: "/faq", gradient: "from-violet-500/20 to-violet-500/5", iconColor: "text-violet-500" },
-  { icon: MessageSquare, title: "Глоссарий", description: "Словарь юридических терминов", path: "/glossary", gradient: "from-cyan-500/20 to-cyan-500/5", iconColor: "text-cyan-500" },
+  { icon: HelpCircle, title: "FAQ", description: "Частые вопросы и ответы", path: "/faq", gradient: "from-muted to-muted/50", iconColor: "text-muted-foreground" },
+  { icon: MessageSquare, title: "Глоссарий", description: "Словарь юридических терминов", path: "/glossary", gradient: "from-primary/20 to-primary/5", iconColor: "text-primary" },
   { icon: HelpCircle, title: "Инструкции", description: "Как пользоваться порталом", path: "/instructions", gradient: "from-muted to-muted/50", iconColor: "text-muted-foreground" },
 ];
 
