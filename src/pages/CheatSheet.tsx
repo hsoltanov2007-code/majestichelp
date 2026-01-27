@@ -31,9 +31,9 @@ const ArticleItem = ({
 }: ArticleItemProps) => {
   // Determine border color based on severity (for criminal articles)
   const getBorderColor = () => {
-    if (type === "admin") return "border-l-orange-500/50";
+    if (type === "admin") return "border-l-accent";
     if (stars && stars >= 5) return "border-l-destructive";
-    if (stars && stars >= 3) return "border-l-orange-500";
+    if (stars && stars >= 3) return "border-l-accent";
     return "border-l-emerald-500";
   };
 
@@ -57,7 +57,7 @@ const ArticleItem = ({
       <div className="flex items-start gap-3 p-3">
         <span className={cn(
           "font-mono text-sm font-semibold shrink-0 min-w-[60px]",
-          type === "criminal" ? "text-destructive" : "text-orange-500"
+          type === "criminal" ? "text-destructive" : "text-accent"
         )}>
           {articleNum}
         </span>
@@ -165,10 +165,10 @@ export default function CheatSheet() {
 
             {/* Administrative Code Column */}
             <div className="space-y-4">
-              <div className="flex items-center gap-2 pb-2 border-b border-border">
-                <FileText className="h-5 w-5 text-orange-500" />
+            <div className="flex items-center gap-2 pb-2 border-b border-border">
+                <FileText className="h-5 w-5 text-accent" />
                 <h2 className="text-lg font-bold">Административный кодекс</h2>
-                <Link 
+                <Link
                   to="/administrative-code" 
                   className="ml-auto text-muted-foreground hover:text-foreground transition-colors"
                 >
