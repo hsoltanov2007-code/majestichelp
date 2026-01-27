@@ -347,11 +347,21 @@ serve(async (req) => {
   }
 
   try {
-    const { message } = await req.json();
+    const body = await req.json();
+    
+    // Support both { message: "..." } and { messages: [...] } formats
+    let message: string;
+    if (body.messages && Array.isArray(body.messages)) {
+      // Get the last user message from the array
+      const lastUserMessage = body.messages.filter((m: any) => m.role === "user").pop();
+      message = lastUserMessage?.content || "";
+    } else {
+      message = body.message || "";
+    }
 
-    if (!message) {
+    if (!message || !message.trim()) {
       return new Response(
-        JSON.stringify({ error: "Message is required" }),
+        JSON.stringify({ error: "Пожалуйста, введите ваш вопрос" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
