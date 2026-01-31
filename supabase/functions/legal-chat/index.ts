@@ -1,12 +1,57 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// Функция для получения дополнительных данных из knowledge_base
+async function getKnowledgeBaseContent(): Promise<string> {
+  const supabaseUrl = Deno.env.get("SUPABASE_URL");
+  const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY");
+  
+  if (!supabaseUrl || !supabaseKey) {
+    console.log("Supabase not configured, using static knowledge base only");
+    return "";
+  }
+  
+  try {
+    const supabase = createClient(supabaseUrl, supabaseKey);
+    
+    const { data, error } = await supabase
+      .from("knowledge_base")
+      .select("title, content, category")
+      .eq("is_active", true)
+      .order("category");
+    
+    if (error) {
+      console.error("Error fetching knowledge base:", error);
+      return "";
+    }
+    
+    if (!data || data.length === 0) {
+      console.log("No knowledge base entries found, using static data");
+      return "";
+    }
+    
+    // Format the knowledge base content
+    let additionalContent = "\n\n## ДОПОЛНИТЕЛЬНЫЕ ДАННЫЕ С ФОРУМА (АКТУАЛЬНЫЕ)\n\n";
+    
+    for (const entry of data) {
+      additionalContent += `### ${entry.title}\n${entry.content}\n\n`;
+    }
+    
+    console.log(`Loaded ${data.length} knowledge base entries`);
+    return additionalContent;
+  } catch (error) {
+    console.error("Error loading knowledge base:", error);
+    return "";
+  }
+}
+
 // Полная база знаний для AI — ТОЧНЫЕ ДАННЫЕ ИЗ КОДЕКСОВ
-const KNOWLEDGE_BASE = `
+const STATIC_KNOWLEDGE_BASE = `
 # БАЗА ЗНАНИЙ ЮРИДИЧЕСКОГО ПОМОЩНИКА HARDY — ЗАКОНОДАТЕЛЬСТВО ШТАТА САН-АНДРЕАС (MAJESTIC RP)
 
 Ты — AI-юрист HARDY для сервера Majestic Roleplay. Отвечай на русском языке, кратко и по делу.
@@ -361,6 +406,10 @@ serve(async (req) => {
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    // Get additional knowledge from database
+    const additionalKnowledge = await getKnowledgeBaseContent();
+    const KNOWLEDGE_BASE = STATIC_KNOWLEDGE_BASE + additionalKnowledge;
 
     console.log("Sending request to Lovable AI Gateway...");
 

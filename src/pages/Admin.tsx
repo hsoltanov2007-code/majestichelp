@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner';
 import { 
   ArrowLeft, Plus, Trash2, Users, FolderOpen, MessageSquare, 
-  Shield, Loader2, Pin, Lock, Unlock, Crown, UserCog, Scale
+  Shield, Loader2, Pin, Lock, Unlock, Crown, UserCog, Scale, Database
 } from 'lucide-react';
 
 interface Category {
@@ -289,7 +289,13 @@ export default function Admin() {
             </h1>
             <p className="text-muted-foreground">Управление форумом</p>
           </div>
-          <div className="ml-auto">
+          <div className="ml-auto flex gap-2">
+            <Button asChild variant="outline">
+              <Link to="/admin/knowledge-base">
+                <Database className="h-4 w-4 mr-2" />
+                База знаний AI
+              </Link>
+            </Button>
             <Button asChild variant="outline">
               <Link to="/admin/laws">
                 <Scale className="h-4 w-4 mr-2" />
