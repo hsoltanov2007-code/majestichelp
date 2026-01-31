@@ -258,6 +258,39 @@ export type Database = {
           },
         ]
       }
+      knowledge_base: {
+        Row: {
+          category: string
+          content: string
+          id: string
+          is_active: boolean
+          parsed_at: string
+          source_url: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          content: string
+          id?: string
+          is_active?: boolean
+          parsed_at?: string
+          source_url: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          content?: string
+          id?: string
+          is_active?: boolean
+          parsed_at?: string
+          source_url?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       laws: {
         Row: {
           content: string

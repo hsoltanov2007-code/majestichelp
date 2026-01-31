@@ -24,6 +24,7 @@ import Quiz from "./pages/Quiz";
 import LawsList from "./pages/LawsList";
 import LawDetail from "./pages/LawDetail";
 import AdminLaws from "./pages/AdminLaws";
+import AdminKnowledgeBase from "./pages/AdminKnowledgeBase";
 
 import GovernmentRules from "./pages/GovernmentRules";
 import NotFound from "./pages/NotFound";
@@ -71,6 +72,7 @@ function AppContent() {
         <Route path="/forum/new-topic" element={<NewTopic />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/admin/laws" element={<AdminLaws />} />
+        <Route path="/admin/knowledge-base" element={<AdminKnowledgeBase />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/media" element={<Media />} />
         <Route path="/news" element={<News />} />
