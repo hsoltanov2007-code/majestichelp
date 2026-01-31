@@ -8,48 +8,41 @@ const corsHeaders = {
 
 // Forum URLs to parse - Majestic RP законодательство
 const FORUM_URLS = [
-  // Уголовный кодекс
-  {
-    url: "https://forum.majestic-rp.ru/threads/ugolovnyj-kodeks.60/",
-    category: "criminal_code",
-    title: "Уголовный кодекс",
-  },
-  // Административный кодекс  
-  {
-    url: "https://forum.majestic-rp.ru/threads/administrativnyj-kodeks.61/",
-    category: "administrative_code",
-    title: "Административный кодекс",
-  },
-  // Дорожный кодекс
-  {
-    url: "https://forum.majestic-rp.ru/threads/dorozhnyj-kodeks.62/",
-    category: "traffic_code",
-    title: "Дорожный кодекс",
-  },
-  // Конституция
-  {
-    url: "https://forum.majestic-rp.ru/threads/konstitucija.57/",
-    category: "constitution",
-    title: "Конституция",
-  },
-  // Правила государственных организаций
-  {
-    url: "https://forum.majestic-rp.ru/threads/pravila-gosudarstvennyx-organizacij.59/",
-    category: "government_rules",
-    title: "Правила государственных организаций",
-  },
-  // Трудовой кодекс
-  {
-    url: "https://forum.majestic-rp.ru/threads/trudovoj-kodeks.58/",
-    category: "labor_code",
-    title: "Трудовой кодекс",
-  },
-  // Процессуальный кодекс
-  {
-    url: "https://forum.majestic-rp.ru/threads/processualnyj-kodeks.63/",
-    category: "procedural_code",
-    title: "Процессуальный кодекс",
-  },
+  // Кодексы
+  { url: "https://forum.majestic-rp.ru/threads/dorozhnyi-kodeks-shtata-san-andreas.2579876/", category: "traffic_code", title: "Дорожный кодекс (ДК)" },
+  { url: "https://forum.majestic-rp.ru/threads/protsessual-nyi-kodeks-shtata-san-andreas.2579857/", category: "procedural_code", title: "Процессуальный кодекс (ПК)" },
+  { url: "https://forum.majestic-rp.ru/threads/administrativnyi-kodeks-shtata-san-andreas.2579869/", category: "administrative_code", title: "Административный кодекс (АК)" },
+  { url: "https://forum.majestic-rp.ru/threads/konstitutsiya-shtata-san-andreas.2579865/", category: "constitution", title: "Конституция (КОНСТ)" },
+  { url: "https://forum.majestic-rp.ru/threads/grazhdanskii-kodeks-shtata-san-andreas.2825045/", category: "civil_code", title: "Гражданский кодекс (ГК)" },
+  { url: "https://forum.majestic-rp.ru/threads/ugolovnyi-kodeks-shtata-san-andreas.2579868/", category: "criminal_code", title: "Уголовный кодекс (УК)" },
+  { url: "https://forum.majestic-rp.ru/threads/trudovoi-kodeks-shtata-san-andreas.2746455/", category: "labor_code", title: "Трудовой кодекс (ТК)" },
+  { url: "https://forum.majestic-rp.ru/threads/eticheskii-kodeks-shtata-san-andreas.2579871/", category: "ethics_code", title: "Этический кодекс (ЭК)" },
+  
+  // Законы
+  { url: "https://forum.majestic-rp.ru/threads/zakon-ob-oborote-oruzhiya-boyepripasov-i-spetsial-nykh-sredstv.2825062/", category: "weapons_law", title: "Закон об обороте оружия (ЗООО)" },
+  { url: "https://forum.majestic-rp.ru/threads/konstitutsionnyi-zakon-o-sudebnoi-sisteme-shtata-san-andreas.2579933/", category: "judicial_system", title: "Конституционный закон о судебной системе (КЗСС)" },
+  { url: "https://forum.majestic-rp.ru/threads/konstitutsionnyi-zakon-o-senate-shtata-san-andreas.2825105/", category: "senate_law", title: "Конституционный закон о Сенате (КЗСЕН)" },
+  { url: "https://forum.majestic-rp.ru/threads/zakon-o-deyatel-nosti-regional-nykh-pravookhranitel-nykh-organov.2579915/", category: "law_enforcement", title: "Закон о правоохранительных органах (ЗПОО)" },
+  { url: "https://forum.majestic-rp.ru/threads/zakon-o-gosudarstvennykh-territoriyakh-shtata-san-andreas.2709646/", category: "state_territories", title: "Закон о государственных территориях (ЗГТ)" },
+  { url: "https://forum.majestic-rp.ru/threads/zakon-ob-obespechenii-neprikosnovennosti-gosudarstvennykh-sluzhashchikh-shtata-san-andreas.2579888/", category: "immunity_law", title: "Закон о неприкосновенности госслужащих (ЗНГС)" },
+  { url: "https://forum.majestic-rp.ru/threads/zakon-ob-advokat-skoi-deyatel-nosti-i-advokature-v-shtate-san-andreas.2579911/", category: "attorney_law", title: "Закон об адвокатской деятельности (ЗАА)" },
+  { url: "https://forum.majestic-rp.ru/threads/konstitutsionnyi-zakon-o-pravitel-stve-shtata-san-andreas.2709416/", category: "government_law", title: "Конституционный закон о правительстве (КЗПР)" },
+  { url: "https://forum.majestic-rp.ru/threads/zakon-o-deyatel-nosti-ofisa-general-nogo-prokurora-shtata-san-andreas.2579930/", category: "prosecutor_law", title: "Закон о Генеральном прокуроре (ЗГП)" },
+  { url: "https://forum.majestic-rp.ru/threads/zakon-o-sredstvakh-massovoi-informatsii.2579924/", category: "media_law", title: "Закон о СМИ (ЗСМИ)" },
+  { url: "https://forum.majestic-rp.ru/threads/zakon-o-federal-nom-rassledovatel-skom-byuro.2579923/", category: "fib_law", title: "Закон о ФРБ (ЗФРБ)" },
+  { url: "https://forum.majestic-rp.ru/threads/zakon-o-natsional-noi-gvardii-shtata-san-andreas.2579921/", category: "national_guard", title: "Закон о Национальной гвардии (ЗНГ)" },
+  { url: "https://forum.majestic-rp.ru/threads/zakon-o-chrezvychainom-i-voyennom-polozhenii.2579918/", category: "emergency_law", title: "Закон о чрезвычайном положении (ЗЧВП)" },
+  { url: "https://forum.majestic-rp.ru/threads/zakon-o-deyatel-nosti-sekretnoi-sluzhby-soyedinennykh-shtatov-ameriki-v-shtate-san-andreas.2579914/", category: "secret_service", title: "Закон о Секретной службе (ЗСС)" },
+  { url: "https://forum.majestic-rp.ru/threads/zakon-o-predprinimatel-skoi-deyatel-nosti-v-shtate-san-andreas.2579910/", category: "business_law", title: "Закон о предпринимательской деятельности (ЗПД)" },
+  { url: "https://forum.majestic-rp.ru/threads/zakon-o-sobraniyakh-mitingakh-i-publichnykh-meropriyatiyakh.2579906/", category: "assembly_law", title: "Закон о митингах (ЗМПМ)" },
+  { url: "https://forum.majestic-rp.ru/threads/zakon-o-gosudarstvennoi-taine-v-shtate-san-andreas.2579904/", category: "state_secret", title: "Закон о государственной тайне (ЗГТАЙ)" },
+  { url: "https://forum.majestic-rp.ru/threads/zakon-o-deyatel-nosti-ekstrennoi-meditsinskoi-sluzhby-shtata-san-andreas.2579903/", category: "ems_law", title: "Закон о EMS (ЗEMS)" },
+  { url: "https://forum.majestic-rp.ru/threads/zakon-o-politicheskikh-partiyakh-na-territorii-shtata-san-andreas.2579902/", category: "political_parties", title: "Закон о политических партиях (ЗПП)" },
+  { url: "https://forum.majestic-rp.ru/threads/zakon-o-protivodeistvii-terrorizmu.2579901/", category: "anti_terrorism", title: "Закон о противодействии терроризму (ЗПТ)" },
+  { url: "https://forum.majestic-rp.ru/threads/zakon-ob-operativno-rozysknoi-deyatel-nosti.2579898/", category: "investigative_law", title: "Закон об ОРД (ЗОРД)" },
+  { url: "https://forum.majestic-rp.ru/threads/zakon-ob-okhote-i-rybalke-na-territorii-shtata-san-andreas.2579895/", category: "hunting_fishing", title: "Закон об охоте и рыбалке (ЗОР)" },
+  { url: "https://forum.majestic-rp.ru/threads/zakon-o-gosudarstvennykh-nagradakh-shtata-san-andreas.2579894/", category: "state_awards", title: "Закон о государственных наградах (ЗНАГ)" },
+  { url: "https://forum.majestic-rp.ru/threads/zakon-o-sisteme-orderov-shtata-san-andreas.2579881/", category: "order_system", title: "Закон о системе ордеров (ЗОРДЕР)" },
 ];
 
 interface ParseResult {
