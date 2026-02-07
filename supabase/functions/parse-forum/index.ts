@@ -43,6 +43,19 @@ const FORUM_URLS = [
   { url: "https://forum.majestic-rp.ru/threads/zakon-ob-okhote-i-rybalke-na-territorii-shtata-san-andreas.2579895/", category: "hunting_fishing", title: "Закон об охоте и рыбалке (ЗОР)" },
   { url: "https://forum.majestic-rp.ru/threads/zakon-o-gosudarstvennykh-nagradakh-shtata-san-andreas.2579894/", category: "state_awards", title: "Закон о государственных наградах (ЗНАГ)" },
   { url: "https://forum.majestic-rp.ru/threads/zakon-o-sisteme-orderov-shtata-san-andreas.2579881/", category: "order_system", title: "Закон о системе ордеров (ЗОРДЕР)" },
+  
+  // Правила проекта
+  { url: "https://forum.majestic-rp.ru/threads/osnovnyye-pravila-proyekta.8036/", category: "main_rules", title: "Основные правила проекта" },
+  { url: "https://forum.majestic-rp.ru/threads/pravila-gosudarstvennykh-organizatsii.8672/", category: "gov_org_rules", title: "Правила государственных организаций" },
+  { url: "https://forum.majestic-rp.ru/threads/pravila-dlya-liderov-fraktsii.8048/", category: "faction_leader_rules", title: "Правила для лидеров фракций" },
+  { url: "https://forum.majestic-rp.ru/threads/pravila-igrovykh-zon.8084/", category: "game_zones_rules", title: "Правила игровых зон" },
+  { url: "https://forum.majestic-rp.ru/threads/pravila-ograblenii-i-pokhishchenii.8254/", category: "robbery_rules", title: "Правила ограблений и похищений" },
+  { url: "https://forum.majestic-rp.ru/threads/pravila-perekhvata-postavok.123972/", category: "intercept_rules", title: "Правила перехвата поставок" },
+  { url: "https://forum.majestic-rp.ru/threads/pravila-voiny-za-airdrop.210836/", category: "airdrop_rules", title: "Правила войны за Airdrop" },
+  { url: "https://forum.majestic-rp.ru/threads/pravila-napadeniya-oborony-ostrova-kaio-periko.645651/", category: "cayo_perico_rules", title: "Правила нападения/обороны Кайо-Перико" },
+  { url: "https://forum.majestic-rp.ru/threads/pravila-napadeniya-oborony-territorii-forta-zankudo.8115/", category: "fort_zancudo_rules", title: "Правила нападения/обороны Форт-Занкудо" },
+  { url: "https://forum.majestic-rp.ru/threads/obshchiye-pravila-semeinykh-organizatsii.1061331/", category: "family_org_rules", title: "Общие правила семейных организаций" },
+  { url: "https://forum.majestic-rp.ru/threads/pravila-zakhvata-tsekhov-dilerov.1823529/", category: "capture_rules", title: "Правила захвата цехов/дилеров" },
 ];
 
 interface ParseResult {
