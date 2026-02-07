@@ -56,6 +56,21 @@ const FORUM_URLS = [
   { url: "https://forum.majestic-rp.ru/threads/pravila-napadeniya-oborony-territorii-forta-zankudo.8115/", category: "fort_zancudo_rules", title: "Правила нападения/обороны Форт-Занкудо" },
   { url: "https://forum.majestic-rp.ru/threads/obshchiye-pravila-semeinykh-organizatsii.1061331/", category: "family_org_rules", title: "Общие правила семейных организаций" },
   { url: "https://forum.majestic-rp.ru/threads/pravila-zakhvata-tsekhov-dilerov.1823529/", category: "capture_rules", title: "Правила захвата цехов/дилеров" },
+  
+  // Дополнительные правила
+  { url: "https://forum.majestic-rp.ru/threads/pravila-provedeniya-igrovykh-zakhvatov-teraktov.8843/", category: "terrorist_rules", title: "Правила проведения игровых захватов/терактов" },
+  { url: "https://forum.majestic-rp.ru/threads/pravila-ogrableniya-biznesov.8050/", category: "business_robbery_rules", title: "Правила ограбления бизнесов" },
+  { url: "https://forum.majestic-rp.ru/threads/pravila-ogrableniya-bankov.299735/", category: "bank_robbery_rules", title: "Правила ограбления банков" },
+  { url: "https://forum.majestic-rp.ru/threads/pravila-voyennogo-polozheniya.7524/", category: "martial_law_rules", title: "Правила военного положения" },
+  { url: "https://forum.majestic-rp.ru/threads/pravila-foruma.5245/", category: "forum_rules", title: "Правила форума" },
+  { url: "https://forum.majestic-rp.ru/threads/pravila-proverki-na-storonneye-po.166680/", category: "software_check_rules", title: "Правила проверки на стороннее ПО" },
+  { url: "https://forum.majestic-rp.ru/threads/pravila-i-obyazannosti-administratorov.22919/", category: "admin_rules", title: "Правила и обязанности администраторов" },
+  { url: "https://forum.majestic-rp.ru/threads/pravila-kriminal-nykh-organizatsii.3977/", category: "criminal_org_rules", title: "Правила криминальных организаций" },
+  { url: "https://forum.majestic-rp.ru/threads/pravila-voiny-za-territoriyu.32490/", category: "territory_war_rules", title: "Правила войны за территорию" },
+  { url: "https://forum.majestic-rp.ru/threads/pravila-voiny-za-materialy.8240/", category: "materials_war_rules", title: "Правила войны за материалы" },
+  { url: "https://forum.majestic-rp.ru/threads/pravila-reidov.8833/", category: "raid_rules", title: "Правила рейдов" },
+  { url: "https://forum.majestic-rp.ru/threads/pravila-predvybornoi-gonki.2573716/", category: "election_rules", title: "Правила предвыборной гонки" },
+  { url: "https://forum.majestic-rp.ru/threads/pravila-napadeniya-oborony-forta-zankudo-ostrova-kaio-periko-postavok-vza-zakhvata-dillerov-i-tsekhov.2573715/", category: "combined_attack_rules", title: "Правила нападения/обороны (сводные)" },
 ];
 
 interface ParseResult {
