@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
 import { VisitorCounter } from "@/components/VisitorCounter";
 import { InstallAppButton } from "@/components/InstallAppButton";
+import { FeaturedGiveawayBanner } from "@/components/FeaturedGiveawayBanner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useViewMode } from "@/hooks/useViewMode";
@@ -136,6 +137,10 @@ export default function Index() {
             </div>
           </div>
         </div>
+      </section>
+      {/* Featured Giveaway Banner */}
+      <section className="container py-4 opacity-0 animate-fade-up stagger-3">
+        <FeaturedGiveawayBanner />
       </section>
 
       {/* Latest Video Section */}
