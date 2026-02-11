@@ -1,6 +1,67 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+// Simple hash function for cache keys
+async function hashQuestion(text: string): Promise<string> {
+  const normalized = text.toLowerCase().trim().replace(/\s+/g, ' ').replace(/[?!.,;:]+$/g, '');
+  const encoder = new TextEncoder();
+  const data = encoder.encode(normalized);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// Check cache for existing answer
+async function getCachedAnswer(questionHash: string): Promise<string | null> {
+  const supabaseUrl = Deno.env.get("SUPABASE_URL");
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!supabaseUrl || !serviceKey) return null;
+
+  try {
+    const supabase = createClient(supabaseUrl, serviceKey);
+    const { data, error } = await supabase
+      .from("chat_cache")
+      .select("answer, id, hit_count")
+      .eq("question_hash", questionHash)
+      .maybeSingle();
+
+    if (error || !data) return null;
+
+    // Increment hit count
+    await supabase
+      .from("chat_cache")
+      .update({ hit_count: data.hit_count + 1 })
+      .eq("id", data.id);
+
+    console.log(`Cache HIT! hit_count: ${data.hit_count + 1}`);
+    return data.answer;
+  } catch (e) {
+    console.error("Cache read error:", e);
+    return null;
+  }
+}
+
+// Save answer to cache
+async function saveToCache(questionHash: string, question: string, answer: string): Promise<void> {
+  const supabaseUrl = Deno.env.get("SUPABASE_URL");
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!supabaseUrl || !serviceKey) return;
+
+  try {
+    const supabase = createClient(supabaseUrl, serviceKey);
+    await supabase
+      .from("chat_cache")
+      .upsert({
+        question_hash: questionHash,
+        question: question.substring(0, 500),
+        answer: answer,
+      }, { onConflict: 'question_hash' });
+    console.log("Answer saved to cache");
+  } catch (e) {
+    console.error("Cache write error:", e);
+  }
+}
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
@@ -398,7 +459,17 @@ serve(async (req) => {
       );
     }
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    // Check cache first
+    const questionHash = await hashQuestion(userMessage);
+    const cachedAnswer = await getCachedAnswer(questionHash);
+    if (cachedAnswer) {
+      console.log("Returning cached answer (no AI credits used!)");
+      return new Response(
+        JSON.stringify({ response: cachedAnswer }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     if (!LOVABLE_API_KEY) {
       console.error("LOVABLE_API_KEY is not configured");
       return new Response(
@@ -458,6 +529,9 @@ serve(async (req) => {
     const aiResponse = data.choices?.[0]?.message?.content || "Не удалось получить ответ";
 
     console.log("AI response received successfully");
+
+    // Save to cache for future identical questions
+    await saveToCache(questionHash, userMessage, aiResponse);
 
     return new Response(
       JSON.stringify({ response: aiResponse }),
