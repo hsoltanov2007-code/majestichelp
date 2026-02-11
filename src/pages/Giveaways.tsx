@@ -363,6 +363,44 @@ export default function Giveaways() {
     toast.success("Ссылка скопирована!");
   };
 
+  const handleClaimPrize = async (giveaway: Giveaway) => {
+    if (!user) return;
+    // Check if ticket already exists for this giveaway
+    const { data: existingTickets } = await supabase
+      .from("support_tickets")
+      .select("id")
+      .eq("user_id", user.id)
+      .ilike("subject", `%${giveaway.title}%`);
+
+    if (existingTickets && existingTickets.length > 0) {
+      toast.info("Тикет уже создан! Проверьте раздел поддержки (иконка наушников).");
+      return;
+    }
+
+    const { data: ticket, error } = await supabase
+      .from("support_tickets")
+      .insert({
+        user_id: user.id,
+        subject: `🎉 Получение приза: ${giveaway.title}`,
+      } as any)
+      .select()
+      .single();
+
+    if (error) {
+      toast.error("Ошибка создания тикета");
+      return;
+    }
+
+    await supabase.from("support_messages").insert({
+      ticket_id: ticket.id,
+      sender_id: user.id,
+      is_admin: false,
+      content: `Здравствуйте! Я победитель розыгрыша "${giveaway.title}". Хочу получить приз: ${giveaway.prize}`,
+    } as any);
+
+    toast.success("Тикет создан! Откройте чат поддержки (иконка наушников) для связи с администрацией.");
+  };
+
   const handleNotifyAll = async (giveaway: Giveaway) => {
     if (!user) return;
     try {
@@ -624,6 +662,16 @@ export default function Giveaways() {
                           </div>
                           <Sparkles className="ml-auto h-5 w-5 text-[hsl(45_93%_55%)] animate-pulse" />
                         </div>
+                        {/* Claim prize button for winner */}
+                        {user && user.id === g.winner_id && (
+                          <Button
+                            className="w-full mt-3 bg-gradient-to-r from-[hsl(45_93%_55%)] to-[hsl(45_93%_45%)] hover:from-[hsl(45_93%_50%)] hover:to-[hsl(45_93%_40%)] text-black font-bold rounded-xl shadow-lg"
+                            onClick={() => handleClaimPrize(g)}
+                          >
+                            <Gift className="h-4 w-4 mr-2" />
+                            Получить приз
+                          </Button>
+                        )}
                       </div>
                     )}
 
