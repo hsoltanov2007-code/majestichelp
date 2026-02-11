@@ -11,9 +11,6 @@ const navigationLinks = [
 ];
 
 const toolLinks = [
-  { label: "Калькулятор", path: "/calculator" },
-  { label: "Тест знаний", path: "/quiz" },
-  { label: "Сценарии", path: "/scenarios" },
   { label: "Глоссарий", path: "/glossary" },
   { label: "FAQ", path: "/faq" },
 ];

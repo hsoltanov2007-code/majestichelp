@@ -34,11 +34,7 @@ const codeItems: { path: string; label: string; short: string; icon: LucideIcon 
   { path: "/government-rules", label: "Правила гос. органов", short: "ПГО", icon: Building2 },
 ];
 
-const toolItems = [
-  { path: "/calculator", label: "Калькулятор", icon: Scale },
-  { path: "/quiz", label: "Тест знаний", icon: Brain },
-  { path: "/scenarios", label: "Сценарии", icon: BookOpen },
-];
+const toolItems: { path: string; label: string; icon: LucideIcon }[] = [];
 
 const referenceItems: { path: string; label: string; tooltip: string; icon: LucideIcon }[] = [
   { path: "/media", label: "Медиа", tooltip: "Видео контент", icon: Play },
