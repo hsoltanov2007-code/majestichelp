@@ -258,6 +258,86 @@ export type Database = {
           },
         ]
       }
+      giveaway_entries: {
+        Row: {
+          created_at: string
+          giveaway_id: string
+          id: string
+          screenshot_url: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          giveaway_id: string
+          id?: string
+          screenshot_url: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          giveaway_id?: string
+          id?: string
+          screenshot_url?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "giveaway_entries_giveaway_id_fkey"
+            columns: ["giveaway_id"]
+            isOneToOne: false
+            referencedRelation: "giveaways"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      giveaways: {
+        Row: {
+          conditions: Json
+          created_at: string
+          created_by: string
+          description: string | null
+          ends_at: string | null
+          id: string
+          image_url: string | null
+          prize: string
+          status: string
+          title: string
+          updated_at: string
+          winner_id: string | null
+        }
+        Insert: {
+          conditions?: Json
+          created_at?: string
+          created_by: string
+          description?: string | null
+          ends_at?: string | null
+          id?: string
+          image_url?: string | null
+          prize: string
+          status?: string
+          title: string
+          updated_at?: string
+          winner_id?: string | null
+        }
+        Update: {
+          conditions?: Json
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          ends_at?: string | null
+          id?: string
+          image_url?: string | null
+          prize?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          winner_id?: string | null
+        }
+        Relationships: []
+      }
       knowledge_base: {
         Row: {
           category: string
