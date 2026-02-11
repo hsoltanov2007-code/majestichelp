@@ -303,6 +303,25 @@ export default function AdminGiveaways() {
     if (viewingEntries) viewEntries(viewingEntries);
   };
 
+  const createWinnerTicket = async (winnerId: string, giveawayTitle: string) => {
+    if (!user) return;
+    // Create a support ticket for the winner
+    const { data: ticket } = await supabase
+      .from("support_tickets")
+      .insert({ user_id: winnerId, subject: `🎉 Вы выиграли: ${giveawayTitle}` } as any)
+      .select("id")
+      .single();
+
+    if (ticket) {
+      await supabase.from("support_messages").insert({
+        ticket_id: ticket.id,
+        sender_id: user.id,
+        content: `Поздравляем! Вы победили в розыгрыше «${giveawayTitle}»! Напишите сюда, чтобы получить свой приз.`,
+        is_admin: true,
+      } as any);
+    }
+  };
+
   const pickRandomWinner = async (giveawayId: string) => {
     const approved = entries.filter(e => e.status === "approved");
     if (approved.length === 0) {
@@ -310,20 +329,24 @@ export default function AdminGiveaways() {
       return;
     }
     const winner = approved[Math.floor(Math.random() * approved.length)];
+    const giveaway = giveaways.find(g => g.id === giveawayId);
     await supabase
       .from("giveaways")
       .update({ winner_id: winner.user_id, status: "completed" } as any)
       .eq("id", giveawayId);
+    await createWinnerTicket(winner.user_id, giveaway?.title || "Розыгрыш");
     toast.success(`Победитель: ${winner.profile?.username || "—"}`);
     fetchGiveaways();
     viewEntries(giveawayId);
   };
 
   const pickManualWinner = async (giveawayId: string, userId: string) => {
+    const giveaway = giveaways.find(g => g.id === giveawayId);
     await supabase
       .from("giveaways")
       .update({ winner_id: userId, status: "completed" } as any)
       .eq("id", giveawayId);
+    await createWinnerTicket(userId, giveaway?.title || "Розыгрыш");
     toast.success("Победитель выбран!");
     fetchGiveaways();
     viewEntries(giveawayId);
