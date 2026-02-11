@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { Gift, Clock, Users, Trophy, Upload, CheckCircle2, Loader2, ExternalLink } from "lucide-react";
+import { Gift, Clock, Users, Trophy, Upload, CheckCircle2, Loader2, ExternalLink, XCircle } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,6 +35,7 @@ interface GiveawayEntry {
   user_id: string;
   screenshot_url: string;
   status: string;
+  rejection_reason: string | null;
   created_at: string;
 }
 
@@ -301,10 +302,24 @@ export default function Giveaways() {
                       {isActive && (
                         <>
                           {myEntries[g.id] ? (
-                            <Button disabled className="w-full" variant="secondary">
-                              <CheckCircle2 className="h-4 w-4 mr-2" />
-                              Вы участвуете
-                            </Button>
+                            myEntries[g.id].status === "rejected" ? (
+                              <div className="space-y-2">
+                                <Button disabled className="w-full" variant="destructive">
+                                  <XCircle className="h-4 w-4 mr-2" />
+                                  Отклонено
+                                </Button>
+                                {myEntries[g.id].rejection_reason && (
+                                  <p className="text-xs text-destructive text-center px-2">
+                                    Причина: {myEntries[g.id].rejection_reason}
+                                  </p>
+                                )}
+                              </div>
+                            ) : (
+                              <Button disabled className="w-full" variant="secondary">
+                                <CheckCircle2 className="h-4 w-4 mr-2" />
+                                {myEntries[g.id].status === "approved" ? "Участие подтверждено" : "На проверке"}
+                              </Button>
+                            )
                           ) : user ? (
                             <Button
                               className="w-full bg-accent hover:bg-accent/90 text-accent-foreground"

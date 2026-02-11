@@ -60,6 +60,7 @@ interface Entry {
   user_id: string;
   screenshot_url: string;
   status: string;
+  rejection_reason: string | null;
   created_at: string;
   profile?: { username: string };
 }
@@ -76,6 +77,8 @@ export default function AdminGiveaways() {
   const [entries, setEntries] = useState<Entry[]>([]);
   const [entryCounts, setEntryCounts] = useState<Record<string, number>>({});
   const [screenshotPreview, setScreenshotPreview] = useState<string | null>(null);
+  const [rejectingEntry, setRejectingEntry] = useState<string | null>(null);
+  const [rejectionReason, setRejectionReason] = useState("");
 
   // Form
   const [title, setTitle] = useState("");
@@ -276,12 +279,27 @@ export default function AdminGiveaways() {
     setEntries(entriesData);
   };
 
-  const handleApproveEntry = async (entryId: string, entryStatus: "approved" | "rejected") => {
+  const handleApproveEntry = async (entryId: string) => {
     await supabase
       .from("giveaway_entries")
-      .update({ status: entryStatus } as any)
+      .update({ status: "approved", rejection_reason: null } as any)
       .eq("id", entryId);
-    toast.success(entryStatus === "approved" ? "Одобрено" : "Отклонено");
+    toast.success("Одобрено");
+    if (viewingEntries) viewEntries(viewingEntries);
+  };
+
+  const handleRejectEntry = async () => {
+    if (!rejectingEntry || !rejectionReason.trim()) {
+      toast.error("Укажите причину отклонения");
+      return;
+    }
+    await supabase
+      .from("giveaway_entries")
+      .update({ status: "rejected", rejection_reason: rejectionReason.trim() } as any)
+      .eq("id", rejectingEntry);
+    toast.success("Отклонено");
+    setRejectingEntry(null);
+    setRejectionReason("");
     if (viewingEntries) viewEntries(viewingEntries);
   };
 
@@ -560,12 +578,12 @@ export default function AdminGiveaways() {
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-1">
                             {entry.status !== "approved" && (
-                              <Button variant="ghost" size="icon" onClick={() => handleApproveEntry(entry.id, "approved")}>
+                              <Button variant="ghost" size="icon" onClick={() => handleApproveEntry(entry.id)}>
                                 <Check className="h-4 w-4 text-primary" />
                               </Button>
                             )}
                             {entry.status !== "rejected" && (
-                              <Button variant="ghost" size="icon" onClick={() => handleApproveEntry(entry.id, "rejected")}>
+                              <Button variant="ghost" size="icon" onClick={() => { setRejectingEntry(entry.id); setRejectionReason(""); }}>
                                 <X className="h-4 w-4 text-destructive" />
                               </Button>
                             )}
@@ -594,6 +612,27 @@ export default function AdminGiveaways() {
             {screenshotPreview && (
               <img src={screenshotPreview} alt="Screenshot" className="w-full rounded-lg" />
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Rejection reason dialog */}
+        <Dialog open={!!rejectingEntry} onOpenChange={() => setRejectingEntry(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Причина отклонения</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <Textarea
+                value={rejectionReason}
+                onChange={(e) => setRejectionReason(e.target.value)}
+                placeholder="Укажите причину отклонения..."
+                rows={3}
+              />
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setRejectingEntry(null)}>Отмена</Button>
+                <Button variant="destructive" onClick={handleRejectEntry}>Отклонить</Button>
+              </div>
+            </div>
           </DialogContent>
         </Dialog>
       </div>

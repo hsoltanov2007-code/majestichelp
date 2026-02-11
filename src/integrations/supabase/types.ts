@@ -263,6 +263,7 @@ export type Database = {
           created_at: string
           giveaway_id: string
           id: string
+          rejection_reason: string | null
           screenshot_url: string
           status: string
           user_id: string
@@ -271,6 +272,7 @@ export type Database = {
           created_at?: string
           giveaway_id: string
           id?: string
+          rejection_reason?: string | null
           screenshot_url: string
           status?: string
           user_id: string
@@ -279,6 +281,7 @@ export type Database = {
           created_at?: string
           giveaway_id?: string
           id?: string
+          rejection_reason?: string | null
           screenshot_url?: string
           status?: string
           user_id?: string

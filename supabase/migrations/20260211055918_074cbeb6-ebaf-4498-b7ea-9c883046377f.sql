@@ -1,0 +1,1 @@
+ALTER TABLE public.giveaway_entries ADD COLUMN rejection_reason text;
