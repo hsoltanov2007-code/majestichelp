@@ -152,6 +152,7 @@ export default function Giveaways() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedGiveaway, setSelectedGiveaway] = useState<Giveaway | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [pendingFiles, setPendingFiles] = useState<FileList | null>(null);
   const [winnerProfiles, setWinnerProfiles] = useState<Record<string, string>>({});
 
   // Comments & reactions state
@@ -307,6 +308,7 @@ export default function Giveaways() {
       } else {
         toast.success("Вы участвуете в розыгрыше!");
         setSelectedGiveaway(null);
+        setPendingFiles(null);
         fetchGiveaways();
       }
     } catch (error: any) {
@@ -785,7 +787,7 @@ export default function Giveaways() {
       </div>
 
       {/* Upload dialog */}
-      <Dialog open={!!selectedGiveaway} onOpenChange={() => setSelectedGiveaway(null)}>
+      <Dialog open={!!selectedGiveaway} onOpenChange={() => { setSelectedGiveaway(null); setPendingFiles(null); }}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Участие в розыгрыше</DialogTitle>
@@ -820,10 +822,21 @@ export default function Giveaways() {
                 multiple
                 disabled={isUploading}
                 onChange={(e) => {
-                  const files = e.target.files;
-                  if (files?.length) handleScreenshotUpload(files);
+                  setPendingFiles(e.target.files);
                 }}
               />
+              {pendingFiles && pendingFiles.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">
+                    Выбрано файлов: {pendingFiles.length}
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {Array.from(pendingFiles).map((f, i) => (
+                      <img key={i} src={URL.createObjectURL(f)} alt={f.name} className="w-16 h-16 rounded-lg object-cover border border-border" />
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
             {isUploading && (
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -831,6 +844,19 @@ export default function Giveaways() {
                 Загрузка...
               </div>
             )}
+            <Button
+              disabled={!pendingFiles?.length || isUploading}
+              onClick={() => {
+                if (pendingFiles?.length) handleScreenshotUpload(pendingFiles);
+              }}
+              className="w-full bg-accent hover:bg-accent/90 text-accent-foreground"
+            >
+              {isUploading ? (
+                <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Загрузка...</>
+              ) : (
+                <><Upload className="h-4 w-4 mr-2" /> Подтвердить участие</>
+              )}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
