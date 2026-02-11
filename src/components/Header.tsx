@@ -193,41 +193,6 @@ export function Header() {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* Инструменты */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className={`gap-1.5 rounded-lg ${
-                  toolItems.some(item => location.pathname.startsWith(item.path))
-                    ? "bg-accent/10 text-accent"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                <Wrench className="h-4 w-4" />
-                Инструменты
-                <ChevronDown className="h-3 w-3" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="glass-strong">
-              {toolItems.map((item) => (
-                <DropdownMenuItem key={item.path} asChild>
-                  <Link 
-                    to={item.path} 
-                    className={`w-full cursor-pointer flex items-center gap-3 py-2.5 ${
-                      location.pathname.startsWith(item.path)
-                        ? "bg-accent/10 text-accent"
-                        : ""
-                    }`}
-                  >
-                    <item.icon className="h-4 w-4" />
-                    {item.label}
-                  </Link>
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
 
           {/* Справка */}
           <TooltipProvider delayDuration={300}>
@@ -391,14 +356,6 @@ export function Header() {
                   onClose={() => setIsOpen(false)}
                 />
 
-                {/* Инструменты */}
-                <MobileMenuGroup 
-                  title="Инструменты" 
-                  icon={Wrench}
-                  items={toolItems}
-                  location={location}
-                  onClose={() => setIsOpen(false)}
-                />
 
                 {/* Справка */}
                 <MobileMenuGroup 
