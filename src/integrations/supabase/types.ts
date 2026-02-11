@@ -53,6 +53,36 @@ export type Database = {
         }
         Relationships: []
       }
+      chat_cache: {
+        Row: {
+          answer: string
+          created_at: string
+          hit_count: number
+          id: string
+          question: string
+          question_hash: string
+          updated_at: string
+        }
+        Insert: {
+          answer: string
+          created_at?: string
+          hit_count?: number
+          id?: string
+          question: string
+          question_hash: string
+          updated_at?: string
+        }
+        Update: {
+          answer?: string
+          created_at?: string
+          hit_count?: number
+          id?: string
+          question?: string
+          question_hash?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       discord_news: {
         Row: {
           author_avatar: string | null
