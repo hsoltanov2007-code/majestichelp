@@ -15,12 +15,9 @@ import Procedures from "./pages/Procedures";
 import LegalReference from "./pages/LegalReference";
 import Instructions from "./pages/Instructions";
 import Favorites from "./pages/Favorites";
-import Calculator from "./pages/Calculator";
 import Glossary from "./pages/Glossary";
-import Scenarios from "./pages/Scenarios";
 import FAQ from "./pages/FAQ";
 import ProceduralCode from "./pages/ProceduralCode";
-import Quiz from "./pages/Quiz";
 import LawsList from "./pages/LawsList";
 import LawDetail from "./pages/LawDetail";
 import AdminLaws from "./pages/AdminLaws";
@@ -62,11 +59,8 @@ function AppContent() {
         <Route path="/legal-reference" element={<LegalReference />} />
         <Route path="/instructions" element={<Instructions />} />
         <Route path="/favorites" element={<Favorites />} />
-        <Route path="/calculator" element={<Calculator />} />
         <Route path="/glossary" element={<Glossary />} />
-        <Route path="/scenarios" element={<Scenarios />} />
         <Route path="/faq" element={<FAQ />} />
-        <Route path="/quiz" element={<Quiz />} />
         <Route path="/laws" element={<LawsList />} />
         <Route path="/laws/:lawId" element={<LawDetail />} />
         <Route path="/auth" element={<Auth />} />
