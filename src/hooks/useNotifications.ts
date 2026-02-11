@@ -8,6 +8,7 @@ interface Notification {
   topic_id: string | null;
   comment_id: string | null;
   video_id: string | null;
+  giveaway_id: string | null;
   type: string;
   is_read: boolean;
   created_at: string;
@@ -15,6 +16,9 @@ interface Notification {
     title: string;
   };
   video?: {
+    title: string;
+  };
+  giveaway?: {
     title: string;
   };
 }
@@ -43,11 +47,12 @@ export function useNotifications() {
 
       if (error) throw error;
 
-      // Fetch topic/video titles
+      // Fetch topic/video/giveaway titles
       const notificationsWithDetails: Notification[] = await Promise.all(
         (data || []).map(async (notification) => {
           let topic: { title: string } | undefined;
           let video: { title: string } | undefined;
+          let giveaway: { title: string } | undefined;
           
           if (notification.topic_id) {
             const { data: topicData } = await supabase
@@ -66,6 +71,15 @@ export function useNotifications() {
               .maybeSingle();
             video = videoData || undefined;
           }
+
+          if (notification.giveaway_id) {
+            const { data: giveawayData } = await supabase
+              .from('giveaways')
+              .select('title')
+              .eq('id', notification.giveaway_id)
+              .maybeSingle();
+            giveaway = giveawayData || undefined;
+          }
           
           return {
             id: notification.id,
@@ -73,11 +87,13 @@ export function useNotifications() {
             topic_id: notification.topic_id,
             comment_id: notification.comment_id,
             video_id: notification.video_id,
+            giveaway_id: notification.giveaway_id,
             type: notification.type,
             is_read: notification.is_read || false,
             created_at: notification.created_at || '',
             topic,
             video,
+            giveaway,
           };
         })
       );
