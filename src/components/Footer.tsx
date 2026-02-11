@@ -105,6 +105,28 @@ export function Footer() {
                   </Link>
                 </li>
               ))}
+              <li>
+                <a 
+                  href="https://discord.gg/58mtY7SqZt"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-muted-foreground hover:text-accent transition-colors animated-underline inline-flex items-center gap-1.5"
+                >
+                  Discord HARDY
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              </li>
+              <li>
+                <a 
+                  href="https://t.me/Hardyfamq"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-muted-foreground hover:text-accent transition-colors animated-underline inline-flex items-center gap-1.5"
+                >
+                  Telegram канал
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              </li>
             </ul>
           </div>
         </div>
