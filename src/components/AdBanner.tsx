@@ -29,14 +29,21 @@ export function AdBanner() {
     fetchBanners();
   }, []);
 
-  // Rotate banners every 10 seconds
+  // Rotate banners every 8 seconds
   useEffect(() => {
     if (banners.length <= 1) return;
     const interval = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % banners.length);
-    }, 10000);
+    }, 8000);
     return () => clearInterval(interval);
   }, [banners.length]);
+
+  // Re-show after 30 seconds when dismissed
+  useEffect(() => {
+    if (!dismissed) return;
+    const timeout = setTimeout(() => setDismissed(false), 30000);
+    return () => clearTimeout(timeout);
+  }, [dismissed]);
 
   if (dismissed || banners.length === 0) return null;
 
