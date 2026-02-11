@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import {
   Gift, Clock, Users, Trophy, Upload, CheckCircle2, Loader2,
   ExternalLink, RefreshCw, Share2, MessageCircle, Send,
-  Flame, Heart, ThumbsUp, Sparkles, ChevronDown, ChevronUp
+  Flame, Heart, ThumbsUp, Sparkles, ChevronDown, ChevronUp, Bell
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -143,7 +143,7 @@ function LiveCountdown({ endsAt }: { endsAt: string }) {
 }
 
 export default function Giveaways() {
-  const { user } = useAuth();
+  const { user, canManage } = useAuth();
   const [giveaways, setGiveaways] = useState<Giveaway[]>([]);
   const [entries, setEntries] = useState<Record<string, GiveawayEntry[]>>({});
   const [myEntries, setMyEntries] = useState<Record<string, GiveawayEntry>>({});
@@ -352,6 +352,29 @@ export default function Giveaways() {
     toast.success("Ссылка скопирована!");
   };
 
+  const handleNotifyAll = async (giveaway: Giveaway) => {
+    if (!user) return;
+    try {
+      const { data: allProfiles } = await supabase.from("profiles").select("id");
+      if (!allProfiles) return;
+
+      const notifications = allProfiles
+        .filter(p => p.id !== user.id)
+        .map(p => ({
+          user_id: p.id,
+          giveaway_id: giveaway.id,
+          type: "new_giveaway",
+        }));
+
+      const { error } = await supabase.from("forum_notifications").insert(notifications as any);
+      if (error) throw error;
+      toast.success(`Уведомление отправлено ${notifications.length} пользователям!`);
+    } catch (error) {
+      console.error(error);
+      toast.error("Ошибка отправки уведомлений");
+    }
+  };
+
   const toggleComments = (giveawayId: string) => {
     setExpandedComments(prev => {
       const next = new Set(prev);
@@ -545,6 +568,17 @@ export default function Giveaways() {
                       >
                         <Share2 className="h-3.5 w-3.5" />
                       </button>
+
+                      {/* Admin notify button */}
+                      {canManage && isActive && (
+                        <button
+                          onClick={() => handleNotifyAll(g)}
+                          className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs bg-accent/15 border border-accent/30 text-accent hover:bg-accent/25 transition-all"
+                          title="Уведомить всех пользователей"
+                        >
+                          <Bell className="h-3.5 w-3.5" />
+                        </button>
+                      )}
                     </div>
 
                     {/* Action button */}
