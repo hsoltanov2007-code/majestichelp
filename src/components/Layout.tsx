@@ -14,9 +14,9 @@ export function Layout({ children }: LayoutProps) {
       <Snowfall />
       <Header />
       <main className="flex-1">{children}</main>
-      <AdBanner />
       <Footer />
       <ScrollToTop />
+      <AdBanner />
     </div>
   );
 }

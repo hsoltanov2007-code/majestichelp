@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner';
 import { 
   ArrowLeft, Plus, Trash2, Users, FolderOpen, MessageSquare, 
-  Shield, Loader2, Pin, Lock, Unlock, Crown, UserCog, Scale, Database, Gift, Headphones
+  Shield, Loader2, Pin, Lock, Unlock, Crown, UserCog, Scale, Database, Gift, Headphones, Image
 } from 'lucide-react';
 
 interface Category {
@@ -290,6 +290,12 @@ export default function Admin() {
             <p className="text-muted-foreground">Управление форумом</p>
           </div>
           <div className="ml-auto flex gap-2 flex-wrap">
+            <Button asChild variant="outline">
+              <Link to="/admin/ads">
+                <Image className="h-4 w-4 mr-2" />
+                Реклама
+              </Link>
+            </Button>
             <Button asChild variant="outline">
               <Link to="/admin/support">
                 <Headphones className="h-4 w-4 mr-2" />
