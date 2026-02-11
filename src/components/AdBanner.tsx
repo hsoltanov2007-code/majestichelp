@@ -43,15 +43,19 @@ export function AdBanner() {
   const banner = banners[currentIndex];
 
   return (
-    <div className="fixed right-4 top-1/2 -translate-y-1/2 z-40 w-52 hidden lg:block animate-fade-in">
-      <div className="relative rounded-xl border border-border/50 glass shadow-lg overflow-hidden">
+    <div className="fixed right-4 top-1/2 -translate-y-1/2 z-40 w-56 hidden lg:block animate-fade-in">
+      <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-accent/10 border border-border/30 bg-gradient-to-b from-card/95 to-card/80 backdrop-blur-2xl">
+        {/* Decorative glow */}
+        <div className="absolute -top-12 -right-12 w-32 h-32 rounded-full bg-accent/10 blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-8 -left-8 w-24 h-24 rounded-full bg-primary/5 blur-2xl pointer-events-none" />
+
         {/* Close button */}
         <button
           onClick={() => setDismissed(true)}
-          className="absolute top-1.5 right-1.5 z-10 p-1 rounded-full bg-background/80 hover:bg-background text-muted-foreground hover:text-foreground transition-colors"
+          className="absolute top-2 right-2 z-10 p-1.5 rounded-full bg-background/60 backdrop-blur-sm hover:bg-background/90 text-muted-foreground hover:text-foreground transition-all duration-200 hover:scale-110"
           aria-label="Закрыть"
         >
-          <X className="h-3.5 w-3.5" />
+          <X className="h-3 w-3" />
         </button>
 
         <a
@@ -61,46 +65,51 @@ export function AdBanner() {
           className="block group"
         >
           {banner.image_url && (
-            <img
-              src={banner.image_url}
-              alt={banner.title}
-              className="w-full h-28 object-cover transition-transform duration-500 group-hover:scale-105"
-            />
+            <div className="relative overflow-hidden">
+              <img
+                src={banner.image_url}
+                alt={banner.title}
+                className="w-full h-32 object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-110"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent opacity-60" />
+            </div>
           )}
 
-          <div className="p-3 space-y-1.5">
-            <h4 className="text-sm font-semibold text-foreground group-hover:text-accent transition-colors leading-tight line-clamp-2">
+          <div className="relative p-4 space-y-2">
+            <h4 className="text-sm font-bold text-foreground group-hover:text-accent transition-colors duration-300 leading-snug line-clamp-2">
               {banner.title}
             </h4>
             {banner.description && (
-              <p className="text-xs text-muted-foreground line-clamp-2">
+              <p className="text-xs text-muted-foreground/80 line-clamp-2 leading-relaxed">
                 {banner.description}
               </p>
             )}
-            <span className="inline-flex items-center gap-1 text-xs font-medium text-accent">
+            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-accent group-hover:gap-2 transition-all duration-300">
               {banner.link_text || "Подробнее"}
-              <ExternalLink className="h-3 w-3" />
+              <ExternalLink className="h-3 w-3 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </span>
           </div>
         </a>
 
-        {/* Banner counter */}
+        {/* Banner dots */}
         {banners.length > 1 && (
-          <div className="flex justify-center gap-1 pb-2">
+          <div className="flex justify-center gap-1.5 pb-3">
             {banners.map((_, i) => (
               <button
                 key={i}
                 onClick={() => setCurrentIndex(i)}
-                className={`w-1.5 h-1.5 rounded-full transition-colors ${
-                  i === currentIndex ? "bg-accent" : "bg-muted-foreground/30"
+                className={`rounded-full transition-all duration-300 ${
+                  i === currentIndex
+                    ? "w-4 h-1.5 bg-accent"
+                    : "w-1.5 h-1.5 bg-muted-foreground/25 hover:bg-muted-foreground/40"
                 }`}
               />
             ))}
           </div>
         )}
 
-        <div className="text-center pb-1.5">
-          <span className="text-[9px] text-muted-foreground/40 uppercase tracking-wider">
+        <div className="text-center pb-2">
+          <span className="text-[8px] text-muted-foreground/30 uppercase tracking-[0.2em] font-medium">
             реклама
           </span>
         </div>
