@@ -33,11 +33,11 @@ import {
   Gift,
   Trophy,
   Users,
-  Eye,
   Shuffle,
   X,
   Check,
   Image,
+  Pencil,
 } from "lucide-react";
 
 interface Giveaway {
@@ -69,7 +69,8 @@ export default function AdminGiveaways() {
   const [giveaways, setGiveaways] = useState<Giveaway[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [viewingEntries, setViewingEntries] = useState<string | null>(null);
   const [entries, setEntries] = useState<Entry[]>([]);
   const [entryCounts, setEntryCounts] = useState<Record<string, number>>({});
@@ -81,6 +82,8 @@ export default function AdminGiveaways() {
   const [prize, setPrize] = useState("");
   const [conditions, setConditions] = useState<string[]>([""]);
   const [endsAt, setEndsAt] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
+  const [status, setStatus] = useState("active");
 
   useEffect(() => {
     if (!authLoading && !user) navigate("/auth");
@@ -115,7 +118,6 @@ export default function AdminGiveaways() {
       .order("created_at", { ascending: false });
     setGiveaways((data as unknown as Giveaway[]) || []);
 
-    // Get entry counts
     const counts: Record<string, number> = {};
     for (const g of data || []) {
       const { count } = await supabase
@@ -128,39 +130,84 @@ export default function AdminGiveaways() {
     setIsLoading(false);
   };
 
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!title.trim() || !prize.trim()) {
-      toast.error("Заполните название и приз");
-      return;
-    }
-
-    const { error } = await supabase.from("giveaways").insert({
-      title: title.trim(),
-      description: description.trim() || null,
-      prize: prize.trim(),
-      conditions: conditions.filter(c => c.trim()).map(c => ({ text: c.trim() })),
-      ends_at: endsAt || null,
-      created_by: user!.id,
-    } as any);
-
-    if (error) {
-      toast.error("Ошибка создания");
-      console.error(error);
-    } else {
-      toast.success("Розыгрыш создан!");
-      setIsCreateOpen(false);
-      resetForm();
-      fetchGiveaways();
-    }
-  };
-
   const resetForm = () => {
     setTitle("");
     setDescription("");
     setPrize("");
     setConditions([""]);
     setEndsAt("");
+    setImageUrl("");
+    setStatus("active");
+    setEditingId(null);
+  };
+
+  const openCreate = () => {
+    resetForm();
+    setIsFormOpen(true);
+  };
+
+  const openEdit = (g: Giveaway) => {
+    setEditingId(g.id);
+    setTitle(g.title);
+    setDescription(g.description || "");
+    setPrize(g.prize);
+    setConditions(
+      g.conditions && (g.conditions as { text: string }[]).length > 0
+        ? (g.conditions as { text: string }[]).map(c => c.text)
+        : [""]
+    );
+    setEndsAt(g.ends_at ? g.ends_at.slice(0, 16) : "");
+    setImageUrl(g.image_url || "");
+    setStatus(g.status);
+    setIsFormOpen(true);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!title.trim() || !prize.trim()) {
+      toast.error("Заполните название и приз");
+      return;
+    }
+
+    const payload = {
+      title: title.trim(),
+      description: description.trim() || null,
+      prize: prize.trim(),
+      conditions: conditions.filter(c => c.trim()).map(c => ({ text: c.trim() })),
+      ends_at: endsAt || null,
+      image_url: imageUrl.trim() || null,
+      status,
+    };
+
+    if (editingId) {
+      const { error } = await supabase
+        .from("giveaways")
+        .update(payload as any)
+        .eq("id", editingId);
+      if (error) {
+        toast.error("Ошибка обновления");
+        console.error(error);
+      } else {
+        toast.success("Розыгрыш обновлён!");
+        setIsFormOpen(false);
+        resetForm();
+        fetchGiveaways();
+      }
+    } else {
+      const { error } = await supabase.from("giveaways").insert({
+        ...payload,
+        created_by: user!.id,
+      } as any);
+      if (error) {
+        toast.error("Ошибка создания");
+        console.error(error);
+      } else {
+        toast.success("Розыгрыш создан!");
+        setIsFormOpen(false);
+        resetForm();
+        fetchGiveaways();
+      }
+    }
   };
 
   const handleDelete = async (id: string) => {
@@ -179,8 +226,6 @@ export default function AdminGiveaways() {
       .order("created_at", { ascending: true });
 
     const entriesData = (data as unknown as Entry[]) || [];
-
-    // Fetch profiles
     const userIds = entriesData.map(e => e.user_id);
     if (userIds.length > 0) {
       const { data: profiles } = await supabase
@@ -194,12 +239,12 @@ export default function AdminGiveaways() {
     setEntries(entriesData);
   };
 
-  const handleApproveEntry = async (entryId: string, status: "approved" | "rejected") => {
+  const handleApproveEntry = async (entryId: string, entryStatus: "approved" | "rejected") => {
     await supabase
       .from("giveaway_entries")
-      .update({ status } as any)
+      .update({ status: entryStatus } as any)
       .eq("id", entryId);
-    toast.success(status === "approved" ? "Одобрено" : "Отклонено");
+    toast.success(entryStatus === "approved" ? "Одобрено" : "Отклонено");
     if (viewingEntries) viewEntries(viewingEntries);
   };
 
@@ -253,65 +298,10 @@ export default function AdminGiveaways() {
             </div>
           </div>
 
-          <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-            <DialogTrigger asChild>
-              <Button onClick={resetForm}>
-                <Plus className="h-4 w-4 mr-2" />
-                Создать
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>Новый розыгрыш</DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleCreate} className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Название *</Label>
-                  <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Розыгрыш VIP" required />
-                </div>
-                <div className="space-y-2">
-                  <Label>Приз *</Label>
-                  <Input value={prize} onChange={(e) => setPrize(e.target.value)} placeholder="VIP статус на месяц" required />
-                </div>
-                <div className="space-y-2">
-                  <Label>Описание</Label>
-                  <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Подробности розыгрыша..." rows={3} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Условия участия</Label>
-                  {conditions.map((c, i) => (
-                    <div key={i} className="flex gap-2">
-                      <Input
-                        value={c}
-                        onChange={(e) => {
-                          const newC = [...conditions];
-                          newC[i] = e.target.value;
-                          setConditions(newC);
-                        }}
-                        placeholder={`Условие ${i + 1}`}
-                      />
-                      {conditions.length > 1 && (
-                        <Button type="button" variant="ghost" size="icon" onClick={() => setConditions(conditions.filter((_, j) => j !== i))}>
-                          <X className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
-                  ))}
-                  <Button type="button" variant="outline" size="sm" onClick={() => setConditions([...conditions, ""])}>
-                    <Plus className="h-3 w-3 mr-1" /> Добавить условие
-                  </Button>
-                </div>
-                <div className="space-y-2">
-                  <Label>Дата окончания (опционально)</Label>
-                  <Input type="datetime-local" value={endsAt} onChange={(e) => setEndsAt(e.target.value)} />
-                </div>
-                <div className="flex justify-end gap-2">
-                  <Button type="button" variant="outline" onClick={() => setIsCreateOpen(false)}>Отмена</Button>
-                  <Button type="submit">Создать</Button>
-                </div>
-              </form>
-            </DialogContent>
-          </Dialog>
+          <Button onClick={openCreate}>
+            <Plus className="h-4 w-4 mr-2" />
+            Создать
+          </Button>
         </div>
 
         {/* Giveaways list */}
@@ -346,10 +336,13 @@ export default function AdminGiveaways() {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-1">
-                          <Button variant="ghost" size="icon" onClick={() => viewEntries(g.id)}>
+                          <Button variant="ghost" size="icon" onClick={() => openEdit(g)} title="Редактировать">
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" onClick={() => viewEntries(g.id)} title="Участники">
                             <Users className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="icon" onClick={() => handleDelete(g.id)}>
+                          <Button variant="ghost" size="icon" onClick={() => handleDelete(g.id)} title="Удалить">
                             <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>
                         </div>
@@ -361,6 +354,79 @@ export default function AdminGiveaways() {
             )}
           </CardContent>
         </Card>
+
+        {/* Create / Edit dialog */}
+        <Dialog open={isFormOpen} onOpenChange={(open) => { if (!open) { setIsFormOpen(false); resetForm(); } }}>
+          <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>{editingId ? "Редактировать розыгрыш" : "Новый розыгрыш"}</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label>Название *</Label>
+                <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Розыгрыш VIP" required />
+              </div>
+              <div className="space-y-2">
+                <Label>Приз *</Label>
+                <Input value={prize} onChange={(e) => setPrize(e.target.value)} placeholder="VIP статус на месяц" required />
+              </div>
+              <div className="space-y-2">
+                <Label>Описание</Label>
+                <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Подробности розыгрыша..." rows={3} />
+              </div>
+              <div className="space-y-2">
+                <Label>URL изображения</Label>
+                <Input value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="https://..." />
+              </div>
+              <div className="space-y-2">
+                <Label>Условия участия</Label>
+                {conditions.map((c, i) => (
+                  <div key={i} className="flex gap-2">
+                    <Input
+                      value={c}
+                      onChange={(e) => {
+                        const newC = [...conditions];
+                        newC[i] = e.target.value;
+                        setConditions(newC);
+                      }}
+                      placeholder={`Условие ${i + 1}`}
+                    />
+                    {conditions.length > 1 && (
+                      <Button type="button" variant="ghost" size="icon" onClick={() => setConditions(conditions.filter((_, j) => j !== i))}>
+                        <X className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+                <Button type="button" variant="outline" size="sm" onClick={() => setConditions([...conditions, ""])}>
+                  <Plus className="h-3 w-3 mr-1" /> Добавить условие
+                </Button>
+              </div>
+              <div className="space-y-2">
+                <Label>Дата окончания (опционально)</Label>
+                <Input type="datetime-local" value={endsAt} onChange={(e) => setEndsAt(e.target.value)} />
+              </div>
+              {editingId && (
+                <div className="space-y-2">
+                  <Label>Статус</Label>
+                  <select
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value)}
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <option value="active">Активен</option>
+                    <option value="completed">Завершён</option>
+                    <option value="cancelled">Отменён</option>
+                  </select>
+                </div>
+              )}
+              <div className="flex justify-end gap-2">
+                <Button type="button" variant="outline" onClick={() => { setIsFormOpen(false); resetForm(); }}>Отмена</Button>
+                <Button type="submit">{editingId ? "Сохранить" : "Создать"}</Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
 
         {/* Entries dialog */}
         <Dialog open={!!viewingEntries} onOpenChange={() => setViewingEntries(null)}>
