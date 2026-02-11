@@ -362,12 +362,18 @@ export default function Giveaways() {
         .from("giveaways")
         .update({ is_featured: newFeatured } as any)
         .eq("id", giveaway.id);
-      if (updateError) throw updateError;
+      if (updateError) {
+        console.error("Update giveaway error:", updateError);
+        throw updateError;
+      }
 
       // Also send notifications to registered users
       if (newFeatured) {
-        const { data: allProfiles } = await supabase.from("profiles").select("id");
-        if (allProfiles) {
+        const { data: allProfiles, error: profilesError } = await supabase.from("profiles").select("id");
+        if (profilesError) {
+          console.error("Fetch profiles error:", profilesError);
+        }
+        if (allProfiles && allProfiles.length > 0) {
           const notifications = allProfiles
             .filter(p => p.id !== user.id)
             .map(p => ({
@@ -375,7 +381,17 @@ export default function Giveaways() {
               giveaway_id: giveaway.id,
               type: "new_giveaway",
             }));
-          await supabase.from("forum_notifications").insert(notifications as any);
+          
+          if (notifications.length > 0) {
+            const { error: insertError } = await supabase.from("forum_notifications").insert(notifications as any);
+            if (insertError) {
+              console.error("Insert notifications error:", insertError);
+              // Don't throw - featured status was updated successfully
+              toast.success("Розыгрыш выделен! (уведомления не отправлены)");
+              fetchGiveaways();
+              return;
+            }
+          }
         }
         toast.success("Розыгрыш выделен и уведомления отправлены!");
       } else {
@@ -384,7 +400,7 @@ export default function Giveaways() {
 
       fetchGiveaways();
     } catch (error) {
-      console.error(error);
+      console.error("handleNotifyAll error:", error);
       toast.error("Ошибка");
     }
   };
