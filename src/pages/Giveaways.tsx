@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { Gift, Clock, Users, Trophy, Upload, CheckCircle2, Loader2, ExternalLink, XCircle } from "lucide-react";
+import { Gift, Clock, Users, Trophy, Upload, CheckCircle2, Loader2, ExternalLink, XCircle, RefreshCw } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -304,13 +304,20 @@ export default function Giveaways() {
                           {myEntries[g.id] ? (
                             myEntries[g.id].status === "rejected" ? (
                               <div className="space-y-2">
-                                <Button disabled className="w-full" variant="destructive">
-                                  <XCircle className="h-4 w-4 mr-2" />
-                                  Отклонено
+                                <Button
+                                  className="w-full bg-accent hover:bg-accent/90 text-accent-foreground"
+                                  onClick={async () => {
+                                    await supabase.from("giveaway_entries").delete().eq("id", myEntries[g.id].id);
+                                    setSelectedGiveaway(g);
+                                    fetchGiveaways();
+                                  }}
+                                >
+                                  <RefreshCw className="h-4 w-4 mr-2" />
+                                  Попробовать снова
                                 </Button>
                                 {myEntries[g.id].rejection_reason && (
                                   <p className="text-xs text-destructive text-center px-2">
-                                    Причина: {myEntries[g.id].rejection_reason}
+                                    Отклонено: {myEntries[g.id].rejection_reason}
                                   </p>
                                 )}
                               </div>
