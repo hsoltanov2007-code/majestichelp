@@ -38,6 +38,7 @@ import {
   Check,
   Image,
   Pencil,
+  Upload,
 } from "lucide-react";
 
 interface Giveaway {
@@ -83,6 +84,9 @@ export default function AdminGiveaways() {
   const [conditions, setConditions] = useState<{ text: string; link: string }[]>([{ text: "", link: "" }]);
   const [endsAt, setEndsAt] = useState("");
   const [imageUrl, setImageUrl] = useState("");
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isImageUploading, setIsImageUploading] = useState(false);
   const [status, setStatus] = useState("active");
 
   useEffect(() => {
@@ -137,6 +141,8 @@ export default function AdminGiveaways() {
     setConditions([{ text: "", link: "" }]);
     setEndsAt("");
     setImageUrl("");
+    setImageFile(null);
+    setImagePreview(null);
     setStatus("active");
     setEditingId(null);
   };
@@ -158,8 +164,22 @@ export default function AdminGiveaways() {
     );
     setEndsAt(g.ends_at ? g.ends_at.slice(0, 16) : "");
     setImageUrl(g.image_url || "");
+    setImageFile(null);
+    setImagePreview(null);
     setStatus(g.status);
     setIsFormOpen(true);
+  };
+
+  const uploadImage = async (file: File): Promise<string | null> => {
+    const ext = file.name.split(".").pop();
+    const path = `giveaway-images/${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from("giveaway-screenshots").upload(path, file);
+    if (error) {
+      console.error("Image upload error:", error);
+      return null;
+    }
+    const { data: urlData } = supabase.storage.from("giveaway-screenshots").getPublicUrl(path);
+    return urlData.publicUrl;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -169,13 +189,29 @@ export default function AdminGiveaways() {
       return;
     }
 
+    setIsImageUploading(true);
+
+    let finalImageUrl = imageUrl.trim() || null;
+
+    // Upload image file if selected
+    if (imageFile) {
+      const uploaded = await uploadImage(imageFile);
+      if (uploaded) {
+        finalImageUrl = uploaded;
+      } else {
+        toast.error("Ошибка загрузки изображения");
+        setIsImageUploading(false);
+        return;
+      }
+    }
+
     const payload = {
       title: title.trim(),
       description: description.trim() || null,
       prize: prize.trim(),
       conditions: conditions.filter(c => c.text.trim()).map(c => ({ text: c.text.trim(), ...(c.link.trim() ? { link: c.link.trim() } : {}) })),
       ends_at: endsAt || null,
-      image_url: imageUrl.trim() || null,
+      image_url: finalImageUrl,
       status,
     };
 
@@ -208,6 +244,7 @@ export default function AdminGiveaways() {
         fetchGiveaways();
       }
     }
+    setIsImageUploading(false);
   };
 
   const handleDelete = async (id: string) => {
@@ -375,8 +412,32 @@ export default function AdminGiveaways() {
                 <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Подробности розыгрыша..." rows={3} />
               </div>
               <div className="space-y-2">
-                <Label>URL изображения</Label>
-                <Input value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="https://..." />
+                <Label>Изображение</Label>
+                {(imagePreview || imageUrl) && (
+                  <div className="relative w-full h-32 rounded-lg overflow-hidden bg-muted">
+                    <img src={imagePreview || imageUrl} alt="Preview" className="w-full h-full object-cover" />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute top-2 right-2 h-6 w-6"
+                      onClick={() => { setImageFile(null); setImagePreview(null); setImageUrl(""); }}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                )}
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      setImageFile(file);
+                      setImagePreview(URL.createObjectURL(file));
+                    }
+                  }}
+                />
               </div>
               <div className="space-y-2">
                 <Label>Условия участия</Label>
@@ -434,7 +495,10 @@ export default function AdminGiveaways() {
               )}
               <div className="flex justify-end gap-2">
                 <Button type="button" variant="outline" onClick={() => { setIsFormOpen(false); resetForm(); }}>Отмена</Button>
-                <Button type="submit">{editingId ? "Сохранить" : "Создать"}</Button>
+                <Button type="submit" disabled={isImageUploading}>
+                  {isImageUploading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                  {editingId ? "Сохранить" : "Создать"}
+                </Button>
               </div>
             </form>
           </DialogContent>
