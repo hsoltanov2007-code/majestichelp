@@ -34,6 +34,7 @@ interface Giveaway {
   winner_id: string | null;
   ends_at: string | null;
   created_at: string;
+  is_featured: boolean;
 }
 
 interface GiveawayEntry {
@@ -355,23 +356,36 @@ export default function Giveaways() {
   const handleNotifyAll = async (giveaway: Giveaway) => {
     if (!user) return;
     try {
-      const { data: allProfiles } = await supabase.from("profiles").select("id");
-      if (!allProfiles) return;
+      // Toggle featured status
+      const newFeatured = !giveaway.is_featured;
+      const { error: updateError } = await supabase
+        .from("giveaways")
+        .update({ is_featured: newFeatured } as any)
+        .eq("id", giveaway.id);
+      if (updateError) throw updateError;
 
-      const notifications = allProfiles
-        .filter(p => p.id !== user.id)
-        .map(p => ({
-          user_id: p.id,
-          giveaway_id: giveaway.id,
-          type: "new_giveaway",
-        }));
+      // Also send notifications to registered users
+      if (newFeatured) {
+        const { data: allProfiles } = await supabase.from("profiles").select("id");
+        if (allProfiles) {
+          const notifications = allProfiles
+            .filter(p => p.id !== user.id)
+            .map(p => ({
+              user_id: p.id,
+              giveaway_id: giveaway.id,
+              type: "new_giveaway",
+            }));
+          await supabase.from("forum_notifications").insert(notifications as any);
+        }
+        toast.success("Розыгрыш выделен и уведомления отправлены!");
+      } else {
+        toast.success("Выделение розыгрыша снято");
+      }
 
-      const { error } = await supabase.from("forum_notifications").insert(notifications as any);
-      if (error) throw error;
-      toast.success(`Уведомление отправлено ${notifications.length} пользователям!`);
+      fetchGiveaways();
     } catch (error) {
       console.error(error);
-      toast.error("Ошибка отправки уведомлений");
+      toast.error("Ошибка");
     }
   };
 
@@ -407,6 +421,52 @@ export default function Giveaways() {
             <p className="text-sm text-muted-foreground">Участвуй и выигрывай призы</p>
           </div>
         </div>
+
+        {/* Featured giveaway banner */}
+        {giveaways.filter(g => g.is_featured && g.status === "active").map(g => (
+          <div
+            key={`featured-${g.id}`}
+            className="mb-8 relative overflow-hidden rounded-2xl border-2 border-accent/40 bg-gradient-to-r from-accent/15 via-card to-accent/10 p-6 shadow-[0_0_30px_hsl(351_80%_58%/0.15)]"
+          >
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-accent via-accent/60 to-accent animate-pulse" />
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
+              {g.image_url && (
+                <img src={g.image_url} alt={g.title} className="w-20 h-20 rounded-xl object-cover shrink-0" />
+              )}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <Sparkles className="h-5 w-5 text-accent animate-pulse" />
+                  <span className="text-xs font-bold uppercase tracking-wider text-accent">Не пропустите!</span>
+                </div>
+                <h3 className="text-xl font-bold">{g.title}</h3>
+                {g.description && <p className="text-sm text-muted-foreground mt-1">{g.description}</p>}
+                <div className="flex items-center gap-3 mt-2">
+                  <Badge className="bg-accent/90 text-accent-foreground">Приз: {g.prize}</Badge>
+                  {g.ends_at && (
+                    <span className="text-xs text-muted-foreground flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      <LiveCountdown endsAt={g.ends_at} />
+                    </span>
+                  )}
+                </div>
+              </div>
+              {!myEntries[g.id] && user && (
+                <Button
+                  className="bg-accent hover:bg-accent/90 text-accent-foreground rounded-xl shadow-lg"
+                  onClick={() => setSelectedGiveaway(g)}
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  Участвовать
+                </Button>
+              )}
+              {!user && (
+                <Button variant="outline" className="rounded-xl" onClick={() => toast.info("Войдите, чтобы участвовать")}>
+                  Войти для участия
+                </Button>
+              )}
+            </div>
+          </div>
+        ))}
 
         {giveaways.length === 0 ? (
           <div className="glass rounded-2xl border-dashed text-center py-20 text-muted-foreground">
@@ -569,14 +629,18 @@ export default function Giveaways() {
                         <Share2 className="h-3.5 w-3.5" />
                       </button>
 
-                      {/* Admin notify button */}
+                      {/* Admin notify/feature button */}
                       {canManage && isActive && (
                         <button
                           onClick={() => handleNotifyAll(g)}
-                          className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs bg-accent/15 border border-accent/30 text-accent hover:bg-accent/25 transition-all"
-                          title="Уведомить всех пользователей"
+                          className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs transition-all border ${
+                            g.is_featured
+                              ? "bg-accent/30 border-accent/50 text-accent"
+                              : "bg-accent/15 border-accent/30 text-accent hover:bg-accent/25"
+                          }`}
+                          title={g.is_featured ? "Снять выделение" : "Выделить и уведомить всех"}
                         >
-                          <Bell className="h-3.5 w-3.5" />
+                          <Bell className={`h-3.5 w-3.5 ${g.is_featured ? "fill-current" : ""}`} />
                         </button>
                       )}
                     </div>

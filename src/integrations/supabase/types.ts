@@ -379,6 +379,7 @@ export type Database = {
           ends_at: string | null
           id: string
           image_url: string | null
+          is_featured: boolean
           prize: string
           status: string
           title: string
@@ -393,6 +394,7 @@ export type Database = {
           ends_at?: string | null
           id?: string
           image_url?: string | null
+          is_featured?: boolean
           prize: string
           status?: string
           title: string
@@ -407,6 +409,7 @@ export type Database = {
           ends_at?: string | null
           id?: string
           image_url?: string | null
+          is_featured?: boolean
           prize?: string
           status?: string
           title?: string
