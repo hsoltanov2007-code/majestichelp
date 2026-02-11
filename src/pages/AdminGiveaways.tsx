@@ -80,7 +80,7 @@ export default function AdminGiveaways() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [prize, setPrize] = useState("");
-  const [conditions, setConditions] = useState<string[]>([""]);
+  const [conditions, setConditions] = useState<{ text: string; link: string }[]>([{ text: "", link: "" }]);
   const [endsAt, setEndsAt] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [status, setStatus] = useState("active");
@@ -134,7 +134,7 @@ export default function AdminGiveaways() {
     setTitle("");
     setDescription("");
     setPrize("");
-    setConditions([""]);
+    setConditions([{ text: "", link: "" }]);
     setEndsAt("");
     setImageUrl("");
     setStatus("active");
@@ -152,9 +152,9 @@ export default function AdminGiveaways() {
     setDescription(g.description || "");
     setPrize(g.prize);
     setConditions(
-      g.conditions && (g.conditions as { text: string }[]).length > 0
-        ? (g.conditions as { text: string }[]).map(c => c.text)
-        : [""]
+      g.conditions && (g.conditions as { text: string; link?: string }[]).length > 0
+        ? (g.conditions as { text: string; link?: string }[]).map(c => ({ text: c.text, link: c.link || "" }))
+        : [{ text: "", link: "" }]
     );
     setEndsAt(g.ends_at ? g.ends_at.slice(0, 16) : "");
     setImageUrl(g.image_url || "");
@@ -173,7 +173,7 @@ export default function AdminGiveaways() {
       title: title.trim(),
       description: description.trim() || null,
       prize: prize.trim(),
-      conditions: conditions.filter(c => c.trim()).map(c => ({ text: c.trim() })),
+      conditions: conditions.filter(c => c.text.trim()).map(c => ({ text: c.text.trim(), ...(c.link.trim() ? { link: c.link.trim() } : {}) })),
       ends_at: endsAt || null,
       image_url: imageUrl.trim() || null,
       status,
@@ -381,24 +381,36 @@ export default function AdminGiveaways() {
               <div className="space-y-2">
                 <Label>Условия участия</Label>
                 {conditions.map((c, i) => (
-                  <div key={i} className="flex gap-2">
+                  <div key={i} className="space-y-1.5 p-3 rounded-lg bg-muted/50 border border-border">
+                    <div className="flex gap-2">
+                      <Input
+                        value={c.text}
+                        onChange={(e) => {
+                          const newC = [...conditions];
+                          newC[i] = { ...newC[i], text: e.target.value };
+                          setConditions(newC);
+                        }}
+                        placeholder={`Условие ${i + 1}`}
+                      />
+                      {conditions.length > 1 && (
+                        <Button type="button" variant="ghost" size="icon" onClick={() => setConditions(conditions.filter((_, j) => j !== i))}>
+                          <X className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
                     <Input
-                      value={c}
+                      value={c.link}
                       onChange={(e) => {
                         const newC = [...conditions];
-                        newC[i] = e.target.value;
+                        newC[i] = { ...newC[i], link: e.target.value };
                         setConditions(newC);
                       }}
-                      placeholder={`Условие ${i + 1}`}
+                      placeholder="Ссылка (необязательно)"
+                      className="text-xs"
                     />
-                    {conditions.length > 1 && (
-                      <Button type="button" variant="ghost" size="icon" onClick={() => setConditions(conditions.filter((_, j) => j !== i))}>
-                        <X className="h-4 w-4" />
-                      </Button>
-                    )}
                   </div>
                 ))}
-                <Button type="button" variant="outline" size="sm" onClick={() => setConditions([...conditions, ""])}>
+                <Button type="button" variant="outline" size="sm" onClick={() => setConditions([...conditions, { text: "", link: "" }])}>
                   <Plus className="h-3 w-3 mr-1" /> Добавить условие
                 </Button>
               </div>

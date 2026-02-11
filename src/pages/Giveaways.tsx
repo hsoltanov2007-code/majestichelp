@@ -1,22 +1,27 @@
 import { useState, useEffect } from "react";
 import { Layout } from "@/components/Layout";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { Gift, Clock, Users, Trophy, Upload, CheckCircle2, Loader2 } from "lucide-react";
+import { Gift, Clock, Users, Trophy, Upload, CheckCircle2, Loader2, ExternalLink } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+
+interface Condition {
+  text: string;
+  link?: string;
+}
 
 interface Giveaway {
   id: string;
   title: string;
   description: string | null;
   prize: string;
-  conditions: { text: string }[];
+  conditions: Condition[];
   image_url: string | null;
   status: string;
   winner_id: string | null;
@@ -59,7 +64,6 @@ export default function Giveaways() {
     } else {
       setGiveaways((data as unknown as Giveaway[]) || []);
 
-      // Fetch entry counts
       const entryCounts: Record<string, GiveawayEntry[]> = {};
       const myE: Record<string, GiveawayEntry> = {};
       const winnerIds = (data || []).filter(g => g.winner_id).map(g => g.winner_id);
@@ -77,7 +81,6 @@ export default function Giveaways() {
         }
       }
 
-      // Fetch winner profiles
       if (winnerIds.length > 0) {
         const { data: profiles } = await supabase
           .from("profiles")
@@ -139,17 +142,13 @@ export default function Giveaways() {
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "active":
-        return <Badge className="bg-primary">Активен</Badge>;
-      case "completed":
-        return <Badge variant="secondary">Завершён</Badge>;
-      case "cancelled":
-        return <Badge variant="destructive">Отменён</Badge>;
-      default:
-        return null;
-    }
+  const getTimeLeft = (endsAt: string) => {
+    const diff = new Date(endsAt).getTime() - Date.now();
+    if (diff <= 0) return "Завершён";
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    if (days > 0) return `${days}д ${hours}ч`;
+    return `${hours}ч`;
   };
 
   if (isLoading) {
@@ -165,110 +164,172 @@ export default function Giveaways() {
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center gap-3 mb-6">
-          <Gift className="h-7 w-7 text-primary" />
-          <h1 className="text-3xl font-bold">Розыгрыши</h1>
+        <div className="flex items-center gap-3 mb-8">
+          <div className="p-2.5 rounded-xl bg-accent/10">
+            <Gift className="h-7 w-7 text-accent" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold">Розыгрыши</h1>
+            <p className="text-sm text-muted-foreground">Участвуй и выигрывай призы</p>
+          </div>
         </div>
 
         {giveaways.length === 0 ? (
-          <Card>
-            <CardContent className="text-center py-12 text-muted-foreground">
-              <Gift className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p className="text-lg">Пока нет активных розыгрышей</p>
+          <Card className="border-dashed">
+            <CardContent className="text-center py-16 text-muted-foreground">
+              <Gift className="h-16 w-16 mx-auto mb-4 opacity-30" />
+              <p className="text-lg font-medium">Пока нет активных розыгрышей</p>
+              <p className="text-sm mt-1">Следите за обновлениями!</p>
             </CardContent>
           </Card>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {giveaways.map((g) => (
-              <Card key={g.id} className="flex flex-col">
-                {g.image_url && (
-                  <img
-                    src={g.image_url}
-                    alt={g.title}
-                    className="w-full h-48 object-cover rounded-t-lg"
-                  />
-                )}
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <CardTitle className="text-lg">{g.title}</CardTitle>
-                    {getStatusBadge(g.status)}
-                  </div>
-                </CardHeader>
-                <CardContent className="flex-1 space-y-4">
-                  {g.description && (
-                    <p className="text-sm text-muted-foreground">{g.description}</p>
-                  )}
-                  <div className="flex items-center gap-2 text-primary font-semibold">
-                    <Trophy className="h-4 w-4" />
-                    <span>{g.prize}</span>
-                  </div>
+            {giveaways.map((g) => {
+              const isActive = g.status === "active";
+              const isCompleted = g.status === "completed";
+              const participantCount = entries[g.id]?.length || 0;
 
-                  {g.conditions && (g.conditions as { text: string }[]).length > 0 && (
-                    <div className="space-y-2">
-                      <p className="text-sm font-medium">Условия:</p>
-                      <ul className="space-y-1">
-                        {(g.conditions as { text: string }[]).map((c, i) => (
-                          <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
-                            <CheckCircle2 className="h-4 w-4 mt-0.5 text-primary shrink-0" />
-                            {c.text}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    <span className="flex items-center gap-1">
-                      <Users className="h-4 w-4" />
-                      {entries[g.id]?.length || 0} участников
-                    </span>
-                    {g.ends_at && (
-                      <span className="flex items-center gap-1">
-                        <Clock className="h-4 w-4" />
-                        до {new Date(g.ends_at).toLocaleDateString("ru-RU")}
-                      </span>
-                    )}
-                  </div>
-
-                  {g.status === "completed" && g.winner_id && (
-                    <div className="p-3 rounded-lg bg-primary/10 border border-primary/20">
-                      <p className="text-sm font-medium flex items-center gap-2">
-                        <Trophy className="h-4 w-4 text-primary" />
-                        Победитель: {winnerProfiles[g.winner_id] || "—"}
-                      </p>
-                    </div>
-                  )}
-                </CardContent>
-                <CardFooter>
-                  {g.status === "active" && (
-                    <>
-                      {myEntries[g.id] ? (
-                        <Button disabled className="w-full" variant="secondary">
-                          <CheckCircle2 className="h-4 w-4 mr-2" />
-                          Вы участвуете
-                        </Button>
-                      ) : user ? (
-                        <Button
-                          className="w-full"
-                          onClick={() => setSelectedGiveaway(g)}
-                        >
-                          <Upload className="h-4 w-4 mr-2" />
-                          Участвовать
-                        </Button>
-                      ) : (
-                        <Button className="w-full" variant="outline" onClick={() => toast.info("Войдите, чтобы участвовать")}>
-                          Войти для участия
-                        </Button>
+              return (
+                <Card
+                  key={g.id}
+                  className={`group flex flex-col overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-accent/5 hover:-translate-y-1 ${
+                    isCompleted ? "opacity-80" : ""
+                  }`}
+                >
+                  {/* Image */}
+                  {g.image_url ? (
+                    <div className="relative h-48 overflow-hidden">
+                      <img
+                        src={g.image_url}
+                        alt={g.title}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-card/90 via-transparent to-transparent" />
+                      <div className="absolute top-3 right-3">
+                        {isActive && <Badge className="bg-accent text-accent-foreground shadow-lg">Активен</Badge>}
+                        {isCompleted && <Badge variant="secondary">Завершён</Badge>}
+                        {g.status === "cancelled" && <Badge variant="destructive">Отменён</Badge>}
+                      </div>
+                      {g.ends_at && isActive && (
+                        <div className="absolute bottom-3 left-3 flex items-center gap-1.5 text-xs font-medium text-foreground bg-card/80 backdrop-blur-sm rounded-full px-3 py-1.5">
+                          <Clock className="h-3.5 w-3.5" />
+                          {getTimeLeft(g.ends_at)}
+                        </div>
                       )}
-                    </>
+                    </div>
+                  ) : (
+                    <div className="relative h-32 bg-gradient-to-br from-accent/10 via-secondary to-card flex items-center justify-center">
+                      <Gift className="h-12 w-12 text-accent/30" />
+                      <div className="absolute top-3 right-3">
+                        {isActive && <Badge className="bg-accent text-accent-foreground shadow-lg">Активен</Badge>}
+                        {isCompleted && <Badge variant="secondary">Завершён</Badge>}
+                        {g.status === "cancelled" && <Badge variant="destructive">Отменён</Badge>}
+                      </div>
+                    </div>
                   )}
-                </CardFooter>
-              </Card>
-            ))}
+
+                  {/* Content */}
+                  <div className="flex flex-col flex-1 p-5 space-y-4">
+                    <div>
+                      <h3 className="text-lg font-bold leading-tight mb-1">{g.title}</h3>
+                      {g.description && (
+                        <p className="text-sm text-muted-foreground line-clamp-2">{g.description}</p>
+                      )}
+                    </div>
+
+                    {/* Prize */}
+                    <div className="flex items-center gap-2.5 p-3 rounded-lg bg-accent/5 border border-accent/10">
+                      <Trophy className="h-5 w-5 text-accent shrink-0" />
+                      <span className="font-semibold text-sm">{g.prize}</span>
+                    </div>
+
+                    {/* Conditions with links */}
+                    {g.conditions && (g.conditions as Condition[]).length > 0 && (
+                      <div className="space-y-2">
+                        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Условия</p>
+                        <ul className="space-y-1.5">
+                          {(g.conditions as Condition[]).map((c, i) => (
+                            <li key={i} className="flex items-start gap-2 text-sm">
+                              <CheckCircle2 className="h-4 w-4 mt-0.5 text-accent shrink-0" />
+                              <span className="flex-1">
+                                {c.link ? (
+                                  <a
+                                    href={c.link}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-accent hover:underline inline-flex items-center gap-1"
+                                  >
+                                    {c.text}
+                                    <ExternalLink className="h-3 w-3" />
+                                  </a>
+                                ) : (
+                                  <span className="text-muted-foreground">{c.text}</span>
+                                )}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {/* Stats */}
+                    <div className="flex items-center gap-4 text-xs text-muted-foreground pt-1">
+                      <span className="flex items-center gap-1.5">
+                        <Users className="h-3.5 w-3.5" />
+                        {participantCount} участников
+                      </span>
+                      {g.ends_at && !g.image_url && isActive && (
+                        <span className="flex items-center gap-1.5">
+                          <Clock className="h-3.5 w-3.5" />
+                          {getTimeLeft(g.ends_at)}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Winner */}
+                    {isCompleted && g.winner_id && (
+                      <div className="p-3 rounded-lg bg-accent/10 border border-accent/20">
+                        <p className="text-sm font-medium flex items-center gap-2">
+                          <Trophy className="h-4 w-4 text-accent" />
+                          Победитель: {winnerProfiles[g.winner_id] || "—"}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Action */}
+                    <div className="mt-auto pt-2">
+                      {isActive && (
+                        <>
+                          {myEntries[g.id] ? (
+                            <Button disabled className="w-full" variant="secondary">
+                              <CheckCircle2 className="h-4 w-4 mr-2" />
+                              Вы участвуете
+                            </Button>
+                          ) : user ? (
+                            <Button
+                              className="w-full bg-accent hover:bg-accent/90 text-accent-foreground"
+                              onClick={() => setSelectedGiveaway(g)}
+                            >
+                              <Upload className="h-4 w-4 mr-2" />
+                              Участвовать
+                            </Button>
+                          ) : (
+                            <Button className="w-full" variant="outline" onClick={() => toast.info("Войдите, чтобы участвовать")}>
+                              Войти для участия
+                            </Button>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </Card>
+              );
+            })}
           </div>
         )}
       </div>
 
+      {/* Upload dialog */}
       <Dialog open={!!selectedGiveaway} onOpenChange={() => setSelectedGiveaway(null)}>
         <DialogContent>
           <DialogHeader>
@@ -281,10 +342,17 @@ export default function Giveaways() {
             {selectedGiveaway?.conditions && (
               <div className="space-y-2 p-3 rounded-lg bg-muted">
                 <p className="font-medium text-sm">Условия:</p>
-                {(selectedGiveaway.conditions as { text: string }[]).map((c, i) => (
+                {(selectedGiveaway.conditions as Condition[]).map((c, i) => (
                   <p key={i} className="text-sm flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-primary" />
-                    {c.text}
+                    <CheckCircle2 className="h-4 w-4 text-accent" />
+                    {c.link ? (
+                      <a href={c.link} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline inline-flex items-center gap-1">
+                        {c.text}
+                        <ExternalLink className="h-3 w-3" />
+                      </a>
+                    ) : (
+                      c.text
+                    )}
                   </p>
                 ))}
               </div>
@@ -313,3 +381,4 @@ export default function Giveaways() {
     </Layout>
   );
 }
+
