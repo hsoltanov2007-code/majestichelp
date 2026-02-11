@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.legal-chat]
 verify_jwt = false
+
+[functions.auto-pick-winner]
+verify_jwt = false

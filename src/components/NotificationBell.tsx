@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Bell, Check, Trash2, MessageCircle, Play } from 'lucide-react';
+import { Bell, Check, Trash2, MessageCircle, Play, Gift, Trophy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Popover,
@@ -27,6 +27,24 @@ export function NotificationBell() {
         title: 'Новое видео',
         subtitle: notification.video?.title || 'Видео',
         link: '/media',
+      };
+    }
+
+    if (notification.type === 'new_giveaway') {
+      return {
+        icon: <Gift className="h-5 w-5 text-accent shrink-0 mt-0.5" />,
+        title: 'Новый розыгрыш',
+        subtitle: notification.giveaway?.title || 'Розыгрыш',
+        link: '/giveaways',
+      };
+    }
+
+    if (notification.type === 'giveaway_winner') {
+      return {
+        icon: <Trophy className="h-5 w-5 text-[hsl(45_93%_55%)] shrink-0 mt-0.5" />,
+        title: '🎉 Вы выиграли!',
+        subtitle: notification.giveaway?.title || 'Розыгрыш',
+        link: '/giveaways',
       };
     }
     

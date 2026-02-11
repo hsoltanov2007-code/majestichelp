@@ -160,6 +160,7 @@ export type Database = {
         Row: {
           comment_id: string | null
           created_at: string | null
+          giveaway_id: string | null
           id: string
           is_read: boolean | null
           topic_id: string | null
@@ -170,6 +171,7 @@ export type Database = {
         Insert: {
           comment_id?: string | null
           created_at?: string | null
+          giveaway_id?: string | null
           id?: string
           is_read?: boolean | null
           topic_id?: string | null
@@ -180,6 +182,7 @@ export type Database = {
         Update: {
           comment_id?: string | null
           created_at?: string | null
+          giveaway_id?: string | null
           id?: string
           is_read?: boolean | null
           topic_id?: string | null
@@ -193,6 +196,13 @@ export type Database = {
             columns: ["comment_id"]
             isOneToOne: false
             referencedRelation: "forum_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "forum_notifications_giveaway_id_fkey"
+            columns: ["giveaway_id"]
+            isOneToOne: false
+            referencedRelation: "giveaways"
             referencedColumns: ["id"]
           },
           {
@@ -258,6 +268,38 @@ export type Database = {
           },
         ]
       }
+      giveaway_comments: {
+        Row: {
+          author_id: string
+          content: string
+          created_at: string
+          giveaway_id: string
+          id: string
+        }
+        Insert: {
+          author_id: string
+          content: string
+          created_at?: string
+          giveaway_id: string
+          id?: string
+        }
+        Update: {
+          author_id?: string
+          content?: string
+          created_at?: string
+          giveaway_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "giveaway_comments_giveaway_id_fkey"
+            columns: ["giveaway_id"]
+            isOneToOne: false
+            referencedRelation: "giveaways"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       giveaway_entries: {
         Row: {
           created_at: string
@@ -289,6 +331,38 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "giveaway_entries_giveaway_id_fkey"
+            columns: ["giveaway_id"]
+            isOneToOne: false
+            referencedRelation: "giveaways"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      giveaway_reactions: {
+        Row: {
+          created_at: string
+          giveaway_id: string
+          id: string
+          reaction_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          giveaway_id: string
+          id?: string
+          reaction_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          giveaway_id?: string
+          id?: string
+          reaction_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "giveaway_reactions_giveaway_id_fkey"
             columns: ["giveaway_id"]
             isOneToOne: false
             referencedRelation: "giveaways"
