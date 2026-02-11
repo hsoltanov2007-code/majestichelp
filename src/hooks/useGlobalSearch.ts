@@ -14,11 +14,25 @@ export function dispatchOpenBot() {
   window.dispatchEvent(new CustomEvent(OPEN_BOT_EVENT));
 }
 
+const OPEN_SUPPORT_EVENT = "open-hardy-support";
+
+export function dispatchOpenSupport() {
+  window.dispatchEvent(new CustomEvent(OPEN_SUPPORT_EVENT));
+}
+
 export function useOpenBotListener(callback: () => void) {
   useEffect(() => {
     const handler = () => callback();
     window.addEventListener(OPEN_BOT_EVENT, handler);
     return () => window.removeEventListener(OPEN_BOT_EVENT, handler);
+  }, [callback]);
+}
+
+export function useOpenSupportListener(callback: () => void) {
+  useEffect(() => {
+    const handler = () => callback();
+    window.addEventListener(OPEN_SUPPORT_EVENT, handler);
+    return () => window.removeEventListener(OPEN_SUPPORT_EVENT, handler);
   }, [callback]);
 }
 

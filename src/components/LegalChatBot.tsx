@@ -7,7 +7,7 @@ import { Send, X, Loader2, Minimize2, Maximize2, Copy, Check, Trash2, Headphones
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import hardyLogo from "@/assets/hardy-logo.png";
-import { useOpenBotListener } from "@/hooks/useGlobalSearch";
+import { useOpenBotListener, useOpenSupportListener } from "@/hooks/useGlobalSearch";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -104,6 +104,15 @@ export function LegalChatBot() {
   }, []);
   
   useOpenBotListener(handleOpenBot);
+
+  const handleOpenSupport = useCallback(() => {
+    setIsOpen(true);
+    setIsMinimized(false);
+    setBotView("support-list");
+    fetchTickets();
+  }, []);
+
+  useOpenSupportListener(handleOpenSupport);
 
   useEffect(() => {
     try {

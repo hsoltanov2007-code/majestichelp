@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { dispatchOpenSupport } from "@/hooks/useGlobalSearch";
 import {
   Gift, Clock, Users, Trophy, Upload, CheckCircle2, Loader2,
   ExternalLink, RefreshCw, Share2, MessageCircle, Send,
@@ -373,7 +374,12 @@ export default function Giveaways() {
       .ilike("subject", `%${giveaway.title}%`);
 
     if (existingTickets && existingTickets.length > 0) {
-      toast.info("Тикет уже создан! Проверьте раздел поддержки (иконка наушников).");
+      toast.info("Тикет уже создан!", {
+        action: {
+          label: "Открыть чат",
+          onClick: () => dispatchOpenSupport(),
+        },
+      });
       return;
     }
 
@@ -398,7 +404,12 @@ export default function Giveaways() {
       content: `Здравствуйте! Я победитель розыгрыша "${giveaway.title}". Хочу получить приз: ${giveaway.prize}`,
     } as any);
 
-    toast.success("Тикет создан! Откройте чат поддержки (иконка наушников) для связи с администрацией.");
+    toast.success("Тикет создан! Нажмите чтобы открыть чат.", {
+      action: {
+        label: "Открыть чат",
+        onClick: () => dispatchOpenSupport(),
+      },
+    });
   };
 
   const handleNotifyAll = async (giveaway: Giveaway) => {
