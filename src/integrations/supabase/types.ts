@@ -307,6 +307,7 @@ export type Database = {
           id: string
           rejection_reason: string | null
           screenshot_url: string
+          screenshot_urls: string[] | null
           status: string
           user_id: string
         }
@@ -316,6 +317,7 @@ export type Database = {
           id?: string
           rejection_reason?: string | null
           screenshot_url: string
+          screenshot_urls?: string[] | null
           status?: string
           user_id: string
         }
@@ -325,6 +327,7 @@ export type Database = {
           id?: string
           rejection_reason?: string | null
           screenshot_url?: string
+          screenshot_urls?: string[] | null
           status?: string
           user_id?: string
         }

@@ -42,6 +42,7 @@ interface GiveawayEntry {
   giveaway_id: string;
   user_id: string;
   screenshot_url: string;
+  screenshot_urls: string[];
   status: string;
   rejection_reason: string | null;
   created_at: string;
@@ -264,30 +265,37 @@ export default function Giveaways() {
     setReactions(allReactions);
   };
 
-  const handleScreenshotUpload = async (file: File) => {
-    if (!user || !selectedGiveaway) return;
+  const handleScreenshotUpload = async (files: FileList) => {
+    if (!user || !selectedGiveaway || files.length === 0) return;
     setIsUploading(true);
 
     try {
-      const ext = file.name.split(".").pop();
-      const path = `${selectedGiveaway.id}/${user.id}-${Date.now()}.${ext}`;
+      const uploadedUrls: string[] = [];
 
-      const { error: uploadError } = await supabase.storage
-        .from("giveaway-screenshots")
-        .upload(path, file);
+      for (const file of Array.from(files)) {
+        const ext = file.name.split(".").pop();
+        const path = `${selectedGiveaway.id}/${user.id}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}.${ext}`;
 
-      if (uploadError) throw uploadError;
+        const { error: uploadError } = await supabase.storage
+          .from("giveaway-screenshots")
+          .upload(path, file);
 
-      const { data: urlData } = supabase.storage
-        .from("giveaway-screenshots")
-        .getPublicUrl(path);
+        if (uploadError) throw uploadError;
+
+        const { data: urlData } = supabase.storage
+          .from("giveaway-screenshots")
+          .getPublicUrl(path);
+
+        uploadedUrls.push(urlData.publicUrl);
+      }
 
       const { error: insertError } = await supabase
         .from("giveaway_entries")
         .insert({
           giveaway_id: selectedGiveaway.id,
           user_id: user.id,
-          screenshot_url: urlData.publicUrl,
+          screenshot_url: uploadedUrls[0],
+          screenshot_urls: uploadedUrls,
         } as any);
 
       if (insertError) {
@@ -303,7 +311,7 @@ export default function Giveaways() {
       }
     } catch (error: any) {
       console.error("Upload error:", error);
-      toast.error("Ошибка загрузки скриншота");
+      toast.error("Ошибка загрузки скриншотов");
     } finally {
       setIsUploading(false);
     }
@@ -805,14 +813,15 @@ export default function Giveaways() {
               </div>
             )}
             <div className="space-y-2">
-              <Label>Скриншот подтверждения *</Label>
+              <Label>Скриншоты подтверждения * (можно несколько)</Label>
               <Input
                 type="file"
                 accept="image/*"
+                multiple
                 disabled={isUploading}
                 onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) handleScreenshotUpload(file);
+                  const files = e.target.files;
+                  if (files?.length) handleScreenshotUpload(files);
                 }}
               />
             </div>

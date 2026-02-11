@@ -59,6 +59,7 @@ interface Entry {
   giveaway_id: string;
   user_id: string;
   screenshot_url: string;
+  screenshot_urls: string[];
   status: string;
   rejection_reason: string | null;
   created_at: string;
@@ -588,9 +589,11 @@ export default function AdminGiveaways() {
                           {isWinner && <Trophy className="h-4 w-4 inline ml-1 text-primary" />}
                         </TableCell>
                         <TableCell>
-                          <Button variant="ghost" size="sm" onClick={() => setScreenshotPreview(entry.screenshot_url)}>
-                            <Image className="h-4 w-4 mr-1" /> Просмотр
-                          </Button>
+                          {(entry.screenshot_urls?.length > 0 ? entry.screenshot_urls : [entry.screenshot_url]).map((url, idx) => (
+                            <Button key={idx} variant="ghost" size="sm" onClick={() => setScreenshotPreview(url)} className="mr-1">
+                              <Image className="h-4 w-4 mr-1" /> {idx + 1}
+                            </Button>
+                          ))}
                         </TableCell>
                         <TableCell>
                           <Badge variant={entry.status === "approved" ? "default" : entry.status === "rejected" ? "destructive" : "secondary"}>
