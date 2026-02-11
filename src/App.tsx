@@ -41,6 +41,7 @@ import AppView from "./pages/AppView";
 import CheatSheet from "./pages/CheatSheet";
 import Giveaways from "./pages/Giveaways";
 import AdminGiveaways from "./pages/AdminGiveaways";
+import AdminSupport from "./pages/AdminSupport";
 const queryClient = new QueryClient();
 
 // Wrapper component to use hooks inside HashRouter
@@ -82,6 +83,7 @@ function AppContent() {
         <Route path="/cheat-sheet" element={<CheatSheet />} />
         <Route path="/giveaways" element={<Giveaways />} />
         <Route path="/admin/giveaways" element={<AdminGiveaways />} />
+        <Route path="/admin/support" element={<AdminSupport />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <LegalChatBot />
