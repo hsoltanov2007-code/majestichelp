@@ -2,6 +2,7 @@ import { Header } from "./Header";
 import { Footer } from "./Footer";
 import { ScrollToTop } from "./ScrollToTop";
 import Snowfall from "./Snowfall";
+import { AdBanner } from "./AdBanner";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -13,6 +14,7 @@ export function Layout({ children }: LayoutProps) {
       <Snowfall />
       <Header />
       <main className="flex-1">{children}</main>
+      <AdBanner />
       <Footer />
       <ScrollToTop />
     </div>
