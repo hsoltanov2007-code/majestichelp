@@ -93,11 +93,18 @@ export function useAuth() {
       // Fetch role
       const { data: roleData } = await supabase
         .from('user_roles')
-        .select('role')
+        .select('role, expires_at')
         .eq('user_id', userId)
         .single();
 
-      const role = (roleData?.role as AppRole) || 'user';
+      // Check if subscriber role has expired
+      let role = ((roleData?.role as string) || 'user') as AppRole;
+      if ((role as string) === 'subscriber' && (roleData as any)?.expires_at) {
+        const expiresAt = new Date((roleData as any).expires_at);
+        if (expiresAt < new Date()) {
+          role = 'user' as AppRole;
+        }
+      }
       const isAdmin = role === 'admin';
       const isModerator = role === 'moderator';
 
