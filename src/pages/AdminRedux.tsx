@@ -48,6 +48,7 @@ export default function AdminRedux() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [uploadingImages, setUploadingImages] = useState(false);
+  const [uploadingFile, setUploadingFile] = useState(false);
 
   // Category form
   const [newCatValue, setNewCatValue] = useState("");
@@ -335,7 +336,32 @@ export default function AdminRedux() {
               </div>
               <div className="space-y-2">
                 <Label>Ссылка для скачивания</Label>
-                <Input value={form.download_url} onChange={(e) => setForm((f) => ({ ...f, download_url: e.target.value }))} placeholder="https://..." />
+                <div className="flex gap-2">
+                  <Input className="flex-1" value={form.download_url} onChange={(e) => setForm((f) => ({ ...f, download_url: e.target.value }))} placeholder="https://... или загрузите файл →" />
+                  <label className="cursor-pointer flex-shrink-0">
+                    <input
+                      type="file"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        setUploadingFile(true);
+                        const ext = file.name.split(".").pop();
+                        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+                        const path = `downloads/${Date.now()}-${safeName}`;
+                        const { error } = await supabase.storage.from("redux-files").upload(path, file);
+                        if (error) { toast.error("Ошибка загрузки файла"); setUploadingFile(false); return; }
+                        const { data: urlData } = supabase.storage.from("redux-files").getPublicUrl(path);
+                        setForm((f) => ({ ...f, download_url: urlData.publicUrl }));
+                        toast.success(`Файл "${file.name}" загружен`);
+                        setUploadingFile(false);
+                      }}
+                    />
+                    <Button variant="outline" size="default" className="gap-2" asChild disabled={uploadingFile}>
+                      <span>{uploadingFile ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}Файл</span>
+                    </Button>
+                  </label>
+                </div>
               </div>
               <div className="space-y-2">
                 <Label>Изображения</Label>
