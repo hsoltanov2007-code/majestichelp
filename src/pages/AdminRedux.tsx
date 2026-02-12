@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
@@ -49,6 +50,7 @@ export default function AdminRedux() {
   const [isSaving, setIsSaving] = useState(false);
   const [uploadingImages, setUploadingImages] = useState(false);
   const [uploadingFile, setUploadingFile] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   // Category form
   const [newCatValue, setNewCatValue] = useState("");
@@ -346,15 +348,46 @@ export default function AdminRedux() {
                         const file = e.target.files?.[0];
                         if (!file) return;
                         setUploadingFile(true);
-                        const ext = file.name.split(".").pop();
+                        setUploadProgress(0);
+                        
                         const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
                         const path = `downloads/${Date.now()}-${safeName}`;
-                        const { error } = await supabase.storage.from("redux-files").upload(path, file);
-                        if (error) { toast.error("Ошибка загрузки файла"); setUploadingFile(false); return; }
-                        const { data: urlData } = supabase.storage.from("redux-files").getPublicUrl(path);
-                        setForm((f) => ({ ...f, download_url: urlData.publicUrl }));
-                        toast.success(`Файл "${file.name}" загружен`);
-                        setUploadingFile(false);
+                        
+                        // Use XHR for progress tracking
+                        const { data: { session } } = await supabase.auth.getSession();
+                        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+                        const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+                        
+                        const xhr = new XMLHttpRequest();
+                        xhr.upload.addEventListener('progress', (evt) => {
+                          if (evt.lengthComputable) {
+                            setUploadProgress(Math.round((evt.loaded / evt.total) * 100));
+                          }
+                        });
+                        
+                        xhr.addEventListener('load', () => {
+                          if (xhr.status >= 200 && xhr.status < 300) {
+                            const { data: urlData } = supabase.storage.from("redux-files").getPublicUrl(path);
+                            setForm((f) => ({ ...f, download_url: urlData.publicUrl }));
+                            toast.success(`Файл "${file.name}" загружен`);
+                          } else {
+                            toast.error("Ошибка загрузки файла");
+                          }
+                          setUploadingFile(false);
+                          setUploadProgress(0);
+                        });
+                        
+                        xhr.addEventListener('error', () => {
+                          toast.error("Ошибка загрузки файла");
+                          setUploadingFile(false);
+                          setUploadProgress(0);
+                        });
+                        
+                        xhr.open('POST', `${supabaseUrl}/storage/v1/object/redux-files/${path}`);
+                        xhr.setRequestHeader('Authorization', `Bearer ${session?.access_token || supabaseKey}`);
+                        xhr.setRequestHeader('apikey', supabaseKey);
+                        xhr.setRequestHeader('x-upsert', 'false');
+                        xhr.send(file);
                       }}
                     />
                     <Button variant="outline" size="default" className="gap-2" asChild disabled={uploadingFile}>
@@ -362,6 +395,12 @@ export default function AdminRedux() {
                     </Button>
                   </label>
                 </div>
+                {uploadingFile && (
+                  <div className="space-y-1">
+                    <Progress value={uploadProgress} className="h-2" />
+                    <p className="text-xs text-muted-foreground text-right">{uploadProgress}%</p>
+                  </div>
+                )}
               </div>
               <div className="space-y-2">
                 <Label>Изображения</Label>
