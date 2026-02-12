@@ -109,9 +109,9 @@ export default function AdminGiveaways() {
     const { data } = await supabase
       .from("user_roles")
       .select("role")
-      .eq("user_id", user.id)
-      .single();
-    if (data?.role === "admin" || data?.role === "moderator") {
+      .eq("user_id", user.id);
+    const hasAccess = data?.some(r => r.role === "admin" || r.role === "moderator");
+    if (hasAccess) {
       setIsAdmin(true);
     } else {
       navigate("/");
