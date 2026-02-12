@@ -1,30 +1,54 @@
 
 
-# Подключение ChatGPT к юридическому боту HARDY
+# Уведомления для администраторов
 
 ## Что будет сделано
 
-Переключение AI-бота с Lovable AI Gateway на прямой вызов OpenAI API с твоим ключом.
+Добавим систему уведомлений, которая будет оповещать админов/модераторов о важных событиях:
 
-## Шаги
+1. **Новая заявка на розыгрыш** -- когда кто-то подает заявку на участие
+2. **Новая тема на форуме** -- когда создается новая тема
+3. **Новый тикет поддержки** -- когда пользователь создает тикет
 
-1. **Сохранение API ключа** -- безопасно сохраним твой OpenAI API ключ как секрет проекта (он не будет виден в коде)
+Уведомления будут приходить в тот же колокольчик в шапке, но с отдельными иконками и ссылками на соответствующие разделы админки.
 
-2. **Обновление edge-функции `legal-chat`** -- заменим вызов Lovable AI Gateway на прямой вызов OpenAI API:
-   - URL: `https://api.openai.com/v1/chat/completions`
-   - Модель: `gpt-4o` (или другая по желанию)
-   - Авторизация через твой ключ вместо LOVABLE_API_KEY
+---
 
-3. **Всё остальное остаётся без изменений** -- база знаний, промпт, фронтенд чат-бота -- всё работает как раньше
+## Техническая реализация
 
-## Техническая деталь
+### 1. Обновить CHECK constraint на `forum_notifications.type`
 
-В файле `supabase/functions/legal-chat/index.ts` (строки 401-431) заменяется:
-- `LOVABLE_API_KEY` на `OPENAI_API_KEY`
-- URL с `https://ai.gateway.lovable.dev/v1/chat/completions` на `https://api.openai.com/v1/chat/completions`
-- Модель с `google/gemini-2.5-flash` на `gpt-4o`
+Добавить новые типы: `new_entry`, `new_topic_admin`, `new_ticket`.
 
-## Что нужно от тебя
+### 2. Создать 3 триггерные функции в базе данных
 
-- OpenAI API ключ (начинается с `sk-...`). Его можно взять на https://platform.openai.com/api-keys
+- **`notify_admins_new_entry()`** -- срабатывает при INSERT в `giveaway_entries`. Отправляет уведомление всем пользователям с ролью `admin` или `moderator`.
+- **`notify_admins_new_topic()`** -- срабатывает при INSERT в `forum_topics`. Уведомляет админов/модераторов о новой теме.
+- **`notify_admins_new_ticket()`** -- срабатывает при INSERT в `support_tickets`. Уведомляет админов/модераторов о новом тикете.
+
+Каждая функция перебирает пользователей из `user_roles` с ролями `admin`/`moderator` и создает записи в `forum_notifications`.
+
+### 3. Создать триггеры
+
+- `on_new_giveaway_entry` -> таблица `giveaway_entries`
+- `on_new_forum_topic` -> таблица `forum_topics`
+- `on_new_support_ticket` -> таблица `support_tickets`
+
+### 4. Добавить столбцы в `forum_notifications`
+
+- `entry_id` (uuid, nullable) -- ссылка на заявку розыгрыша
+- `ticket_id` (uuid, nullable) -- ссылка на тикет поддержки
+
+### 5. Обновить `useNotifications.ts`
+
+Добавить запрос данных для новых типов: загрузка названия розыгрыша по `entry_id`, темы по `topic_id`, тикета по `ticket_id`.
+
+### 6. Обновить `NotificationBell.tsx`
+
+Добавить отображение новых типов уведомлений:
+- `new_entry` -- иконка UserPlus, текст "Новая заявка на розыгрыш", ссылка на `/admin/giveaways`
+- `new_topic_admin` -- иконка MessageSquare, текст "Новая тема на форуме", ссылка на `/forum/topic/{id}`
+- `new_ticket` -- иконка Headphones, текст "Новый тикет поддержки", ссылка на `/admin/support`
+
+Админские уведомления будут визуально отличаться (например, бейджем "Админ") для удобства.
 
