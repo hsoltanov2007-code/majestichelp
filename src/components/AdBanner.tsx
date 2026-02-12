@@ -69,7 +69,7 @@ export function AdBanner() {
   return (
     <>
       {/* Desktop sidebar */}
-      <div className="fixed right-5 top-1/2 -translate-y-1/2 z-40 w-72 hidden lg:block animate-fade-in">
+      <div className="fixed right-5 top-1/2 -translate-y-1/2 z-40 w-72 hidden lg:block animate-slide-in-right opacity-0" style={{ animation: 'slide-in-from-right 0.6s ease-out 0.1s forwards' }}>
         <div className="relative rounded-3xl overflow-hidden shadow-[0_8px_60px_-12px_hsl(var(--accent)/0.25)] border border-accent/15">
           <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-accent/20 via-transparent to-primary/10 pointer-events-none z-[1]" />
           <div className="relative bg-gradient-to-b from-card/98 via-card/95 to-card backdrop-blur-3xl">
@@ -124,7 +124,7 @@ export function AdBanner() {
       </div>
 
       {/* Mobile horizontal banner */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 lg:hidden animate-fade-in">
+      <div className="fixed bottom-0 left-0 right-0 z-40 lg:hidden opacity-0" style={{ animation: 'slide-in-from-bottom 0.5s ease-out 0.1s forwards' }}>
         <div className="relative overflow-hidden border-t border-accent/15 bg-gradient-to-r from-card/98 via-card/95 to-card backdrop-blur-2xl shadow-[0_-4px_30px_-8px_hsl(var(--accent)/0.2)]">
           <div className="absolute -top-8 -left-8 w-24 h-24 rounded-full bg-accent/10 blur-2xl pointer-events-none" />
           <div className="absolute -bottom-4 -right-8 w-20 h-20 rounded-full bg-primary/8 blur-2xl pointer-events-none" />
