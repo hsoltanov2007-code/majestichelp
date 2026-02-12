@@ -99,6 +99,9 @@ export default function Index() {
             <p className="text-xl md:text-2xl text-muted-foreground opacity-0 animate-fade-up stagger-1">
               Majestic RP | <span className="text-accent font-semibold">Denver</span> — законы, правила и процедуры
             </p>
+            <p className="text-sm text-muted-foreground/70 opacity-0 animate-fade-up stagger-1">
+              Портал создан исключительно для сервера <span className="text-accent/80 font-medium">Denver</span>. Законы и правила других серверов могут отличаться.
+            </p>
             
             <form onSubmit={handleSearch} className="opacity-0 animate-fade-up stagger-2">
               <div className="relative max-w-xl mx-auto group">
