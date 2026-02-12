@@ -105,12 +105,40 @@ export function LegalChatBot() {
   
   useOpenBotListener(handleOpenBot);
 
-  const handleOpenSupport = useCallback(() => {
+  const autoCreateTicket = useCallback(async (subject: string) => {
+    if (!user) return;
+    setSupportLoading(true);
+    const { data: ticket, error } = await supabase
+      .from("support_tickets")
+      .insert({ user_id: user.id, subject } as any)
+      .select()
+      .single();
+    if (error || !ticket) {
+      toast.error("Ошибка создания обращения");
+      setSupportLoading(false);
+      return;
+    }
+    await supabase.from("support_messages").insert({
+      ticket_id: ticket.id,
+      sender_id: user.id,
+      content: `Здравствуйте! Хочу ${subject.toLowerCase()}.`,
+      is_admin: false,
+    } as any);
+    toast.success("Обращение создано!");
+    openTicketThread(ticket.id);
+    setSupportLoading(false);
+  }, [user]);
+
+  const handleOpenSupport = useCallback((detail?: { subject?: string }) => {
     setIsOpen(true);
     setIsMinimized(false);
-    setBotView("support-list");
-    fetchTickets();
-  }, []);
+    if (detail?.subject && user) {
+      autoCreateTicket(detail.subject);
+    } else {
+      setBotView("support-list");
+      fetchTickets();
+    }
+  }, [user, autoCreateTicket]);
 
   useOpenSupportListener(handleOpenSupport);
 

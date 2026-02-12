@@ -28,9 +28,12 @@ export function useOpenBotListener(callback: () => void) {
   }, [callback]);
 }
 
-export function useOpenSupportListener(callback: () => void) {
+export function useOpenSupportListener(callback: (detail?: { subject?: string }) => void) {
   useEffect(() => {
-    const handler = () => callback();
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent)?.detail;
+      callback(detail);
+    };
     window.addEventListener(OPEN_SUPPORT_EVENT, handler);
     return () => window.removeEventListener(OPEN_SUPPORT_EVENT, handler);
   }, [callback]);
