@@ -97,14 +97,14 @@ export function useAuth() {
         .select('role, expires_at')
         .eq('user_id', userId);
 
-      // Determine primary role: admin > moderator > subscriber > user
+      // Determine primary role and subscriber status independently
       let role: AppRole = 'user';
       let isSubscriber = false;
       if (rolesData && rolesData.length > 0) {
         for (const r of rolesData) {
           const roleName = r.role as string;
-          if (roleName === 'admin') { role = 'admin' as AppRole; break; }
-          if (roleName === 'moderator') { role = 'moderator' as AppRole; }
+          if (roleName === 'admin') { role = 'admin' as AppRole; }
+          else if (roleName === 'moderator' && role !== 'admin') { role = 'moderator' as AppRole; }
           if (roleName === 'subscriber') {
             const expiresAt = (r as any).expires_at ? new Date((r as any).expires_at) : null;
             if (!expiresAt || expiresAt > new Date()) {
@@ -112,7 +112,7 @@ export function useAuth() {
             }
           }
         }
-        if ((role as string) !== 'admin' && (role as string) !== 'moderator' && isSubscriber) {
+        if (role === 'user' && isSubscriber) {
           role = 'subscriber' as AppRole;
         }
       }
