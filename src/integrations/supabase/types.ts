@@ -694,6 +694,7 @@ export type Database = {
           created_at: string
           id: string
           is_active: boolean
+          is_restricted: boolean
           label: string
           order_index: number
           value: string
@@ -702,6 +703,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_active?: boolean
+          is_restricted?: boolean
           label: string
           order_index?: number
           value: string
@@ -710,11 +712,41 @@ export type Database = {
           created_at?: string
           id?: string
           is_active?: boolean
+          is_restricted?: boolean
           label?: string
           order_index?: number
           value?: string
         }
         Relationships: []
+      }
+      redux_category_access: {
+        Row: {
+          category_id: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          category_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          category_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "redux_category_access_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "redux_categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       redux_items: {
         Row: {

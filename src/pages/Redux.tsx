@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { Download, Play, ImageIcon, ChevronDown, ExternalLink } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
@@ -13,6 +14,7 @@ interface ReduxCategory {
   value: string;
   label: string;
   order_index: number;
+  is_restricted: boolean;
 }
 
 interface ReduxItem {
@@ -32,27 +34,39 @@ export default function Redux() {
   const [isLoading, setIsLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [openCategories, setOpenCategories] = useState<Record<string, boolean>>({});
+  const { user } = useAuth();
 
   useEffect(() => {
-    Promise.all([fetchCategories(), fetchItems()]).then(() => setIsLoading(false));
-  }, []);
+    fetchData();
+  }, [user]);
 
-  const fetchCategories = async () => {
-    const { data } = await supabase
-      .from("redux_categories")
-      .select("*")
-      .eq("is_active", true)
-      .order("order_index");
-    setCategories((data as ReduxCategory[]) || []);
-  };
+  const fetchData = async () => {
+    setIsLoading(true);
+    const [{ data: cats }, { data: itemsData }] = await Promise.all([
+      supabase.from("redux_categories").select("*").eq("is_active", true).order("order_index"),
+      supabase.from("redux_items").select("*").eq("is_active", true).order("order_index", { ascending: true }),
+    ]);
 
-  const fetchItems = async () => {
-    const { data } = await supabase
-      .from("redux_items")
-      .select("*")
-      .eq("is_active", true)
-      .order("order_index", { ascending: true });
-    setItems((data as ReduxItem[]) || []);
+    let allCats = (cats as ReduxCategory[]) || [];
+
+    // Filter restricted categories: only show if user has access
+    if (allCats.some((c) => c.is_restricted)) {
+      let accessibleCatIds: string[] = [];
+      if (user) {
+        const { data: accessData } = await supabase
+          .from("redux_category_access")
+          .select("category_id")
+          .eq("user_id", user.id);
+        accessibleCatIds = (accessData || []).map((a: any) => a.category_id);
+      }
+      allCats = allCats.filter((c) => !c.is_restricted || accessibleCatIds.includes(c.id));
+    }
+
+    setCategories(allCats);
+    // Also filter items to only show items from visible categories
+    const visibleCatValues = new Set(allCats.map((c) => c.value));
+    setItems(((itemsData as ReduxItem[]) || []).filter((i) => visibleCatValues.has(i.category)));
+    setIsLoading(false);
   };
 
   const filtered = activeCategory === "all" ? items : items.filter((i) => i.category === activeCategory);

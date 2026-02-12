@@ -16,7 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { ArrowLeft, Plus, Trash2, Edit, Loader2, Upload, X, Image as ImageIcon, Tag } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Edit, Loader2, Upload, X, Image as ImageIcon, Tag, Lock, Users, Search } from "lucide-react";
 
 interface ReduxCategory {
   id: string;
@@ -24,6 +24,18 @@ interface ReduxCategory {
   label: string;
   order_index: number;
   is_active: boolean;
+  is_restricted: boolean;
+}
+
+interface CategoryAccess {
+  id: string;
+  category_id: string;
+  user_id: string;
+}
+
+interface ProfileOption {
+  id: string;
+  username: string;
 }
 
 interface ReduxItem {
@@ -57,6 +69,12 @@ export default function AdminRedux() {
   const [newCatLabel, setNewCatLabel] = useState("");
   const [isAddingCat, setIsAddingCat] = useState(false);
 
+  // Access management
+  const [allProfiles, setAllProfiles] = useState<ProfileOption[]>([]);
+  const [categoryAccess, setCategoryAccess] = useState<Record<string, string[]>>({});
+  const [accessDialogCat, setAccessDialogCat] = useState<ReduxCategory | null>(null);
+  const [userSearch, setUserSearch] = useState("");
+
   // Item form
   const [form, setForm] = useState({
     category: "",
@@ -79,12 +97,23 @@ export default function AdminRedux() {
 
   const fetchAll = async () => {
     setIsLoading(true);
-    const [{ data: cats }, { data: itemsData }] = await Promise.all([
+    const [{ data: cats }, { data: itemsData }, { data: profiles }, { data: accessData }] = await Promise.all([
       supabase.from("redux_categories").select("*").order("order_index"),
       supabase.from("redux_items").select("*").order("category").order("order_index"),
+      supabase.from("profiles").select("id, username"),
+      supabase.from("redux_category_access").select("*"),
     ]);
     setCategories((cats as ReduxCategory[]) || []);
     setItems((itemsData as ReduxItem[]) || []);
+    setAllProfiles((profiles as ProfileOption[]) || []);
+    
+    // Group access by category_id
+    const accessMap: Record<string, string[]> = {};
+    ((accessData as CategoryAccess[]) || []).forEach((a) => {
+      if (!accessMap[a.category_id]) accessMap[a.category_id] = [];
+      accessMap[a.category_id].push(a.user_id);
+    });
+    setCategoryAccess(accessMap);
     setIsLoading(false);
   };
 
@@ -107,6 +136,32 @@ export default function AdminRedux() {
     const { error } = await supabase.from("redux_categories").delete().eq("id", id);
     if (error) toast.error(error.message);
     else { toast.success("Удалено"); fetchAll(); }
+  };
+
+  const handleToggleRestricted = async (cat: ReduxCategory) => {
+    const newVal = !cat.is_restricted;
+    const { error } = await supabase.from("redux_categories").update({ is_restricted: newVal }).eq("id", cat.id);
+    if (error) toast.error(error.message);
+    else {
+      toast.success(newVal ? "Категория ограничена" : "Категория открыта для всех");
+      if (!newVal) {
+        await supabase.from("redux_category_access").delete().eq("category_id", cat.id);
+      }
+      fetchAll();
+    }
+  };
+
+  const handleAddAccess = async (categoryId: string, userId: string) => {
+    const { error } = await supabase.from("redux_category_access").insert({ category_id: categoryId, user_id: userId });
+    if (error) { if (error.code === '23505') toast.error("Уже добавлен"); else toast.error(error.message); return; }
+    toast.success("Доступ выдан");
+    fetchAll();
+  };
+
+  const handleRemoveAccess = async (categoryId: string, userId: string) => {
+    const { error } = await supabase.from("redux_category_access").delete().eq("category_id", categoryId).eq("user_id", userId);
+    if (error) toast.error(error.message);
+    else { toast.success("Доступ убран"); fetchAll(); }
   };
 
   // --- Item management ---
@@ -291,20 +346,102 @@ export default function AdminRedux() {
             <div className="space-y-2">
               {categories.map((cat) => (
                 <Card key={cat.id} className="glass border-0">
-                  <CardContent className="py-3 flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">{cat.label}</p>
-                      <p className="text-xs text-muted-foreground">Ключ: {cat.value}</p>
+                  <CardContent className="py-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium">{cat.label}</p>
+                          {cat.is_restricted && (
+                            <Badge variant="outline" className="gap-1 text-denver-gold border-denver-gold/30">
+                              <Lock className="h-3 w-3" /> Ограничена
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground">Ключ: {cat.value}</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant={cat.is_restricted ? "secondary" : "outline"}
+                          size="sm"
+                          className="gap-1"
+                          onClick={() => handleToggleRestricted(cat)}
+                        >
+                          <Lock className="h-3.5 w-3.5" />
+                          {cat.is_restricted ? "Открыть" : "Ограничить"}
+                        </Button>
+                        {cat.is_restricted && (
+                          <Button variant="outline" size="sm" className="gap-1" onClick={() => { setAccessDialogCat(cat); setUserSearch(""); }}>
+                            <Users className="h-3.5 w-3.5" />
+                            {categoryAccess[cat.id]?.length || 0}
+                          </Button>
+                        )}
+                        <Button variant="destructive" size="icon" onClick={() => handleDeleteCategory(cat.id)}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
-                    <Button variant="destructive" size="icon" onClick={() => handleDeleteCategory(cat.id)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    {cat.is_restricted && categoryAccess[cat.id]?.length > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-1">
+                        {categoryAccess[cat.id].map((uid) => {
+                          const profile = allProfiles.find((p) => p.id === uid);
+                          return (
+                            <Badge key={uid} variant="secondary" className="gap-1">
+                              {profile?.username || uid.slice(0, 8)}
+                              <button onClick={() => handleRemoveAccess(cat.id, uid)} className="ml-0.5 hover:text-destructive">
+                                <X className="h-3 w-3" />
+                              </button>
+                            </Badge>
+                          );
+                        })}
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               ))}
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Access management dialog */}
+        <Dialog open={!!accessDialogCat} onOpenChange={(open) => { if (!open) setAccessDialogCat(null); }}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Доступ к «{accessDialogCat?.label}»</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-3">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Поиск по имени..."
+                  value={userSearch}
+                  onChange={(e) => setUserSearch(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+              <div className="max-h-64 overflow-y-auto space-y-1">
+                {allProfiles
+                  .filter((p) => p.username.toLowerCase().includes(userSearch.toLowerCase()))
+                  .map((profile) => {
+                    const hasAccess = accessDialogCat ? categoryAccess[accessDialogCat.id]?.includes(profile.id) : false;
+                    return (
+                      <div key={profile.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50">
+                        <span className="text-sm font-medium">{profile.username}</span>
+                        {hasAccess ? (
+                          <Button variant="destructive" size="sm" onClick={() => accessDialogCat && handleRemoveAccess(accessDialogCat.id, profile.id)}>
+                            Убрать
+                          </Button>
+                        ) : (
+                          <Button variant="outline" size="sm" onClick={() => accessDialogCat && handleAddAccess(accessDialogCat.id, profile.id)}>
+                            Выдать
+                          </Button>
+                        )}
+                      </div>
+                    );
+                  })}
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
 
         {/* Create/Edit dialog */}
         <Dialog open={isDialogOpen} onOpenChange={(open) => { if (!open) resetForm(); setIsDialogOpen(open); }}>
