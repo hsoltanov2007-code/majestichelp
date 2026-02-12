@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, Bookmark, MessageSquare, User, LogOut, Crown, Brain, Scale, BookOpen, Wrench, ChevronDown, Gavel, FileWarning, Car, ScrollText, Building2, LucideIcon, Home, HelpCircle, FileText, Play, Gift } from "lucide-react";
+import { Menu, Bookmark, MessageSquare, User, LogOut, Crown, Brain, Scale, BookOpen, Wrench, ChevronDown, Gavel, FileWarning, Car, ScrollText, Building2, LucideIcon, Home, HelpCircle, FileText, Play, Gift, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useState, useEffect } from "react";
@@ -39,6 +39,7 @@ const toolItems: { path: string; label: string; icon: LucideIcon }[] = [];
 const referenceItems: { path: string; label: string; tooltip: string; icon: LucideIcon }[] = [
   { path: "/media", label: "Медиа", tooltip: "Видео контент", icon: Play },
   { path: "/laws", label: "Законы", tooltip: "Нормативно-правовые акты", icon: FileText },
+  { path: "/redux", label: "Redux", tooltip: "Редуксы, ганпаки, моды", icon: Package },
 ];
 
 function MobileMenuGroup({ 

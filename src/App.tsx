@@ -40,6 +40,8 @@ import Giveaways from "./pages/Giveaways";
 import AdminGiveaways from "./pages/AdminGiveaways";
 import AdminSupport from "./pages/AdminSupport";
 import AdminAds from "./pages/AdminAds";
+import Redux from "./pages/Redux";
+import AdminRedux from "./pages/AdminRedux";
 const queryClient = new QueryClient();
 
 // Wrapper component to use hooks inside HashRouter
@@ -80,6 +82,8 @@ function AppContent() {
         <Route path="/admin/giveaways" element={<AdminGiveaways />} />
         <Route path="/admin/support" element={<AdminSupport />} />
         <Route path="/admin/ads" element={<AdminAds />} />
+        <Route path="/redux" element={<Redux />} />
+        <Route path="/admin/redux" element={<AdminRedux />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <LegalChatBot />
