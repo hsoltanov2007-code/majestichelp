@@ -90,19 +90,29 @@ export function useAuth() {
         .eq('id', userId)
         .single();
 
-      // Fetch role
-      const { data: roleData } = await supabase
+      // Fetch roles (user may have multiple: admin + subscriber)
+      const { data: rolesData } = await supabase
         .from('user_roles')
         .select('role, expires_at')
-        .eq('user_id', userId)
-        .single();
+        .eq('user_id', userId);
 
-      // Check if subscriber role has expired
-      let role = ((roleData?.role as string) || 'user') as AppRole;
-      if ((role as string) === 'subscriber' && (roleData as any)?.expires_at) {
-        const expiresAt = new Date((roleData as any).expires_at);
-        if (expiresAt < new Date()) {
-          role = 'user' as AppRole;
+      // Determine primary role: admin > moderator > subscriber > user
+      let role: AppRole = 'user';
+      let isSubscriber = false;
+      if (rolesData && rolesData.length > 0) {
+        for (const r of rolesData) {
+          const roleName = r.role as string;
+          if (roleName === 'admin') { role = 'admin' as AppRole; break; }
+          if (roleName === 'moderator') { role = 'moderator' as AppRole; }
+          if (roleName === 'subscriber') {
+            const expiresAt = (r as any).expires_at ? new Date((r as any).expires_at) : null;
+            if (!expiresAt || expiresAt > new Date()) {
+              isSubscriber = true;
+            }
+          }
+        }
+        if ((role as string) !== 'admin' && (role as string) !== 'moderator' && isSubscriber) {
+          role = 'subscriber' as AppRole;
         }
       }
       const isAdmin = role === 'admin';
