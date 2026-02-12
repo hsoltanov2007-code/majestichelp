@@ -184,7 +184,10 @@ const ProceduralCode = () => {
         <div className="flex items-center justify-between gap-3 mb-6">
           <div className="flex items-center gap-3">
             <img src={hardyLogo} alt="HARDY" className="w-10 h-10 object-contain" />
-            <h1 className="text-3xl font-bold">Процессуальный кодекс</h1>
+            <div>
+              <h1 className="text-3xl font-bold">Процессуальный кодекс</h1>
+              <p className="text-muted-foreground text-sm">Majestic RP | <span className="text-accent font-semibold">Denver</span></p>
+            </div>
           </div>
           <Button 
             variant="outline" 

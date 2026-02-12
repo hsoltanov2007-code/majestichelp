@@ -169,7 +169,7 @@ export default function Laws() {
           <img src={hardyLogo} alt="HARDY" className="w-10 h-10 object-contain" />
           <div>
             <h1 className="text-3xl font-bold">Нормативно-правовые акты</h1>
-            <p className="text-muted-foreground">Законы и кодексы штата Сан-Андреас</p>
+            <p className="text-muted-foreground">Majestic RP | <span className="text-accent font-semibold">Denver</span> · Законы и кодексы штата Сан-Андреас</p>
           </div>
         </div>
 

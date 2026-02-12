@@ -91,7 +91,7 @@ export default function AdministrativeCode() {
           <img src={hardyLogo} alt="HARDY" className="w-10 h-10 object-contain" />
           <div>
             <h1 className="text-3xl font-bold">Административный кодекс</h1>
-            <p className="text-muted-foreground">Всего статей: {adminArticles.length}</p>
+            <p className="text-muted-foreground">Majestic RP | <span className="text-accent font-semibold">Denver</span> · Всего статей: {adminArticles.length}</p>
           </div>
         </div>
 

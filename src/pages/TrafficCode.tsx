@@ -91,7 +91,7 @@ export default function TrafficCode() {
           <img src={hardyLogo} alt="HARDY" className="w-10 h-10 object-contain" />
           <div>
             <h1 className="text-3xl font-bold">Дорожный кодекс</h1>
-            <p className="text-muted-foreground">Всего статей: {trafficArticles.length}</p>
+            <p className="text-muted-foreground">Majestic RP | <span className="text-accent font-semibold">Denver</span> · Всего статей: {trafficArticles.length}</p>
           </div>
         </div>
 

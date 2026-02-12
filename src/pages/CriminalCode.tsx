@@ -125,7 +125,7 @@ export default function CriminalCode() {
             <img src={hardyLogo} alt="HARDY" className="w-12 h-12 object-contain" />
             <div>
               <h1 className="text-4xl font-bold">Уголовный кодекс</h1>
-              <p className="text-muted-foreground">Всего статей: {criminalArticles.length}</p>
+              <p className="text-muted-foreground">Majestic RP | <span className="text-accent font-semibold">Denver</span> · Всего статей: {criminalArticles.length}</p>
             </div>
           </div>
         </div>
