@@ -17,10 +17,18 @@ export function AdBanner() {
   const [banners, setBanners] = useState<AdBannerData[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [dismissed, setDismissed] = useState(false);
-  const { user, isSubscriber } = useAuth();
+  const [ready, setReady] = useState(false);
+  const { user, isSubscriber, isLoading } = useAuth();
+
+  // Wait for auth to load, then delay before showing
+  useEffect(() => {
+    if (isLoading || isSubscriber) return;
+    const timer = setTimeout(() => setReady(true), 2000);
+    return () => clearTimeout(timer);
+  }, [isLoading, isSubscriber]);
 
   useEffect(() => {
-    if (isSubscriber) return;
+    if (isSubscriber || !ready) return;
     const fetchBanners = async () => {
       const { data } = await supabase
         .from("ad_banners")
@@ -30,7 +38,7 @@ export function AdBanner() {
       if (data && data.length > 0) setBanners(data);
     };
     fetchBanners();
-  }, [isSubscriber]);
+  }, [isSubscriber, ready]);
 
   useEffect(() => {
     if (banners.length <= 1) return;
@@ -46,7 +54,7 @@ export function AdBanner() {
     return () => clearTimeout(timeout);
   }, [dismissed]);
 
-  if (isSubscriber || dismissed || banners.length === 0) return null;
+  if (isLoading || !ready || isSubscriber || dismissed || banners.length === 0) return null;
 
   const handleBuySubscription = () => {
     if (!user) {
