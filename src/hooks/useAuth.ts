@@ -45,7 +45,6 @@ export function useAuth() {
             ...prev,
             session,
             user: session.user,
-            isLoading: true,
           }));
           setTimeout(() => {
             fetchUserData(session.user.id);
