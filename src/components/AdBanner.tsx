@@ -17,9 +17,7 @@ export function AdBanner() {
   const [banners, setBanners] = useState<AdBannerData[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [dismissed, setDismissed] = useState(false);
-  const { user, role } = useAuth();
-
-  const isSubscriber = (role as string) === 'subscriber';
+  const { user, isSubscriber } = useAuth();
 
   useEffect(() => {
     if (isSubscriber) return;
