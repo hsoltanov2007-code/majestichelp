@@ -19,6 +19,7 @@ interface AuthState {
   isLoading: boolean;
   isAdmin: boolean;
   isModerator: boolean;
+  isSubscriber: boolean;
   canManage: boolean; // admin or moderator
 }
 
@@ -31,6 +32,7 @@ export function useAuth() {
     isLoading: true,
     isAdmin: false,
     isModerator: false,
+    isSubscriber: false,
     canManage: false,
   });
 
@@ -56,6 +58,7 @@ export function useAuth() {
             role: null,
             isAdmin: false,
             isModerator: false,
+            isSubscriber: false,
             canManage: false,
             isLoading: false,
           }));
@@ -124,6 +127,7 @@ export function useAuth() {
         role,
         isAdmin,
         isModerator,
+        isSubscriber,
         canManage: isAdmin || isModerator,
         isLoading: false,
       }));
@@ -181,6 +185,7 @@ export function useAuth() {
       isLoading: false,
       isAdmin: false,
       isModerator: false,
+      isSubscriber: false,
       canManage: false,
     });
 
