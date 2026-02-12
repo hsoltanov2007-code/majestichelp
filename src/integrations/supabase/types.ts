@@ -689,6 +689,33 @@ export type Database = {
         }
         Relationships: []
       }
+      redux_categories: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          label: string
+          order_index: number
+          value: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label: string
+          order_index?: number
+          value: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label?: string
+          order_index?: number
+          value?: string
+        }
+        Relationships: []
+      }
       redux_items: {
         Row: {
           category: string
