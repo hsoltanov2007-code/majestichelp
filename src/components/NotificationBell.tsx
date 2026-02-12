@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
-import { Bell, Check, Trash2, MessageCircle, Play, Gift, Trophy } from 'lucide-react';
+import { Bell, Check, Trash2, MessageCircle, Play, Gift, Trophy, UserPlus, MessageSquare, Headphones } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Popover,
@@ -21,12 +22,45 @@ export function NotificationBell() {
   } = useNotifications();
 
   const getNotificationContent = (notification: typeof notifications[0]) => {
+    const isAdmin = ['new_entry', 'new_topic_admin', 'new_ticket'].includes(notification.type);
+
+    if (notification.type === 'new_entry') {
+      return {
+        icon: <UserPlus className="h-5 w-5 text-accent shrink-0 mt-0.5" />,
+        title: 'Новая заявка на розыгрыш',
+        subtitle: notification.giveaway?.title || 'Розыгрыш',
+        link: '/admin/giveaways',
+        isAdmin,
+      };
+    }
+
+    if (notification.type === 'new_topic_admin') {
+      return {
+        icon: <MessageSquare className="h-5 w-5 text-primary shrink-0 mt-0.5" />,
+        title: 'Новая тема на форуме',
+        subtitle: notification.topic?.title || 'Тема',
+        link: `/forum/topic/${notification.topic_id}`,
+        isAdmin,
+      };
+    }
+
+    if (notification.type === 'new_ticket') {
+      return {
+        icon: <Headphones className="h-5 w-5 text-destructive shrink-0 mt-0.5" />,
+        title: 'Новый тикет поддержки',
+        subtitle: notification.ticket?.subject || 'Тикет',
+        link: '/admin/support',
+        isAdmin,
+      };
+    }
+
     if (notification.type === 'new_video') {
       return {
         icon: <Play className="h-5 w-5 text-primary shrink-0 mt-0.5" />,
         title: 'Новое видео',
         subtitle: notification.video?.title || 'Видео',
         link: '/media',
+        isAdmin: false,
       };
     }
 
@@ -36,6 +70,7 @@ export function NotificationBell() {
         title: 'Новый розыгрыш',
         subtitle: notification.giveaway?.title || 'Розыгрыш',
         link: '/giveaways',
+        isAdmin: false,
       };
     }
 
@@ -45,6 +80,7 @@ export function NotificationBell() {
         title: '🎉 Вы выиграли!',
         subtitle: notification.giveaway?.title || 'Розыгрыш',
         link: '/giveaways',
+        isAdmin: false,
       };
     }
     
@@ -53,6 +89,7 @@ export function NotificationBell() {
       title: 'Новый комментарий',
       subtitle: notification.topic?.title || 'Тема',
       link: `/forum/topic/${notification.topic_id}`,
+      isAdmin: false,
     };
   };
 
@@ -104,8 +141,11 @@ export function NotificationBell() {
                           onClick={() => markAsRead(notification.id)}
                           className="block"
                         >
-                          <p className="text-sm font-medium truncate">
+                          <p className="text-sm font-medium truncate flex items-center gap-1.5">
                             {content.title}
+                            {content.isAdmin && (
+                              <Badge variant="secondary" className="text-[10px] px-1.5 py-0">Админ</Badge>
+                            )}
                           </p>
                           <p className="text-sm text-muted-foreground truncate">
                             {content.subtitle}

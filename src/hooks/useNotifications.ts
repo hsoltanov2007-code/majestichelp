@@ -9,6 +9,8 @@ interface Notification {
   comment_id: string | null;
   video_id: string | null;
   giveaway_id: string | null;
+  entry_id: string | null;
+  ticket_id: string | null;
   type: string;
   is_read: boolean;
   created_at: string;
@@ -20,6 +22,9 @@ interface Notification {
   };
   giveaway?: {
     title: string;
+  };
+  ticket?: {
+    subject: string;
   };
 }
 
@@ -53,6 +58,7 @@ export function useNotifications() {
           let topic: { title: string } | undefined;
           let video: { title: string } | undefined;
           let giveaway: { title: string } | undefined;
+          let ticket: { subject: string } | undefined;
           
           if (notification.topic_id) {
             const { data: topicData } = await supabase
@@ -80,6 +86,15 @@ export function useNotifications() {
               .maybeSingle();
             giveaway = giveawayData || undefined;
           }
+
+          if ((notification as any).ticket_id) {
+            const { data: ticketData } = await supabase
+              .from('support_tickets')
+              .select('subject')
+              .eq('id', (notification as any).ticket_id)
+              .maybeSingle();
+            ticket = ticketData || undefined;
+          }
           
           return {
             id: notification.id,
@@ -88,12 +103,15 @@ export function useNotifications() {
             comment_id: notification.comment_id,
             video_id: notification.video_id,
             giveaway_id: notification.giveaway_id,
+            entry_id: (notification as any).entry_id || null,
+            ticket_id: (notification as any).ticket_id || null,
             type: notification.type,
             is_read: notification.is_read || false,
             created_at: notification.created_at || '',
             topic,
             video,
             giveaway,
+            ticket,
           };
         })
       );

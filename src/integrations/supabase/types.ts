@@ -229,9 +229,11 @@ export type Database = {
         Row: {
           comment_id: string | null
           created_at: string | null
+          entry_id: string | null
           giveaway_id: string | null
           id: string
           is_read: boolean | null
+          ticket_id: string | null
           topic_id: string | null
           type: string
           user_id: string
@@ -240,9 +242,11 @@ export type Database = {
         Insert: {
           comment_id?: string | null
           created_at?: string | null
+          entry_id?: string | null
           giveaway_id?: string | null
           id?: string
           is_read?: boolean | null
+          ticket_id?: string | null
           topic_id?: string | null
           type: string
           user_id: string
@@ -251,9 +255,11 @@ export type Database = {
         Update: {
           comment_id?: string | null
           created_at?: string | null
+          entry_id?: string | null
           giveaway_id?: string | null
           id?: string
           is_read?: boolean | null
+          ticket_id?: string | null
           topic_id?: string | null
           type?: string
           user_id?: string
