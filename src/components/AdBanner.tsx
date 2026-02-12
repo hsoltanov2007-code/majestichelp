@@ -108,17 +108,8 @@ export function AdBanner() {
               </div>
             )}
 
-            <div className="text-center pb-3 space-y-2">
-              <button
-                onClick={handleBuySubscription}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-500/20 to-yellow-500/20 hover:from-amber-500/30 hover:to-yellow-500/30 text-amber-400 text-[10px] font-semibold uppercase tracking-wider transition-all duration-300 hover:scale-105 border border-amber-500/20"
-              >
-                <Crown className="h-3 w-3" />
-                Убрать рекламу — 100₽/мес
-              </button>
-              <div>
-                <span className="text-[9px] text-muted-foreground/25 uppercase tracking-[0.25em] font-medium">реклама</span>
-              </div>
+            <div className="text-center pb-3">
+              <span className="text-[9px] text-muted-foreground/25 uppercase tracking-[0.25em] font-medium">реклама</span>
             </div>
           </div>
         </div>
@@ -164,14 +155,7 @@ export function AdBanner() {
             </div>
           )}
 
-          <div className="flex items-center justify-center gap-3 pb-2">
-            <button
-              onClick={handleBuySubscription}
-              className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-amber-500/15 text-amber-400 text-[8px] font-semibold uppercase tracking-wider hover:bg-amber-500/25 transition-all border border-amber-500/15"
-            >
-              <Crown className="h-2.5 w-2.5" />
-              Без рекламы 100₽
-            </button>
+          <div className="flex items-center justify-center pb-2">
             <span className="text-[7px] text-muted-foreground/20 uppercase tracking-[0.2em] font-medium">реклама</span>
           </div>
         </div>
