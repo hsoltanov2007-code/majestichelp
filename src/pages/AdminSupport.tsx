@@ -17,7 +17,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2, Headphones, Send, X, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Loader2, Headphones, Send, X, CheckCircle2, Crown } from "lucide-react";
 
 interface Ticket {
   id: string;
@@ -184,6 +184,45 @@ export default function AdminSupport() {
     fetchTickets();
   };
 
+  const grantSubscription = async () => {
+    if (!activeTicket) return;
+    const userId = activeTicket.user_id;
+    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+
+    // Check if user already has subscriber role
+    const { data: existing } = await supabase
+      .from("user_roles")
+      .select("*")
+      .eq("user_id", userId)
+      .eq("role", "subscriber" as any)
+      .maybeSingle();
+
+    if (existing) {
+      // Update expiry
+      await supabase
+        .from("user_roles")
+        .update({ expires_at: expiresAt } as any)
+        .eq("id", existing.id);
+      toast.success("Подписка продлена на 30 дней!");
+    } else {
+      // Insert new subscriber role
+      await supabase
+        .from("user_roles")
+        .insert({ user_id: userId, role: "subscriber" as any, expires_at: expiresAt } as any);
+      toast.success("Подписка выдана на 30 дней!");
+    }
+
+    // Send confirmation message in chat
+    if (user) {
+      await supabase.from("support_messages").insert({
+        ticket_id: activeTicket.id,
+        sender_id: user.id,
+        content: `✅ Подписка активирована! Реклама убрана на 30 дней (до ${new Date(expiresAt).toLocaleDateString("ru-RU")}).`,
+        is_admin: true,
+      } as any);
+    }
+  };
+
   if (authLoading || isLoading || !isAdmin) {
     return (
       <Layout>
@@ -262,6 +301,9 @@ export default function AdminSupport() {
                       </p>
                     </div>
                     <div className="flex gap-2">
+                      <Button size="sm" variant="outline" className="text-amber-500 border-amber-500/30 hover:bg-amber-500/10" onClick={grantSubscription}>
+                        <Crown className="h-3.5 w-3.5 mr-1" /> Подписка 30д
+                      </Button>
                       {activeTicket.status !== "closed" ? (
                         <Button size="sm" variant="outline" onClick={() => closeTicket(activeTicket.id)}>
                           <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Закрыть
