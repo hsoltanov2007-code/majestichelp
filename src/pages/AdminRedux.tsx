@@ -10,21 +10,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { ArrowLeft, Plus, Trash2, Edit, Loader2, Upload, X, Image as ImageIcon } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Edit, Loader2, Upload, X, Image as ImageIcon, Tag } from "lucide-react";
 
-const CATEGORIES = [
-  { value: "redux", label: "Редуксы" },
-  { value: "gunpack", label: "Ганпаки" },
-  { value: "clothes", label: "Одежда" },
-  { value: "world", label: "Мир" },
-  { value: "builds", label: "Сборки" },
-  { value: "guides", label: "Гайды" },
-  { value: "other", label: "Другое" },
-];
+interface ReduxCategory {
+  id: string;
+  value: string;
+  label: string;
+  order_index: number;
+  is_active: boolean;
+}
 
 interface ReduxItem {
   id: string;
@@ -42,6 +41,7 @@ interface ReduxItem {
 export default function AdminRedux() {
   const navigate = useNavigate();
   const { user, canManage, isLoading: authLoading } = useAuth();
+  const [categories, setCategories] = useState<ReduxCategory[]>([]);
   const [items, setItems] = useState<ReduxItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [editItem, setEditItem] = useState<ReduxItem | null>(null);
@@ -49,9 +49,14 @@ export default function AdminRedux() {
   const [isSaving, setIsSaving] = useState(false);
   const [uploadingImages, setUploadingImages] = useState(false);
 
-  // Form state
+  // Category form
+  const [newCatValue, setNewCatValue] = useState("");
+  const [newCatLabel, setNewCatLabel] = useState("");
+  const [isAddingCat, setIsAddingCat] = useState(false);
+
+  // Item form
   const [form, setForm] = useState({
-    category: "redux",
+    category: "",
     title: "",
     description: "",
     video_url: "",
@@ -65,30 +70,49 @@ export default function AdminRedux() {
     if (!authLoading) {
       if (!user) navigate("/auth");
       else if (!canManage) { toast.error("Доступ запрещён"); navigate("/"); }
-      else fetchItems();
+      else fetchAll();
     }
   }, [user, canManage, authLoading]);
 
-  const fetchItems = async () => {
+  const fetchAll = async () => {
     setIsLoading(true);
-    const { data } = await supabase
-      .from("redux_items")
-      .select("*")
-      .order("category")
-      .order("order_index");
-    setItems((data as ReduxItem[]) || []);
+    const [{ data: cats }, { data: itemsData }] = await Promise.all([
+      supabase.from("redux_categories").select("*").order("order_index"),
+      supabase.from("redux_items").select("*").order("category").order("order_index"),
+    ]);
+    setCategories((cats as ReduxCategory[]) || []);
+    setItems((itemsData as ReduxItem[]) || []);
     setIsLoading(false);
   };
 
+  // --- Category management ---
+  const handleAddCategory = async () => {
+    if (!newCatValue.trim() || !newCatLabel.trim()) { toast.error("Заполните оба поля"); return; }
+    setIsAddingCat(true);
+    const { error } = await supabase.from("redux_categories").insert({
+      value: newCatValue.trim().toLowerCase().replace(/\s+/g, "-"),
+      label: newCatLabel.trim(),
+      order_index: categories.length,
+    });
+    if (error) toast.error(error.message);
+    else { toast.success("Категория добавлена"); setNewCatValue(""); setNewCatLabel(""); fetchAll(); }
+    setIsAddingCat(false);
+  };
+
+  const handleDeleteCategory = async (id: string) => {
+    if (!confirm("Удалить категорию?")) return;
+    const { error } = await supabase.from("redux_categories").delete().eq("id", id);
+    if (error) toast.error(error.message);
+    else { toast.success("Удалено"); fetchAll(); }
+  };
+
+  // --- Item management ---
   const resetForm = () => {
-    setForm({ category: "redux", title: "", description: "", video_url: "", download_url: "", image_urls: [], order_index: 0, is_active: true });
+    setForm({ category: categories[0]?.value || "", title: "", description: "", video_url: "", download_url: "", image_urls: [], order_index: 0, is_active: true });
     setEditItem(null);
   };
 
-  const openCreate = () => {
-    resetForm();
-    setIsDialogOpen(true);
-  };
+  const openCreate = () => { resetForm(); setIsDialogOpen(true); };
 
   const openEdit = (item: ReduxItem) => {
     setEditItem(item);
@@ -128,6 +152,7 @@ export default function AdminRedux() {
 
   const handleSave = async () => {
     if (!form.title.trim()) { toast.error("Введите название"); return; }
+    if (!form.category) { toast.error("Выберите категорию"); return; }
     setIsSaving(true);
     try {
       const payload = {
@@ -140,7 +165,6 @@ export default function AdminRedux() {
         order_index: form.order_index,
         is_active: form.is_active,
       };
-
       if (editItem) {
         const { error } = await supabase.from("redux_items").update(payload).eq("id", editItem.id);
         if (error) throw error;
@@ -152,7 +176,7 @@ export default function AdminRedux() {
       }
       setIsDialogOpen(false);
       resetForm();
-      fetchItems();
+      fetchAll();
     } catch (err: any) {
       toast.error(err.message || "Ошибка сохранения");
     } finally {
@@ -164,10 +188,10 @@ export default function AdminRedux() {
     if (!confirm("Удалить?")) return;
     const { error } = await supabase.from("redux_items").delete().eq("id", id);
     if (error) toast.error("Ошибка удаления");
-    else { toast.success("Удалено"); fetchItems(); }
+    else { toast.success("Удалено"); fetchAll(); }
   };
 
-  const catLabel = (v: string) => CATEGORIES.find((c) => c.value === v)?.label || v;
+  const catLabel = (v: string) => categories.find((c) => c.value === v)?.label || v;
 
   if (authLoading || isLoading) {
     return (
@@ -189,41 +213,95 @@ export default function AdminRedux() {
           </Button>
           <div>
             <h1 className="text-2xl font-bold">Управление Redux / Моды</h1>
-            <p className="text-muted-foreground">Добавляйте и редактируйте моды</p>
+            <p className="text-muted-foreground">Категории и моды</p>
           </div>
-          <Button className="ml-auto gap-2" onClick={openCreate}>
-            <Plus className="h-4 w-4" /> Добавить
-          </Button>
         </div>
 
-        {/* Items list */}
-        <div className="space-y-2">
-          {items.length === 0 ? (
-            <Card className="glass border-0"><CardContent className="py-8 text-center text-muted-foreground">Нет материалов</CardContent></Card>
-          ) : (
-            items.map((item) => (
-              <Card key={item.id} className={`glass border-0 ${!item.is_active ? "opacity-50" : ""}`}>
-                <CardContent className="py-3 flex items-center justify-between gap-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Badge variant="secondary">{catLabel(item.category)}</Badge>
-                      {!item.is_active && <Badge variant="outline">Скрыт</Badge>}
-                      {item.image_urls?.length > 0 && (
-                        <Badge variant="outline" className="gap-1"><ImageIcon className="h-3 w-3" />{item.image_urls.length}</Badge>
-                      )}
+        <Tabs defaultValue="items">
+          <TabsList className="mb-4">
+            <TabsTrigger value="items">Моды</TabsTrigger>
+            <TabsTrigger value="categories" className="gap-2">
+              <Tag className="h-4 w-4" /> Категории
+            </TabsTrigger>
+          </TabsList>
+
+          {/* === ITEMS TAB === */}
+          <TabsContent value="items">
+            <div className="flex justify-end mb-4">
+              <Button className="gap-2" onClick={openCreate} disabled={categories.length === 0}>
+                <Plus className="h-4 w-4" /> Добавить мод
+              </Button>
+            </div>
+            {categories.length === 0 && (
+              <Card className="glass border-0 mb-4"><CardContent className="py-4 text-center text-muted-foreground">Сначала добавьте категории</CardContent></Card>
+            )}
+            <div className="space-y-2">
+              {items.length === 0 ? (
+                <Card className="glass border-0"><CardContent className="py-8 text-center text-muted-foreground">Нет материалов</CardContent></Card>
+              ) : (
+                items.map((item) => (
+                  <Card key={item.id} className={`glass border-0 ${!item.is_active ? "opacity-50" : ""}`}>
+                    <CardContent className="py-3 flex items-center justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Badge variant="secondary">{catLabel(item.category)}</Badge>
+                          {!item.is_active && <Badge variant="outline">Скрыт</Badge>}
+                          {item.image_urls?.length > 0 && (
+                            <Badge variant="outline" className="gap-1"><ImageIcon className="h-3 w-3" />{item.image_urls.length}</Badge>
+                          )}
+                        </div>
+                        <p className="font-medium truncate">{item.title}</p>
+                        {item.description && <p className="text-sm text-muted-foreground truncate">{item.description}</p>}
+                      </div>
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="icon" onClick={() => openEdit(item)}><Edit className="h-4 w-4" /></Button>
+                        <Button variant="destructive" size="icon" onClick={() => handleDelete(item.id)}><Trash2 className="h-4 w-4" /></Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
+            </div>
+          </TabsContent>
+
+          {/* === CATEGORIES TAB === */}
+          <TabsContent value="categories">
+            <Card className="mb-4">
+              <CardHeader><CardTitle>Новая категория</CardTitle></CardHeader>
+              <CardContent>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <div className="flex-1 space-y-2">
+                    <Label>Ключ (латиницей)</Label>
+                    <Input placeholder="gunpack" value={newCatValue} onChange={(e) => setNewCatValue(e.target.value)} />
+                  </div>
+                  <div className="flex-1 space-y-2">
+                    <Label>Название</Label>
+                    <Input placeholder="Ганпаки" value={newCatLabel} onChange={(e) => setNewCatLabel(e.target.value)} />
+                  </div>
+                  <Button className="self-end gap-2" onClick={handleAddCategory} disabled={isAddingCat}>
+                    {isAddingCat ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+                    Добавить
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+            <div className="space-y-2">
+              {categories.map((cat) => (
+                <Card key={cat.id} className="glass border-0">
+                  <CardContent className="py-3 flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">{cat.label}</p>
+                      <p className="text-xs text-muted-foreground">Ключ: {cat.value}</p>
                     </div>
-                    <p className="font-medium truncate">{item.title}</p>
-                    {item.description && <p className="text-sm text-muted-foreground truncate">{item.description}</p>}
-                  </div>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="icon" onClick={() => openEdit(item)}><Edit className="h-4 w-4" /></Button>
-                    <Button variant="destructive" size="icon" onClick={() => handleDelete(item.id)}><Trash2 className="h-4 w-4" /></Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))
-          )}
-        </div>
+                    <Button variant="destructive" size="icon" onClick={() => handleDeleteCategory(cat.id)}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+        </Tabs>
 
         {/* Create/Edit dialog */}
         <Dialog open={isDialogOpen} onOpenChange={(open) => { if (!open) resetForm(); setIsDialogOpen(open); }}>
@@ -237,8 +315,8 @@ export default function AdminRedux() {
                 <Select value={form.category} onValueChange={(v) => setForm((f) => ({ ...f, category: v }))}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {CATEGORIES.map((c) => (
-                      <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
+                    {categories.map((c) => (
+                      <SelectItem key={c.id} value={c.value}>{c.label}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>

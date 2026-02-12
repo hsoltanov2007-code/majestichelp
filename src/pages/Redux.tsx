@@ -8,15 +8,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { Download, Play, ImageIcon, ChevronDown, ExternalLink } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
-const CATEGORIES = [
-  { value: "redux", label: "Редуксы" },
-  { value: "gunpack", label: "Ганпаки" },
-  { value: "clothes", label: "Одежда" },
-  { value: "world", label: "Мир" },
-  { value: "builds", label: "Сборки" },
-  { value: "guides", label: "Гайды" },
-  { value: "other", label: "Другое" },
-];
+interface ReduxCategory {
+  id: string;
+  value: string;
+  label: string;
+  order_index: number;
+}
 
 interface ReduxItem {
   id: string;
@@ -30,14 +27,24 @@ interface ReduxItem {
 }
 
 export default function Redux() {
+  const [categories, setCategories] = useState<ReduxCategory[]>([]);
   const [items, setItems] = useState<ReduxItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [openCategories, setOpenCategories] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
-    fetchItems();
+    Promise.all([fetchCategories(), fetchItems()]).then(() => setIsLoading(false));
   }, []);
+
+  const fetchCategories = async () => {
+    const { data } = await supabase
+      .from("redux_categories")
+      .select("*")
+      .eq("is_active", true)
+      .order("order_index");
+    setCategories((data as ReduxCategory[]) || []);
+  };
 
   const fetchItems = async () => {
     const { data } = await supabase
@@ -46,22 +53,23 @@ export default function Redux() {
       .eq("is_active", true)
       .order("order_index", { ascending: true });
     setItems((data as ReduxItem[]) || []);
-    setIsLoading(false);
   };
 
   const filtered = activeCategory === "all" ? items : items.filter((i) => i.category === activeCategory);
 
-  const grouped = CATEGORIES.reduce((acc, cat) => {
+  const grouped = categories.reduce((acc, cat) => {
     const catItems = filtered.filter((i) => i.category === cat.value);
     if (catItems.length > 0) acc.push({ ...cat, items: catItems });
     return acc;
-  }, [] as (typeof CATEGORIES[number] & { items: ReduxItem[] })[]);
+  }, [] as (ReduxCategory & { items: ReduxItem[] })[]);
 
   const getVideoEmbed = (url: string) => {
     const yt = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([^&?\s]+)/);
     if (yt) return `https://www.youtube.com/embed/${yt[1]}`;
     return null;
   };
+
+  const catLabel = (v: string) => categories.find((c) => c.value === v)?.label || v;
 
   return (
     <Layout>
@@ -83,9 +91,9 @@ export default function Redux() {
           >
             Все
           </Button>
-          {CATEGORIES.map((cat) => (
+          {categories.map((cat) => (
             <Button
-              key={cat.value}
+              key={cat.id}
               variant={activeCategory === cat.value ? "default" : "outline"}
               size="sm"
               onClick={() => setActiveCategory(cat.value)}
@@ -153,18 +161,11 @@ function ReduxCard({ item, getVideoEmbed }: { item: ReduxItem; getVideoEmbed: (u
 
   return (
     <Card className="glass border-0 hover-lift overflow-hidden">
-      {/* Video preview */}
       {embedUrl && (
         <div className="aspect-video">
-          <iframe
-            src={embedUrl}
-            className="w-full h-full"
-            allowFullScreen
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          />
+          <iframe src={embedUrl} className="w-full h-full" allowFullScreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" />
         </div>
       )}
-      {/* First image as preview if no video */}
       {!embedUrl && item.image_urls?.length > 0 && (
         <div className="aspect-video overflow-hidden">
           <img src={item.image_urls[0]} alt={item.title} className="w-full h-full object-cover" />
@@ -174,11 +175,7 @@ function ReduxCard({ item, getVideoEmbed }: { item: ReduxItem; getVideoEmbed: (u
         <CardTitle className="text-lg">{item.title}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        {item.description && (
-          <p className="text-sm text-muted-foreground whitespace-pre-line">{item.description}</p>
-        )}
-
-        {/* Images gallery */}
+        {item.description && <p className="text-sm text-muted-foreground whitespace-pre-line">{item.description}</p>}
         {item.image_urls?.length > (embedUrl ? 0 : 1) && (
           <>
             <Button variant="ghost" size="sm" className="gap-2" onClick={() => setShowImages(!showImages)}>
@@ -196,23 +193,17 @@ function ReduxCard({ item, getVideoEmbed }: { item: ReduxItem; getVideoEmbed: (u
             )}
           </>
         )}
-
-        {/* Download */}
         {item.download_url && (
           <Button asChild size="sm" className="w-full gap-2">
             <a href={item.download_url} target="_blank" rel="noopener noreferrer">
-              <Download className="h-4 w-4" />
-              Скачать
+              <Download className="h-4 w-4" /> Скачать
             </a>
           </Button>
         )}
-
-        {/* Video link if not embeddable */}
         {item.video_url && !embedUrl && (
           <Button asChild variant="outline" size="sm" className="w-full gap-2">
             <a href={item.video_url} target="_blank" rel="noopener noreferrer">
-              <Play className="h-4 w-4" />
-              Смотреть видео
+              <Play className="h-4 w-4" /> Смотреть видео
             </a>
           </Button>
         )}
