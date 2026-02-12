@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { ExternalLink, X, Sparkles } from "lucide-react";
+import { ExternalLink, X, Sparkles, Crown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 interface AdBannerData {
   id: string;
@@ -16,8 +17,12 @@ export function AdBanner() {
   const [banners, setBanners] = useState<AdBannerData[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [dismissed, setDismissed] = useState(false);
+  const { user, role } = useAuth();
+
+  const isSubscriber = (role as string) === 'subscriber';
 
   useEffect(() => {
+    if (isSubscriber) return;
     const fetchBanners = async () => {
       const { data } = await supabase
         .from("ad_banners")
@@ -27,7 +32,7 @@ export function AdBanner() {
       if (data && data.length > 0) setBanners(data);
     };
     fetchBanners();
-  }, []);
+  }, [isSubscriber]);
 
   useEffect(() => {
     if (banners.length <= 1) return;
@@ -43,7 +48,15 @@ export function AdBanner() {
     return () => clearTimeout(timeout);
   }, [dismissed]);
 
-  if (dismissed || banners.length === 0) return null;
+  if (isSubscriber || dismissed || banners.length === 0) return null;
+
+  const handleBuySubscription = () => {
+    if (!user) {
+      window.location.hash = '/auth';
+      return;
+    }
+    window.dispatchEvent(new CustomEvent('open-hardy-support', { detail: { subject: 'Покупка подписки — 100₽/мес (убрать рекламу)' } }));
+  };
 
   const banner = banners[currentIndex];
 
@@ -97,8 +110,17 @@ export function AdBanner() {
               </div>
             )}
 
-            <div className="text-center pb-3">
-              <span className="text-[9px] text-muted-foreground/25 uppercase tracking-[0.25em] font-medium">реклама</span>
+            <div className="text-center pb-3 space-y-2">
+              <button
+                onClick={handleBuySubscription}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-500/20 to-yellow-500/20 hover:from-amber-500/30 hover:to-yellow-500/30 text-amber-400 text-[10px] font-semibold uppercase tracking-wider transition-all duration-300 hover:scale-105 border border-amber-500/20"
+              >
+                <Crown className="h-3 w-3" />
+                Убрать рекламу — 100₽/мес
+              </button>
+              <div>
+                <span className="text-[9px] text-muted-foreground/25 uppercase tracking-[0.25em] font-medium">реклама</span>
+              </div>
             </div>
           </div>
         </div>
@@ -144,7 +166,14 @@ export function AdBanner() {
             </div>
           )}
 
-          <div className="text-center pb-1.5">
+          <div className="flex items-center justify-center gap-3 pb-2">
+            <button
+              onClick={handleBuySubscription}
+              className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-amber-500/15 text-amber-400 text-[8px] font-semibold uppercase tracking-wider hover:bg-amber-500/25 transition-all border border-amber-500/15"
+            >
+              <Crown className="h-2.5 w-2.5" />
+              Без рекламы 100₽
+            </button>
             <span className="text-[7px] text-muted-foreground/20 uppercase tracking-[0.2em] font-medium">реклама</span>
           </div>
         </div>
