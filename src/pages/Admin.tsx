@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner';
 import { 
   ArrowLeft, Plus, Trash2, Users, FolderOpen, MessageSquare, 
-  Shield, Loader2, Pin, Lock, Unlock, Crown, UserCog, Scale, Database, Gift, Headphones, Image
+  Shield, Loader2, Pin, Lock, Unlock, Crown, UserCog, Scale, Database, Gift, Headphones, Image, Package
 } from 'lucide-react';
 
 interface Category {
@@ -318,6 +318,12 @@ export default function Admin() {
               <Link to="/admin/laws">
                 <Scale className="h-4 w-4 mr-2" />
                 Управление законами
+              </Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link to="/admin/redux">
+                <Package className="h-4 w-4 mr-2" />
+                Redux / Моды
               </Link>
             </Button>
           </div>

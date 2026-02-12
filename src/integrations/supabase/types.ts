@@ -689,6 +689,51 @@ export type Database = {
         }
         Relationships: []
       }
+      redux_items: {
+        Row: {
+          category: string
+          created_at: string
+          created_by: string
+          description: string | null
+          download_url: string | null
+          id: string
+          image_urls: string[] | null
+          is_active: boolean
+          order_index: number
+          title: string
+          updated_at: string
+          video_url: string | null
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          created_by: string
+          description?: string | null
+          download_url?: string | null
+          id?: string
+          image_urls?: string[] | null
+          is_active?: boolean
+          order_index?: number
+          title: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          download_url?: string | null
+          id?: string
+          image_urls?: string[] | null
+          is_active?: boolean
+          order_index?: number
+          title?: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Relationships: []
+      }
       site_visitors: {
         Row: {
           created_at: string
