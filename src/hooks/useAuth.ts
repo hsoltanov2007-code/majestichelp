@@ -40,14 +40,13 @@ export function useAuth() {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        setAuthState(prev => ({
-          ...prev,
-          session,
-          user: session?.user ?? null,
-        }));
-
-        // Defer fetching profile and role
         if (session?.user) {
+          setAuthState(prev => ({
+            ...prev,
+            session,
+            user: session.user,
+            isLoading: true,
+          }));
           setTimeout(() => {
             fetchUserData(session.user.id);
           }, 0);
