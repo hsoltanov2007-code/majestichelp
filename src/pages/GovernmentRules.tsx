@@ -26,7 +26,10 @@ export default function GovernmentRules() {
       <div className="container py-8">
         <div className="flex items-center gap-3 mb-6">
           <img src={hardyLogo} alt="HARDY" className="w-10 h-10 object-contain" />
-          <h1 className="text-3xl font-bold">Правила государственных организаций</h1>
+          <div>
+            <h1 className="text-3xl font-bold">Правила государственных организаций</h1>
+            <p className="text-muted-foreground text-sm">Majestic RP | <span className="text-accent font-semibold">Denver</span></p>
+          </div>
         </div>
 
         <div className="relative mb-6 max-w-md">
