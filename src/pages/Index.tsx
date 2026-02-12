@@ -97,7 +97,7 @@ export default function Index() {
             </div>
             
             <p className="text-xl md:text-2xl text-muted-foreground opacity-0 animate-fade-up stagger-1">
-              Majestic RP — законы, правила и процедуры
+              Majestic RP | <span className="text-accent font-semibold">Denver</span> — законы, правила и процедуры
             </p>
             
             <form onSubmit={handleSearch} className="opacity-0 animate-fade-up stagger-2">
