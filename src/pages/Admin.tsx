@@ -14,8 +14,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner';
 import { 
   ArrowLeft, Plus, Trash2, Users, FolderOpen, MessageSquare, 
-  Shield, Loader2, Pin, Lock, Unlock, Crown, UserCog, Scale, Database, Gift, Headphones, Image, Package
+  Shield, Loader2, Pin, Lock, Unlock, Crown, UserCog, Scale, Database, Gift, Headphones, Image, Package, Star, CalendarIcon, XCircle
 } from 'lucide-react';
+import { format, addMonths } from 'date-fns';
+import { ru } from 'date-fns/locale';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
 
 interface Category {
   id: string;
@@ -40,6 +45,14 @@ interface Topic {
   author?: { username: string };
 }
 
+interface Subscriber {
+  role_id: string;
+  user_id: string;
+  username: string;
+  expires_at: string | null;
+  created_at: string;
+}
+
 export default function Admin() {
   const navigate = useNavigate();
   const { user, isAdmin, canManage, isLoading: authLoading } = useAuth();
@@ -49,6 +62,14 @@ export default function Admin() {
   const [topics, setTopics] = useState<Topic[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [updatingRoleFor, setUpdatingRoleFor] = useState<string | null>(null);
+
+  // Subscriptions
+  const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
+  const [grantUserId, setGrantUserId] = useState('');
+  const [grantDuration, setGrantDuration] = useState<number>(1);
+  const [grantDate, setGrantDate] = useState<Date | undefined>(undefined);
+  const [isGranting, setIsGranting] = useState(false);
+  const [revokingId, setRevokingId] = useState<string | null>(null);
 
   // New category form
   const [newCategoryName, setNewCategoryName] = useState('');
@@ -64,6 +85,7 @@ export default function Admin() {
         navigate('/forum');
       } else {
         fetchData();
+        fetchSubscribers();
       }
     }
   }, [user, canManage, authLoading, navigate]);
@@ -259,6 +281,95 @@ export default function Admin() {
     }
   };
 
+  const fetchSubscribers = async () => {
+    const { data: roles } = await supabase
+      .from('user_roles')
+      .select('id, user_id, expires_at, created_at')
+      .eq('role', 'subscriber');
+    
+    if (!roles || roles.length === 0) { setSubscribers([]); return; }
+    
+    const subs = await Promise.all(
+      roles.map(async (r) => {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('username')
+          .eq('id', r.user_id)
+          .single();
+        return {
+          role_id: r.id,
+          user_id: r.user_id,
+          username: profile?.username || 'Неизвестный',
+          expires_at: r.expires_at,
+          created_at: r.created_at,
+        };
+      })
+    );
+    setSubscribers(subs);
+  };
+
+  const handleGrantSubscription = async () => {
+    if (!grantUserId.trim()) { toast.error('Выберите пользователя'); return; }
+    
+    setIsGranting(true);
+    try {
+      const expiresAt = grantDate || addMonths(new Date(), grantDuration);
+      
+      const { error } = await supabase
+        .from('user_roles')
+        .insert({ user_id: grantUserId.trim(), role: 'subscriber' as any, expires_at: expiresAt.toISOString() });
+      
+      if (error) throw error;
+      
+      toast.success('Подписка выдана');
+      setGrantUserId('');
+      setGrantDate(undefined);
+      fetchSubscribers();
+    } catch (error: any) {
+      console.error('Error granting subscription:', error);
+      toast.error(error?.message?.includes('duplicate') ? 'У пользователя уже есть подписка' : 'Ошибка при выдаче подписки');
+    } finally {
+      setIsGranting(false);
+    }
+  };
+
+  const handleRevokeSubscription = async (roleId: string) => {
+    if (!confirm('Отозвать подписку?')) return;
+    setRevokingId(roleId);
+    try {
+      const { error } = await supabase
+        .from('user_roles')
+        .delete()
+        .eq('id', roleId);
+      if (error) throw error;
+      toast.success('Подписка отозвана');
+      fetchSubscribers();
+    } catch (error) {
+      console.error('Error revoking subscription:', error);
+      toast.error('Ошибка');
+    } finally {
+      setRevokingId(null);
+    }
+  };
+
+  const handleExtendSubscription = async (roleId: string, currentExpires: string | null) => {
+    const baseDate = currentExpires ? new Date(currentExpires) : new Date();
+    const newExpires = addMonths(baseDate > new Date() ? baseDate : new Date(), 1);
+    
+    try {
+      const { error } = await supabase
+        .from('user_roles')
+        .update({ expires_at: newExpires.toISOString() })
+        .eq('id', roleId);
+      if (error) throw error;
+      toast.success('Подписка продлена на 1 месяц');
+      fetchSubscribers();
+    } catch (error) {
+      console.error('Error extending subscription:', error);
+      toast.error('Ошибка');
+    }
+  };
+
   if (authLoading || isLoading) {
     return (
       <Layout>
@@ -376,6 +487,7 @@ export default function Admin() {
             <TabsTrigger value="categories">Категории</TabsTrigger>
             <TabsTrigger value="topics">Темы</TabsTrigger>
             {isAdmin && <TabsTrigger value="users">Пользователи</TabsTrigger>}
+            {isAdmin && <TabsTrigger value="subscriptions">Подписки</TabsTrigger>}
           </TabsList>
 
           <TabsContent value="categories">
@@ -575,6 +687,138 @@ export default function Admin() {
                 </Card>
               ))}
             </div>
+          </TabsContent>
+          )}
+
+          {isAdmin && (
+          <TabsContent value="subscriptions">
+            <Card className="mb-4">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Star className="h-5 w-5" />
+                  Управление подписками
+                </CardTitle>
+                <CardDescription>
+                  Выдавайте и отзывайте подписки. Подписчики не видят рекламу.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <div className="flex-1 space-y-2">
+                    <Label>Пользователь</Label>
+                    <Select value={grantUserId} onValueChange={setGrantUserId}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Выберите пользователя" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {users.filter(u => !subscribers.some(s => s.user_id === u.id)).map(u => (
+                          <SelectItem key={u.id} value={u.id}>{u.username}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Срок</Label>
+                    <Select value={String(grantDuration)} onValueChange={(v) => { setGrantDuration(Number(v)); setGrantDate(undefined); }}>
+                      <SelectTrigger className="w-[140px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1">1 месяц</SelectItem>
+                        <SelectItem value="3">3 месяца</SelectItem>
+                        <SelectItem value="6">6 месяцев</SelectItem>
+                        <SelectItem value="12">12 месяцев</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Или дата</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" className={cn("w-[160px] justify-start text-left font-normal", !grantDate && "text-muted-foreground")}>
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {grantDate ? format(grantDate, 'dd.MM.yyyy') : 'Выбрать'}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={grantDate}
+                          onSelect={setGrantDate}
+                          disabled={(date) => date < new Date()}
+                          initialFocus
+                          className={cn("p-3 pointer-events-auto")}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                  <Button onClick={handleGrantSubscription} disabled={isGranting} className="self-end">
+                    {isGranting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plus className="mr-2 h-4 w-4" />}
+                    Выдать
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {subscribers.length === 0 ? (
+              <Card>
+                <CardContent className="py-8 text-center text-muted-foreground">
+                  Нет активных подписок
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-2">
+                {subscribers.map((sub) => {
+                  const isExpired = sub.expires_at && new Date(sub.expires_at) < new Date();
+                  return (
+                    <Card key={sub.role_id} className={isExpired ? 'opacity-60' : ''}>
+                      <CardContent className="py-4 flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full flex items-center justify-center bg-accent/20 text-accent">
+                            <Star className="h-5 w-5" />
+                          </div>
+                          <div>
+                            <p className="font-medium">{sub.username}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {sub.expires_at ? (
+                                <>
+                                  {isExpired ? 'Истекла ' : 'До '}
+                                  {format(new Date(sub.expires_at), 'dd.MM.yyyy HH:mm', { locale: ru })}
+                                  {isExpired && <Badge variant="destructive" className="ml-2 text-xs">Истекла</Badge>}
+                                </>
+                              ) : 'Бессрочная'}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleExtendSubscription(sub.role_id, sub.expires_at)}
+                          >
+                            <Plus className="h-3 w-3 mr-1" />
+                            +1 мес
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleRevokeSubscription(sub.role_id)}
+                            disabled={revokingId === sub.role_id}
+                          >
+                            {revokingId === sub.role_id ? (
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                            ) : (
+                              <XCircle className="h-3 w-3 mr-1" />
+                            )}
+                            Отозвать
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
           </TabsContent>
           )}
         </Tabs>
