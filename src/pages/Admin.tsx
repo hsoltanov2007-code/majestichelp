@@ -104,15 +104,24 @@ export default function Admin() {
       const { data: profiles } = await supabase.from('profiles').select('*');
       const usersWithRoles = await Promise.all(
         (profiles || []).map(async (profile) => {
-          const { data: roleData } = await supabase
+          const { data: rolesData } = await supabase
             .from('user_roles')
             .select('role')
-            .eq('user_id', profile.id)
-            .single();
+            .eq('user_id', profile.id);
+          
+          // Pick highest priority role: admin > moderator > subscriber > user
+          let role = 'user';
+          if (rolesData && rolesData.length > 0) {
+            const roles = rolesData.map(r => r.role as string);
+            if (roles.includes('admin')) role = 'admin';
+            else if (roles.includes('moderator')) role = 'moderator';
+            else if (roles.includes('subscriber')) role = 'subscriber';
+          }
+
           return {
             id: profile.id,
             username: profile.username,
-            role: roleData?.role || 'user',
+            role,
             created_at: profile.created_at,
           };
         })
