@@ -404,12 +404,9 @@ export default function Giveaways() {
       content: `Здравствуйте! Я победитель розыгрыша "${giveaway.title}". Хочу получить приз: ${giveaway.prize}`,
     } as any);
 
-    toast.success("Тикет создан! Нажмите чтобы открыть чат.", {
-      action: {
-        label: "Открыть чат",
-        onClick: () => dispatchOpenSupport(),
-      },
-    });
+    toast.success("Тикет создан! Открываем чат поддержки...");
+    // Auto-open support chat after a short delay for toast to show
+    setTimeout(() => dispatchOpenSupport(), 500);
   };
 
   const handleNotifyAll = async (giveaway: Giveaway) => {
