@@ -679,18 +679,21 @@ export type Database = {
           avatar_url: string | null
           created_at: string
           id: string
+          telegram_chat_id: number | null
           username: string
         }
         Insert: {
           avatar_url?: string | null
           created_at?: string
           id: string
+          telegram_chat_id?: number | null
           username: string
         }
         Update: {
           avatar_url?: string | null
           created_at?: string
           id?: string
+          telegram_chat_id?: number | null
           username?: string
         }
         Relationships: []
@@ -878,6 +881,30 @@ export type Database = {
           status?: string
           subject?: string
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      telegram_link_codes: {
+        Row: {
+          code: string
+          created_at: string
+          expires_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
           user_id?: string
         }
         Relationships: []
