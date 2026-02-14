@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { User, Crown, Save, Loader2, Mail, Eye, EyeOff, Shield, Calendar, Settings, Camera, Upload } from 'lucide-react';
+import { TelegramLinkSection } from '@/components/TelegramLinkSection';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 
@@ -329,6 +330,15 @@ export default function Profile() {
                 </div>
               </div>
             </div>
+
+            {/* Telegram link */}
+            {user && (
+              <TelegramLinkSection
+                userId={user.id}
+                telegramChatId={(profile as any)?.telegram_chat_id ?? null}
+                onUpdate={() => window.location.reload()}
+              />
+            )}
 
             {/* Username edit */}
             <div className="space-y-3 pt-2">
