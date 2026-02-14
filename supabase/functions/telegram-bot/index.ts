@@ -6,7 +6,7 @@ const corsHeaders = {
 };
 
 const TELEGRAM_API = "https://api.telegram.org/bot";
-const SITE_URL = "https://majestichelp.lovable.app";
+const SITE_URL = "https://majestichelp.com";
 
 // ── Telegram helpers ──
 
