@@ -19,6 +19,22 @@ async function sendMessage(token: string, chatId: number, text: string, extra: R
   return res.json();
 }
 
+async function editMessage(token: string, chatId: number, messageId: number, text: string, extra: Record<string, unknown> = {}) {
+  const res = await fetch(`${TELEGRAM_API}${token}/editMessageText`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ chat_id: chatId, message_id: messageId, text, parse_mode: "HTML", ...extra }),
+  });
+  return res.json();
+}
+
+async function reply(token: string, chatId: number, text: string, extra: Record<string, unknown> = {}, messageId?: number) {
+  if (messageId) {
+    return editMessage(token, chatId, messageId, text, extra);
+  }
+  return sendMessage(token, chatId, text, extra);
+}
+
 async function answerCallback(token: string, callbackId: string, text = "") {
   await fetch(`${TELEGRAM_API}${token}/answerCallbackQuery`, {
     method: "POST",
@@ -105,7 +121,6 @@ async function handleStart(token: string, chatId: number, text: string, supabase
     return;
   }
 
-  // No code — show welcome with menu
   await sendMessage(token, chatId,
     "👋 <b>Привет! Я бот Hardy Help</b>\n\n" +
     "🔹 Поиск законов прямо в Telegram\n" +
@@ -117,16 +132,17 @@ async function handleStart(token: string, chatId: number, text: string, supabase
   );
 }
 
-async function handleLaw(token: string, chatId: number, query: string, supabase: ReturnType<typeof createClient>) {
+async function handleLaw(token: string, chatId: number, query: string, supabase: ReturnType<typeof createClient>, messageId?: number) {
   if (!query) {
-    await sendMessage(token, chatId,
+    await reply(token, chatId,
       "📚 <b>Поиск законов</b>\n\n" +
       "Используй: <code>/law запрос</code>\n\n" +
       "Примеры:\n" +
       "• <code>/law ук 228</code>\n" +
       "• <code>/law дорожный кодекс</code>\n" +
       "• <code>/law грабёж</code>",
-      { reply_markup: { inline_keyboard: [[{ text: "◀️ Главное меню", callback_data: "menu_main" }]] } }
+      { reply_markup: { inline_keyboard: [[{ text: "◀️ Главное меню", callback_data: "menu_main" }]] } },
+      messageId
     );
     return;
   }
@@ -139,9 +155,10 @@ async function handleLaw(token: string, chatId: number, query: string, supabase:
     .limit(3);
 
   if (!laws?.length) {
-    await sendMessage(token, chatId,
+    await reply(token, chatId,
       `🔍 По запросу «<b>${query}</b>» ничего не найдено.\n\nПопробуй другой запрос.`,
-      { reply_markup: { inline_keyboard: [[{ text: "◀️ Главное меню", callback_data: "menu_main" }]] } }
+      { reply_markup: { inline_keyboard: [[{ text: "◀️ Главное меню", callback_data: "menu_main" }]] } },
+      messageId
     );
     return;
   }
@@ -154,13 +171,13 @@ async function handleLaw(token: string, chatId: number, query: string, supabase:
     msg += `🔗 <a href="${SITE_URL}/laws/${law.slug}">Читать полностью</a>\n\n`;
   });
 
-  await sendMessage(token, chatId, msg, {
+  await reply(token, chatId, msg, {
     reply_markup: { inline_keyboard: [[{ text: "◀️ Главное меню", callback_data: "menu_main" }]] },
     disable_web_page_preview: true,
-  });
+  }, messageId);
 }
 
-async function handleProfile(token: string, chatId: number, supabase: ReturnType<typeof createClient>) {
+async function handleProfile(token: string, chatId: number, supabase: ReturnType<typeof createClient>, messageId?: number) {
   const { data: profile } = await supabase
     .from("profiles")
     .select("id, username, avatar_url, created_at")
@@ -168,9 +185,10 @@ async function handleProfile(token: string, chatId: number, supabase: ReturnType
     .maybeSingle();
 
   if (!profile) {
-    await sendMessage(token, chatId,
+    await reply(token, chatId,
       "❌ Аккаунт не привязан.\n\nЗайди на сайт → Профиль → «Привязать Telegram».",
-      { reply_markup: { inline_keyboard: [[{ text: "◀️ Главное меню", callback_data: "menu_main" }]] } }
+      { reply_markup: { inline_keyboard: [[{ text: "◀️ Главное меню", callback_data: "menu_main" }]] } },
+      messageId
     );
     return;
   }
@@ -202,13 +220,13 @@ async function handleProfile(token: string, chatId: number, supabase: ReturnType
     `📅 <b>На сайте с:</b> ${formatDate(profile.created_at)}\n\n` +
     `🔗 <a href="${SITE_URL}/profile">Открыть профиль</a>`;
 
-  await sendMessage(token, chatId, msg, {
+  await reply(token, chatId, msg, {
     reply_markup: { inline_keyboard: [[{ text: "◀️ Главное меню", callback_data: "menu_main" }]] },
     disable_web_page_preview: true,
-  });
+  }, messageId);
 }
 
-async function handleGiveaways(token: string, chatId: number, supabase: ReturnType<typeof createClient>) {
+async function handleGiveaways(token: string, chatId: number, supabase: ReturnType<typeof createClient>, messageId?: number) {
   const { data: giveaways } = await supabase
     .from("giveaways")
     .select("title, prize, ends_at, description")
@@ -217,9 +235,10 @@ async function handleGiveaways(token: string, chatId: number, supabase: ReturnTy
     .limit(5);
 
   if (!giveaways?.length) {
-    await sendMessage(token, chatId,
+    await reply(token, chatId,
       "🎁 Сейчас нет активных розыгрышей.\n\nСледи за новостями!",
-      { reply_markup: { inline_keyboard: [[{ text: "◀️ Главное меню", callback_data: "menu_main" }]] } }
+      { reply_markup: { inline_keyboard: [[{ text: "◀️ Главное меню", callback_data: "menu_main" }]] } },
+      messageId
     );
     return;
   }
@@ -234,13 +253,13 @@ async function handleGiveaways(token: string, chatId: number, supabase: ReturnTy
   });
   msg += `🔗 <a href="${SITE_URL}/giveaways">Участвовать на сайте</a>`;
 
-  await sendMessage(token, chatId, msg, {
+  await reply(token, chatId, msg, {
     reply_markup: { inline_keyboard: [[{ text: "◀️ Главное меню", callback_data: "menu_main" }]] },
     disable_web_page_preview: true,
-  });
+  }, messageId);
 }
 
-async function handleTickets(token: string, chatId: number, supabase: ReturnType<typeof createClient>) {
+async function handleTickets(token: string, chatId: number, supabase: ReturnType<typeof createClient>, messageId?: number) {
   const { data: profile } = await supabase
     .from("profiles")
     .select("id")
@@ -248,9 +267,10 @@ async function handleTickets(token: string, chatId: number, supabase: ReturnType
     .maybeSingle();
 
   if (!profile) {
-    await sendMessage(token, chatId,
+    await reply(token, chatId,
       "❌ Сначала привяжи аккаунт.\nЗайди на сайт → Профиль → «Привязать Telegram».",
-      { reply_markup: { inline_keyboard: [[{ text: "◀️ Главное меню", callback_data: "menu_main" }]] } }
+      { reply_markup: { inline_keyboard: [[{ text: "◀️ Главное меню", callback_data: "menu_main" }]] } },
+      messageId
     );
     return;
   }
@@ -263,9 +283,10 @@ async function handleTickets(token: string, chatId: number, supabase: ReturnType
     .limit(5);
 
   if (!tickets?.length) {
-    await sendMessage(token, chatId,
+    await reply(token, chatId,
       "🎫 У тебя нет тикетов.\n\nСоздай новый: <code>/ticket тема обращения</code>",
-      { reply_markup: { inline_keyboard: [[{ text: "➕ Создать тикет", callback_data: "menu_ticket_new" }, { text: "◀️ Меню", callback_data: "menu_main" }]] } }
+      { reply_markup: { inline_keyboard: [[{ text: "➕ Создать тикет", callback_data: "menu_ticket_new" }, { text: "◀️ Меню", callback_data: "menu_main" }]] } },
+      messageId
     );
     return;
   }
@@ -278,17 +299,17 @@ async function handleTickets(token: string, chatId: number, supabase: ReturnType
   });
   msg += "<i>Ответь сообщением, чтобы дополнить последний открытый тикет.</i>";
 
-  await sendMessage(token, chatId, msg, {
+  await reply(token, chatId, msg, {
     reply_markup: {
       inline_keyboard: [
         [{ text: "➕ Создать тикет", callback_data: "menu_ticket_new" }],
         [{ text: "◀️ Главное меню", callback_data: "menu_main" }],
       ],
     },
-  });
+  }, messageId);
 }
 
-async function handleNews(token: string, chatId: number, supabase: ReturnType<typeof createClient>) {
+async function handleNews(token: string, chatId: number, supabase: ReturnType<typeof createClient>, messageId?: number) {
   const { data: news } = await supabase
     .from("discord_news")
     .select("title, content, created_at, author_name")
@@ -296,9 +317,10 @@ async function handleNews(token: string, chatId: number, supabase: ReturnType<ty
     .limit(5);
 
   if (!news?.length) {
-    await sendMessage(token, chatId,
+    await reply(token, chatId,
       "📰 Новостей пока нет.",
-      { reply_markup: { inline_keyboard: [[{ text: "◀️ Главное меню", callback_data: "menu_main" }]] } }
+      { reply_markup: { inline_keyboard: [[{ text: "◀️ Главное меню", callback_data: "menu_main" }]] } },
+      messageId
     );
     return;
   }
@@ -312,14 +334,14 @@ async function handleNews(token: string, chatId: number, supabase: ReturnType<ty
   });
   msg += `🔗 <a href="${SITE_URL}/news">Все новости на сайте</a>`;
 
-  await sendMessage(token, chatId, msg, {
+  await reply(token, chatId, msg, {
     reply_markup: { inline_keyboard: [[{ text: "◀️ Главное меню", callback_data: "menu_main" }]] },
     disable_web_page_preview: true,
-  });
+  }, messageId);
 }
 
-async function handleHelp(token: string, chatId: number) {
-  await sendMessage(token, chatId,
+async function handleHelp(token: string, chatId: number, messageId?: number) {
+  await reply(token, chatId,
     "📖 <b>Команды Hardy Help бота:</b>\n\n" +
     "📚 /law <i>запрос</i> — поиск законов\n" +
     "👤 /profile — мой профиль\n" +
@@ -329,7 +351,8 @@ async function handleHelp(token: string, chatId: number) {
     "🎫 /ticket <i>тема</i> — создать тикет\n" +
     "❓ /help — эта справка\n\n" +
     "Или используй кнопки меню 👇",
-    mainMenuKeyboard()
+    mainMenuKeyboard(),
+    messageId
   );
 }
 
@@ -439,6 +462,7 @@ Deno.serve(async (req) => {
     if (update?.callback_query) {
       const cb = update.callback_query;
       const chatId = cb.message?.chat?.id;
+      const msgId = cb.message?.message_id;
       const data = cb.data;
 
       if (!chatId) return new Response("ok", { headers: corsHeaders });
@@ -447,34 +471,35 @@ Deno.serve(async (req) => {
 
       switch (data) {
         case "menu_main":
-          await sendMessage(BOT_TOKEN, chatId, "📋 <b>Главное меню</b>\n\nВыбери действие 👇", mainMenuKeyboard());
+          await reply(BOT_TOKEN, chatId, "📋 <b>Главное меню</b>\n\nВыбери действие 👇", mainMenuKeyboard(), msgId);
           break;
         case "menu_law":
-          await handleLaw(BOT_TOKEN, chatId, "", supabase);
+          await handleLaw(BOT_TOKEN, chatId, "", supabase, msgId);
           break;
         case "menu_profile":
-          await handleProfile(BOT_TOKEN, chatId, supabase);
+          await handleProfile(BOT_TOKEN, chatId, supabase, msgId);
           break;
         case "menu_giveaways":
-          await handleGiveaways(BOT_TOKEN, chatId, supabase);
+          await handleGiveaways(BOT_TOKEN, chatId, supabase, msgId);
           break;
         case "menu_tickets":
-          await handleTickets(BOT_TOKEN, chatId, supabase);
+          await handleTickets(BOT_TOKEN, chatId, supabase, msgId);
           break;
         case "menu_news":
-          await handleNews(BOT_TOKEN, chatId, supabase);
+          await handleNews(BOT_TOKEN, chatId, supabase, msgId);
           break;
         case "menu_help":
-          await handleHelp(BOT_TOKEN, chatId);
+          await handleHelp(BOT_TOKEN, chatId, msgId);
           break;
         case "menu_ticket_new":
-          await sendMessage(BOT_TOKEN, chatId,
+          await reply(BOT_TOKEN, chatId,
             "🎫 Для создания тикета отправь:\n<code>/ticket тема обращения</code>",
-            { reply_markup: { inline_keyboard: [[{ text: "◀️ Главное меню", callback_data: "menu_main" }]] } }
+            { reply_markup: { inline_keyboard: [[{ text: "◀️ Главное меню", callback_data: "menu_main" }]] } },
+            msgId
           );
           break;
         default:
-          await sendMessage(BOT_TOKEN, chatId, "📋 Выбери действие 👇", mainMenuKeyboard());
+          await reply(BOT_TOKEN, chatId, "📋 Выбери действие 👇", mainMenuKeyboard(), msgId);
       }
       return new Response("ok", { headers: corsHeaders });
     }
