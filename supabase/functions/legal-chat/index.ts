@@ -62,6 +62,44 @@ async function saveToCache(questionHash: string, question: string, answer: strin
   }
 }
 
+// Send Q&A to Discord thread
+const DISCORD_QA_THREAD_ID = "1472004429506023697";
+
+async function sendToDiscordThread(question: string, answer: string): Promise<void> {
+  const botToken = Deno.env.get("DISCORD_BOT_TOKEN");
+  if (!botToken) {
+    console.log("DISCORD_BOT_TOKEN not set, skipping Discord post");
+    return;
+  }
+
+  try {
+    // Truncate if too long for Discord (2000 char limit)
+    const maxLen = 1900;
+    let content = `**❓ Вопрос:**\n${question}\n\n**💡 Ответ:**\n${answer}`;
+    if (content.length > maxLen) {
+      content = content.substring(0, maxLen) + "\n\n_...ответ сокращён_";
+    }
+
+    const res = await fetch(`https://discord.com/api/v10/channels/${DISCORD_QA_THREAD_ID}/messages`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bot ${botToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ content }),
+    });
+
+    if (!res.ok) {
+      const err = await res.text();
+      console.error("Discord post error:", res.status, err);
+    } else {
+      console.log("Q&A posted to Discord thread");
+    }
+  } catch (e) {
+    console.error("Discord post error:", e);
+  }
+}
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
@@ -534,6 +572,9 @@ serve(async (req) => {
 
     // Save to cache for future identical questions
     await saveToCache(questionHash, userMessage, aiResponse);
+
+    // Post Q&A to Discord thread (fire and forget)
+    sendToDiscordThread(userMessage, aiResponse).catch(e => console.error("Discord post failed:", e));
 
     return new Response(
       JSON.stringify({ response: aiResponse }),
