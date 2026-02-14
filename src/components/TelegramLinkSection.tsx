@@ -62,7 +62,7 @@ export function TelegramLinkSection({ userId, telegramChatId, onUpdate }: Telegr
 
   const copyCode = async () => {
     if (!linkCode) return;
-    const deepLink = `https://t.me/HardyHelpBot?start=${linkCode}`;
+    const deepLink = `https://t.me/hardy1bot?start=${linkCode}`;
     await navigator.clipboard.writeText(deepLink);
     setCopied(true);
     toast.success('Ссылка скопирована!');
@@ -125,7 +125,7 @@ export function TelegramLinkSection({ userId, telegramChatId, onUpdate }: Telegr
           </p>
           <div className="flex gap-2">
             <a
-              href={`https://t.me/HardyHelpBot?start=${linkCode}`}
+              href={`https://t.me/hardy1bot?start=${linkCode}`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex-1"
