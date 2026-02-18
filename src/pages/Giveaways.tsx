@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -158,6 +159,7 @@ function LiveCountdown({ endsAt, createdAt }: { endsAt: string; createdAt?: stri
 
 export default function Giveaways() {
   const { user, canManage } = useAuth();
+  const navigate = useNavigate();
   const [giveaways, setGiveaways] = useState<Giveaway[]>([]);
   const [entries, setEntries] = useState<Record<string, GiveawayEntry[]>>({});
   const [myEntries, setMyEntries] = useState<Record<string, GiveawayEntry>>({});
@@ -543,7 +545,7 @@ export default function Giveaways() {
                 </Button>
               )}
               {!user && (
-                <Button variant="outline" className="rounded-xl" onClick={() => toast.info("Войдите, чтобы участвовать")}>
+                <Button variant="outline" className="rounded-xl" onClick={() => navigate("/auth")}>
                   Войти для участия
                 </Button>
               )}
@@ -777,7 +779,7 @@ export default function Giveaways() {
                               Участвовать
                             </Button>
                           ) : (
-                            <Button className="w-full rounded-xl" variant="outline" onClick={() => toast.info("Войдите, чтобы участвовать")}>
+                            <Button className="w-full rounded-xl" variant="outline" onClick={() => navigate("/auth")}>
                               Войти для участия
                             </Button>
                           )}
