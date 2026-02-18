@@ -98,7 +98,7 @@ function ConfettiParticles() {
 }
 
 // Live countdown timer
-function LiveCountdown({ endsAt }: { endsAt: string }) {
+function LiveCountdown({ endsAt, createdAt }: { endsAt: string; createdAt?: string }) {
   const [timeLeft, setTimeLeft] = useState("");
   const [progress, setProgress] = useState(100);
 
@@ -120,14 +120,20 @@ function LiveCountdown({ endsAt }: { endsAt: string }) {
       else if (hours > 0) setTimeLeft(`${hours}ч ${minutes}м ${seconds}с`);
       else setTimeLeft(`${minutes}м ${seconds}с`);
 
-      // Calculate progress (assume max 30 days)
-      const totalDuration = 30 * 24 * 60 * 60 * 1000;
-      setProgress(Math.min(100, (diff / totalDuration) * 100));
+      // Calculate progress based on actual giveaway duration
+      if (createdAt) {
+        const start = new Date(createdAt).getTime();
+        const total = end - start;
+        setProgress(Math.max(0, Math.min(100, (diff / total) * 100)));
+      } else {
+        const totalDuration = 30 * 24 * 60 * 60 * 1000;
+        setProgress(Math.min(100, (diff / totalDuration) * 100));
+      }
     };
     update();
     const interval = setInterval(update, 1000);
     return () => clearInterval(interval);
-  }, [endsAt]);
+  }, [endsAt, createdAt]);
 
   return (
     <div className="space-y-1.5">
@@ -135,13 +141,16 @@ function LiveCountdown({ endsAt }: { endsAt: string }) {
         <Clock className="h-3.5 w-3.5 text-accent" />
         <span>{timeLeft}</span>
       </div>
-      <div className="h-1 w-full rounded-full bg-muted overflow-hidden">
+      <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
         <div
           className="h-full rounded-full transition-all duration-1000 relative overflow-hidden"
-          style={{ width: `${progress}%`, background: 'hsl(var(--accent))' }}
-        >
-          <div className="absolute inset-0 animate-shimmer bg-gradient-to-r from-transparent via-white/30 to-transparent" style={{ backgroundSize: '200% 100%' }} />
-        </div>
+          style={{
+            width: `${progress}%`,
+            background: `linear-gradient(90deg, hsl(var(--accent)), hsl(var(--accent) / 0.7), hsl(var(--accent)))`,
+            backgroundSize: '200% 100%',
+            animation: 'progress-flow 2s linear infinite',
+          }}
+        />
       </div>
     </div>
   );
@@ -519,7 +528,7 @@ export default function Giveaways() {
                   {g.ends_at && (
                     <span className="text-xs text-muted-foreground flex items-center gap-1">
                       <Clock className="h-3 w-3" />
-                      <LiveCountdown endsAt={g.ends_at} />
+                      <LiveCountdown endsAt={g.ends_at} createdAt={g.created_at} />
                     </span>
                   )}
                 </div>
@@ -587,7 +596,7 @@ export default function Giveaways() {
                       </div>
                       {g.ends_at && isActive && (
                         <div className="absolute bottom-3 left-3 right-3">
-                          <LiveCountdown endsAt={g.ends_at} />
+                          <LiveCountdown endsAt={g.ends_at} createdAt={g.created_at} />
                         </div>
                       )}
                     </div>
@@ -653,7 +662,7 @@ export default function Giveaways() {
                         участников
                       </span>
                       {g.ends_at && !g.image_url && isActive && (
-                        <LiveCountdown endsAt={g.ends_at} />
+                        <LiveCountdown endsAt={g.ends_at} createdAt={g.created_at} />
                       )}
                     </div>
 
