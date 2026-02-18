@@ -137,9 +137,11 @@ function LiveCountdown({ endsAt }: { endsAt: string }) {
       </div>
       <div className="h-1 w-full rounded-full bg-muted overflow-hidden">
         <div
-          className="h-full rounded-full bg-gradient-to-r from-accent to-accent/60 transition-all duration-1000"
-          style={{ width: `${progress}%` }}
-        />
+          className="h-full rounded-full transition-all duration-1000 relative overflow-hidden"
+          style={{ width: `${progress}%`, background: 'hsl(var(--accent))' }}
+        >
+          <div className="absolute inset-0 animate-shimmer bg-gradient-to-r from-transparent via-white/30 to-transparent" style={{ backgroundSize: '200% 100%' }} />
+        </div>
       </div>
     </div>
   );
