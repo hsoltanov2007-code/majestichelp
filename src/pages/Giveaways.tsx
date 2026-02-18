@@ -545,7 +545,7 @@ export default function Giveaways() {
                 </Button>
               )}
               {!user && (
-                <Button variant="outline" className="rounded-xl" onClick={() => navigate("/auth")}>
+                <Button variant="outline" className="rounded-xl" onClick={() => navigate("/auth", { state: { from: "/giveaways" } })}>
                   Войти для участия
                 </Button>
               )}
@@ -779,7 +779,7 @@ export default function Giveaways() {
                               Участвовать
                             </Button>
                           ) : (
-                            <Button className="w-full rounded-xl" variant="outline" onClick={() => navigate("/auth")}>
+                            <Button className="w-full rounded-xl" variant="outline" onClick={() => navigate("/auth", { state: { from: "/giveaways" } })}>
                               Войти для участия
                             </Button>
                           )}
