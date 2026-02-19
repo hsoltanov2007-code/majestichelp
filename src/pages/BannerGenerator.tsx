@@ -305,7 +305,7 @@ export default function BannerGenerator() {
     if (date) {
       ctx.fillStyle = "rgba(255,255,255,0.4)";
       ctx.font = "400 17px Inter, Arial, sans-serif";
-      ctx.fillText(`📅  ${date}`, 100, H - 92);
+      ctx.fillText(`📅  ${date}`, 100, H - 130);
     }
 
     // Footer line
@@ -317,14 +317,17 @@ export default function BannerGenerator() {
     ctx.beginPath();
     ctx.moveTo(100, H - 108); ctx.lineTo(W - 100, H - 108); ctx.stroke();
 
-    // Promo code block — left side (above footer line)
+    // === FOOTER ZONE (H-108 to H-60) ===
+    const footerY = H - 78; // baseline for text
+
+    // Promo code block — LEFT in footer zone
     ctx.font = "bold 13px Inter, Arial, sans-serif";
     const promoText = "/promo HRDY — 50 000$ + 7 дней премиума";
-    const promoW = ctx.measureText(promoText).width + 36;
+    const promoW = ctx.measureText(promoText).width + 32;
     const promoX = 100;
-    const promoY = H - 97;
+    const promoBlockY = H - 95;
     ctx.save();
-    roundRect(ctx, promoX, promoY, promoW, 34, 8);
+    roundRect(ctx, promoX, promoBlockY, promoW, 30, 7);
     ctx.fillStyle = isWinner ? "rgba(244,196,48,0.12)" : "rgba(230,57,70,0.12)";
     ctx.fill();
     ctx.strokeStyle = isWinner ? "rgba(244,196,48,0.45)" : "rgba(230,57,70,0.45)";
@@ -333,9 +336,9 @@ export default function BannerGenerator() {
     ctx.restore();
     ctx.fillStyle = isWinner ? "#f4c430" : ACCENT;
     ctx.font = "bold 13px Inter, Arial, sans-serif";
-    ctx.fillText(promoText, promoX + 18, promoY + 22);
+    ctx.fillText(promoText, promoX + 16, promoBlockY + 20);
 
-    // Footer branding HARDY | Majestic RP — right side with logo
+    // Footer branding HARDY | Majestic RP + logo — RIGHT in footer zone
     ctx.font = "900 14px Inter, Arial Black, sans-serif";
     const hardyW = ctx.measureText("HARDY").width;
     ctx.font = "400 14px Inter, Arial, sans-serif";
@@ -343,7 +346,7 @@ export default function BannerGenerator() {
 
     let logoDrawW = 0;
     if (logoRef.current) {
-      const logoH = 28;
+      const logoH = 26;
       logoDrawW = logoH * (logoRef.current.naturalWidth / logoRef.current.naturalHeight);
     }
 
@@ -351,24 +354,19 @@ export default function BannerGenerator() {
     const totalW = logoDrawW + gap + hardyW + suffixW;
     const startX = W - 100 - totalW;
 
-    // Draw logo
     if (logoRef.current) {
-      const logoH = 28;
       ctx.save();
       ctx.globalAlpha = 0.85;
-      ctx.drawImage(logoRef.current, startX, H - 92, logoDrawW, logoH);
+      ctx.drawImage(logoRef.current, startX, H - 97, logoDrawW, 26);
       ctx.restore();
     }
 
-    // HARDY text
     ctx.fillStyle = ACCENT;
     ctx.font = "900 14px Inter, Arial Black, sans-serif";
-    ctx.fillText("HARDY", startX + logoDrawW + gap, H - 74);
-
-    // | Majestic RP text
+    ctx.fillText("HARDY", startX + logoDrawW + gap, footerY);
     ctx.fillStyle = "rgba(255,255,255,0.4)";
     ctx.font = "400 14px Inter, Arial, sans-serif";
-    ctx.fillText(" | Majestic RP", startX + logoDrawW + gap + hardyW, H - 74);
+    ctx.fillText(" | Majestic RP", startX + logoDrawW + gap + hardyW, footerY);
   }, [bannerType, title, subtitle, description, prize, winner, date, logoLoaded]);
 
   useEffect(() => { drawBanner(); }, [drawBanner]);
