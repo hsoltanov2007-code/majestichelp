@@ -7,6 +7,7 @@ const corsHeaders = {
 
 const TELEGRAM_API = "https://api.telegram.org/bot";
 const SITE_URL = "https://majestichelp.com";
+const MINI_APP_URL = "https://majestichelp.com";
 
 // ── Telegram helpers ──
 
@@ -49,6 +50,9 @@ function mainMenuKeyboard() {
   return {
     reply_markup: {
       inline_keyboard: [
+        [
+          { text: "🚀 Открыть приложение", web_app: { url: MINI_APP_URL } },
+        ],
         [
           { text: "📚 Поиск законов", callback_data: "menu_law" },
           { text: "🎁 Розыгрыши", callback_data: "menu_giveaways" },
@@ -123,11 +127,10 @@ async function handleStart(token: string, chatId: number, text: string, supabase
 
   await sendMessage(token, chatId,
     "👋 <b>Привет! Я бот Hardy Help</b>\n\n" +
-    "🔹 Поиск законов прямо в Telegram\n" +
-    "🔹 Управление тикетами поддержки\n" +
-    "🔹 Розыгрыши и новости\n\n" +
-    "Выбери действие из меню ниже 👇\n\n" +
-    "<i>Для привязки аккаунта зайди на сайт → Профиль → «Привязать Telegram»</i>",
+    "🔹 Нажми кнопку ниже, чтобы открыть полное приложение прямо в Telegram\n" +
+    "🔹 Поиск законов, розыгрыши, тикеты, новости\n" +
+    "🔹 Авторизация происходит автоматически через Telegram\n\n" +
+    "Выбери действие 👇",
     mainMenuKeyboard()
   );
 }

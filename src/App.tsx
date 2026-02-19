@@ -7,6 +7,7 @@ import { ViewModeProvider } from "@/hooks/useViewMode";
 import { LegalChatBot } from "@/components/LegalChatBot";
 import AnimatedBackground from "@/components/AnimatedBackground";
 import { useGlobalSearch } from "@/hooks/useGlobalSearch";
+import { TelegramAuthProvider } from "@/components/TelegramAuthProvider";
 import Index from "./pages/Index";
 import CriminalCode from "./pages/CriminalCode";
 import AdministrativeCode from "./pages/AdministrativeCode";
@@ -95,12 +96,14 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <ViewModeProvider>
       <TooltipProvider>
-        <AnimatedBackground />
-        <Toaster />
-        <Sonner />
-        <HashRouter>
-          <AppContent />
-        </HashRouter>
+        <TelegramAuthProvider>
+          <AnimatedBackground />
+          <Toaster />
+          <Sonner />
+          <HashRouter>
+            <AppContent />
+          </HashRouter>
+        </TelegramAuthProvider>
       </TooltipProvider>
     </ViewModeProvider>
   </QueryClientProvider>
