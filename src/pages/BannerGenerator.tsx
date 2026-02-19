@@ -327,17 +327,30 @@ export default function BannerGenerator() {
       ctx.restore();
     }
 
-    // Footer branding
+    // Footer branding — HARDY | Majestic RP
     ctx.fillStyle = ACCENT;
-    ctx.font = "900 14px Inter, Arial Black, sans-serif";
+    ctx.font = "900 15px Inter, Arial Black, sans-serif";
     ctx.fillText("HARDY", 100, H - 74);
-    ctx.fillStyle = "rgba(255,255,255,0.28)";
-    ctx.font = "400 14px Inter, Arial, sans-serif";
-    ctx.fillText("  ·  Majestic RP", 148, H - 74);
+    ctx.fillStyle = "rgba(255,255,255,0.45)";
+    ctx.font = "500 15px Inter, Arial, sans-serif";
+    ctx.fillText(" | Majestic RP", 148, H - 74);
 
-    ctx.fillStyle = "rgba(255,255,255,0.25)";
-    ctx.font = "400 13px Inter, Arial, sans-serif";
-    ctx.fillText("majestichelp.lovable.app", W - 100 - 195, H - 74);
+    // Promo code block — right side
+    const promoText = "/promo HRDY — 50 000$ + 7 дней премиума";
+    const promoW = ctx.measureText(promoText).width + 36;
+    const promoX = W - 100 - promoW;
+    const promoY = H - 97;
+    ctx.save();
+    roundRect(ctx, promoX, promoY, promoW, 34, 8);
+    ctx.fillStyle = isWinner ? "rgba(244,196,48,0.12)" : "rgba(230,57,70,0.12)";
+    ctx.fill();
+    ctx.strokeStyle = isWinner ? "rgba(244,196,48,0.35)" : "rgba(230,57,70,0.35)";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.restore();
+    ctx.fillStyle = isWinner ? "rgba(244,196,48,0.9)" : "rgba(230,57,70,0.9)";
+    ctx.font = "bold 13px Inter, Arial, sans-serif";
+    ctx.fillText(promoText, promoX + 18, promoY + 22);
   }, [bannerType, title, subtitle, description, prize, winner, date, logoLoaded]);
 
   useEffect(() => { drawBanner(); }, [drawBanner]);
