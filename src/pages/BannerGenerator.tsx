@@ -317,31 +317,11 @@ export default function BannerGenerator() {
     ctx.beginPath();
     ctx.moveTo(100, H - 108); ctx.lineTo(W - 100, H - 108); ctx.stroke();
 
-    // Logo — рядом с HARDY слева
-    let logoDrawW = 0;
-    if (logoRef.current) {
-      const logoH = 32;
-      logoDrawW = logoH * (logoRef.current.naturalWidth / logoRef.current.naturalHeight);
-      ctx.save();
-      ctx.globalAlpha = 0.85;
-      ctx.drawImage(logoRef.current, 100, H - 107, logoDrawW, logoH);
-      ctx.restore();
-    }
-
-    // Footer branding — HARDY | Majestic RP (правее логотипа)
-    const hardyX = logoDrawW > 0 ? 100 + logoDrawW + 10 : 100;
-    ctx.fillStyle = ACCENT;
-    ctx.font = "900 15px Inter, Arial Black, sans-serif";
-    ctx.fillText("HARDY", hardyX, H - 74);
-    ctx.fillStyle = "rgba(255,255,255,0.45)";
-    ctx.font = "500 15px Inter, Arial, sans-serif";
-    ctx.fillText(" | Majestic RP", hardyX + 52, H - 74);
-
-    // Promo code block — right side
+    // Promo code block — left side (above footer line)
     ctx.font = "bold 13px Inter, Arial, sans-serif";
     const promoText = "/promo HRDY — 50 000$ + 7 дней премиума";
     const promoW = ctx.measureText(promoText).width + 36;
-    const promoX = W - 100 - promoW;
+    const promoX = 100;
     const promoY = H - 97;
     ctx.save();
     roundRect(ctx, promoX, promoY, promoW, 34, 8);
@@ -354,6 +334,25 @@ export default function BannerGenerator() {
     ctx.fillStyle = isWinner ? "#f4c430" : ACCENT;
     ctx.font = "bold 13px Inter, Arial, sans-serif";
     ctx.fillText(promoText, promoX + 18, promoY + 22);
+
+    // Logo — right side
+    let logoDrawW = 0;
+    if (logoRef.current) {
+      const logoH = 30;
+      logoDrawW = logoH * (logoRef.current.naturalWidth / logoRef.current.naturalHeight);
+      ctx.save();
+      ctx.globalAlpha = 0.85;
+      ctx.drawImage(logoRef.current, W - 100 - logoDrawW, H - 105, logoDrawW, logoH);
+      ctx.restore();
+    }
+
+    // Footer branding HARDY | Majestic RP — right side, under logo
+    ctx.fillStyle = ACCENT;
+    ctx.font = "900 14px Inter, Arial Black, sans-serif";
+    ctx.fillText("HARDY", W - 100 - logoDrawW, H - 72);
+    ctx.fillStyle = "rgba(255,255,255,0.4)";
+    ctx.font = "400 14px Inter, Arial, sans-serif";
+    ctx.fillText(" | Majestic RP", W - 100 - logoDrawW + 50, H - 72);
   }, [bannerType, title, subtitle, description, prize, winner, date, logoLoaded]);
 
   useEffect(() => { drawBanner(); }, [drawBanner]);
