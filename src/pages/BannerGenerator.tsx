@@ -277,30 +277,6 @@ export default function BannerGenerator() {
       wrapText(ctx, description, 100, 440, W - 200, 30);
     }
 
-    // Prize block
-    if (prize) {
-      const prizeY = isWinner && winner ? 490 : description ? 430 : 360;
-      if (prizeY < H - 130) {
-        ctx.save();
-        roundRect(ctx, 100, prizeY, 520, 68, 14);
-        const prizeGrad = ctx.createLinearGradient(100, prizeY, 620, prizeY);
-        prizeGrad.addColorStop(0, "rgba(244,196,48,0.14)");
-        prizeGrad.addColorStop(1, "rgba(244,196,48,0.03)");
-        ctx.fillStyle = prizeGrad;
-        ctx.fill();
-        ctx.strokeStyle = "rgba(244,196,48,0.28)";
-        ctx.lineWidth = 1;
-        ctx.stroke();
-        ctx.restore();
-        ctx.fillStyle = GOLD;
-        ctx.font = "bold 12px Inter, Arial, sans-serif";
-        ctx.fillText("🏆  ПРИЗ", 120, prizeY + 24);
-        ctx.fillStyle = "#ffffff";
-        ctx.font = "bold 21px Inter, Arial, sans-serif";
-        ctx.fillText(prize, 120, prizeY + 50);
-      }
-    }
-
     // Date
     if (date) {
       ctx.fillStyle = "rgba(255,255,255,0.4)";
@@ -319,15 +295,40 @@ export default function BannerGenerator() {
 
     // === FOOTER ZONE (H-108 to H-60) ===
     const footerY = H - 78; // baseline for text
+    const footerBlockY = H - 95;
 
-    // Promo code block — LEFT in footer zone
+    // Prize block — LEFT in footer zone
+    if (prize) {
+      ctx.font = "bold 13px Inter, Arial, sans-serif";
+      const prizeLabel = "🏆  ПРИЗ:";
+      const prizeLabelW = ctx.measureText(prizeLabel).width;
+      ctx.font = "bold 14px Inter, Arial Black, sans-serif";
+      const prizeValW = ctx.measureText(prize).width;
+      const prizeBlockW = prizeLabelW + 10 + prizeValW + 32;
+      ctx.save();
+      roundRect(ctx, 100, footerBlockY, prizeBlockW, 30, 7);
+      ctx.fillStyle = "rgba(244,196,48,0.12)";
+      ctx.fill();
+      ctx.strokeStyle = "rgba(244,196,48,0.4)";
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      ctx.restore();
+      ctx.fillStyle = GOLD;
+      ctx.font = "bold 13px Inter, Arial, sans-serif";
+      ctx.fillText(prizeLabel, 116, footerBlockY + 20);
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 14px Inter, Arial Black, sans-serif";
+      ctx.fillText(prize, 116 + prizeLabelW + 10, footerBlockY + 20);
+    }
+
+    // Promo code block — CENTER in footer zone
     ctx.font = "bold 13px Inter, Arial, sans-serif";
     const promoText = "/promo HRDY — 50 000$ + 7 дней премиума";
     const promoW = ctx.measureText(promoText).width + 32;
-    const promoX = 100;
-    const promoBlockY = H - 95;
+    // Position promo centered between prize and branding
+    const promoX = prize ? 100 + (W - 200) / 2 - promoW / 2 : 100;
     ctx.save();
-    roundRect(ctx, promoX, promoBlockY, promoW, 30, 7);
+    roundRect(ctx, promoX, footerBlockY, promoW, 30, 7);
     ctx.fillStyle = isWinner ? "rgba(244,196,48,0.12)" : "rgba(230,57,70,0.12)";
     ctx.fill();
     ctx.strokeStyle = isWinner ? "rgba(244,196,48,0.45)" : "rgba(230,57,70,0.45)";
@@ -336,7 +337,7 @@ export default function BannerGenerator() {
     ctx.restore();
     ctx.fillStyle = isWinner ? "#f4c430" : ACCENT;
     ctx.font = "bold 13px Inter, Arial, sans-serif";
-    ctx.fillText(promoText, promoX + 16, promoBlockY + 20);
+    ctx.fillText(promoText, promoX + 16, footerBlockY + 20);
 
     // Footer branding HARDY | Majestic RP + logo — RIGHT in footer zone
     ctx.font = "900 14px Inter, Arial Black, sans-serif";
