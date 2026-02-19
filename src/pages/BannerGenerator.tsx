@@ -335,24 +335,40 @@ export default function BannerGenerator() {
     ctx.font = "bold 13px Inter, Arial, sans-serif";
     ctx.fillText(promoText, promoX + 18, promoY + 22);
 
-    // Logo — right side
+    // Footer branding HARDY | Majestic RP — right side with logo
+    ctx.font = "900 14px Inter, Arial Black, sans-serif";
+    const hardyW = ctx.measureText("HARDY").width;
+    ctx.font = "400 14px Inter, Arial, sans-serif";
+    const suffixW = ctx.measureText(" | Majestic RP").width;
+
     let logoDrawW = 0;
     if (logoRef.current) {
-      const logoH = 30;
+      const logoH = 28;
       logoDrawW = logoH * (logoRef.current.naturalWidth / logoRef.current.naturalHeight);
+    }
+
+    const gap = 8;
+    const totalW = logoDrawW + gap + hardyW + suffixW;
+    const startX = W - 100 - totalW;
+
+    // Draw logo
+    if (logoRef.current) {
+      const logoH = 28;
       ctx.save();
       ctx.globalAlpha = 0.85;
-      ctx.drawImage(logoRef.current, W - 100 - logoDrawW, H - 105, logoDrawW, logoH);
+      ctx.drawImage(logoRef.current, startX, H - 92, logoDrawW, logoH);
       ctx.restore();
     }
 
-    // Footer branding HARDY | Majestic RP — right side, under logo
+    // HARDY text
     ctx.fillStyle = ACCENT;
     ctx.font = "900 14px Inter, Arial Black, sans-serif";
-    ctx.fillText("HARDY", W - 100 - logoDrawW, H - 72);
+    ctx.fillText("HARDY", startX + logoDrawW + gap, H - 74);
+
+    // | Majestic RP text
     ctx.fillStyle = "rgba(255,255,255,0.4)";
     ctx.font = "400 14px Inter, Arial, sans-serif";
-    ctx.fillText(" | Majestic RP", W - 100 - logoDrawW + 50, H - 72);
+    ctx.fillText(" | Majestic RP", startX + logoDrawW + gap + hardyW, H - 74);
   }, [bannerType, title, subtitle, description, prize, winner, date, logoLoaded]);
 
   useEffect(() => { drawBanner(); }, [drawBanner]);
