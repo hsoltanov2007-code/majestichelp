@@ -556,14 +556,6 @@ export default function AdminGiveaways() {
               </DialogTitle>
             </DialogHeader>
 
-            {viewingEntries && giveaways.find(g => g.id === viewingEntries)?.status === "active" && (
-              <div className="flex gap-2">
-                <Button onClick={() => pickRandomWinner(viewingEntries)} variant="outline">
-                  <Shuffle className="h-4 w-4 mr-2" />
-                  Случайный победитель
-                </Button>
-              </div>
-            )}
 
             {entries.length === 0 ? (
               <p className="text-center py-8 text-muted-foreground">Участников пока нет</p>
@@ -611,11 +603,6 @@ export default function AdminGiveaways() {
                             {entry.status !== "rejected" && (
                               <Button variant="ghost" size="icon" onClick={() => { setRejectingEntry(entry.id); setRejectionReason(""); }}>
                                 <X className="h-4 w-4 text-destructive" />
-                              </Button>
-                            )}
-                            {giveaway?.status === "active" && (
-                              <Button variant="ghost" size="sm" onClick={() => pickManualWinner(viewingEntries!, entry.user_id)}>
-                                <Trophy className="h-4 w-4" />
                               </Button>
                             )}
                           </div>
