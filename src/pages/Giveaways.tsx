@@ -166,7 +166,7 @@ export default function Giveaways() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedGiveaway, setSelectedGiveaway] = useState<Giveaway | null>(null);
   const [isUploading, setIsUploading] = useState(false);
-  const [pendingFiles, setPendingFiles] = useState<FileList | null>(null);
+  const [pendingFiles, setPendingFiles] = useState<File[]>([]);
   const [winnerProfiles, setWinnerProfiles] = useState<Record<string, string>>({});
 
   // Comments & reactions state
@@ -280,14 +280,14 @@ export default function Giveaways() {
     setReactions(allReactions);
   };
 
-  const handleScreenshotUpload = async (files: FileList) => {
+  const handleScreenshotUpload = async (files: File[]) => {
     if (!user || !selectedGiveaway || files.length === 0) return;
     setIsUploading(true);
 
     try {
       const uploadedUrls: string[] = [];
 
-      for (const file of Array.from(files)) {
+      for (const file of files) {
         const ext = file.name.split(".").pop();
         const path = `${selectedGiveaway.id}/${user.id}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}.${ext}`;
 
@@ -320,9 +320,9 @@ export default function Giveaways() {
           throw insertError;
         }
       } else {
-        toast.success("Вы участвуете в розыгрыше!");
+      toast.success("Вы участвуете в розыгрыше!");
         setSelectedGiveaway(null);
-        setPendingFiles(null);
+        setPendingFiles([]);
         fetchGiveaways();
       }
     } catch (error: any) {
@@ -856,8 +856,20 @@ export default function Giveaways() {
       </div>
 
       {/* Upload dialog */}
-      <Dialog open={!!selectedGiveaway} onOpenChange={() => { setSelectedGiveaway(null); setPendingFiles(null); }}>
-        <DialogContent>
+      <Dialog open={!!selectedGiveaway} onOpenChange={() => { setSelectedGiveaway(null); setPendingFiles([]); }}>
+        <DialogContent
+          onPaste={(e) => {
+            const items = Array.from(e.clipboardData?.items || []);
+            const imageFiles = items
+              .filter(item => item.type.startsWith("image/"))
+              .map(item => item.getAsFile())
+              .filter((f): f is File => f !== null);
+            if (imageFiles.length > 0) {
+              setPendingFiles(prev => [...prev, ...imageFiles]);
+              toast.success(`Вставлено ${imageFiles.length} скриншот(ов) из буфера`);
+            }
+          }}
+        >
           <DialogHeader>
             <DialogTitle>Участие в розыгрыше</DialogTitle>
           </DialogHeader>
@@ -885,23 +897,71 @@ export default function Giveaways() {
             )}
             <div className="space-y-2">
               <Label>Скриншоты подтверждения * (можно несколько)</Label>
-              <Input
-                type="file"
-                accept="image/*"
-                multiple
-                disabled={isUploading}
-                onChange={(e) => {
-                  setPendingFiles(e.target.files);
+              {/* Paste zone */}
+              <div
+                className="relative border-2 border-dashed border-border rounded-xl p-4 text-center cursor-pointer hover:border-accent/60 transition-colors bg-muted/30 focus-within:border-accent"
+                tabIndex={0}
+                onPaste={(e) => {
+                  const items = Array.from(e.clipboardData?.items || []);
+                  const imageFiles = items
+                    .filter(item => item.type.startsWith("image/"))
+                    .map(item => item.getAsFile())
+                    .filter((f): f is File => f !== null);
+                  if (imageFiles.length > 0) {
+                    setPendingFiles(prev => [...prev, ...imageFiles]);
+                    toast.success(`Вставлено ${imageFiles.length} скриншот(ов) из буфера`);
+                  }
                 }}
-              />
-              {pendingFiles && pendingFiles.length > 0 && (
-                <div className="space-y-2">
+              >
+                <div className="flex flex-col items-center gap-1.5 pointer-events-none select-none">
+                  <Upload className="h-6 w-6 text-muted-foreground" />
                   <p className="text-sm text-muted-foreground">
-                    Выбрано файлов: {pendingFiles.length}
+                    Нажмите <kbd className="px-1.5 py-0.5 rounded bg-muted border border-border text-xs font-mono">Ctrl+V</kbd> чтобы вставить скриншот
                   </p>
+                  <p className="text-xs text-muted-foreground/70">или</p>
+                </div>
+                <label className="mt-2 inline-block cursor-pointer">
+                  <span className="text-xs text-accent hover:underline">выберите файл(ы)</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    disabled={isUploading}
+                    className="hidden"
+                    onChange={(e) => {
+                      if (e.target.files) {
+                        setPendingFiles(prev => [...prev, ...Array.from(e.target.files!)]);
+                      }
+                    }}
+                  />
+                </label>
+              </div>
+              {pendingFiles.length > 0 && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm text-muted-foreground">
+                      Файлов: {pendingFiles.length}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setPendingFiles([])}
+                      className="text-xs text-destructive hover:underline"
+                    >
+                      Очистить
+                    </button>
+                  </div>
                   <div className="flex flex-wrap gap-2">
-                    {Array.from(pendingFiles).map((f, i) => (
-                      <img key={i} src={URL.createObjectURL(f)} alt={f.name} className="w-16 h-16 rounded-lg object-cover border border-border" />
+                    {pendingFiles.map((f, i) => (
+                      <div key={i} className="relative group">
+                        <img src={URL.createObjectURL(f)} alt={f.name} className="w-16 h-16 rounded-lg object-cover border border-border" />
+                        <button
+                          type="button"
+                          onClick={() => setPendingFiles(prev => prev.filter((_, idx) => idx !== i))}
+                          className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-destructive text-destructive-foreground rounded-full text-xs hidden group-hover:flex items-center justify-center"
+                        >
+                          ×
+                        </button>
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -914,9 +974,9 @@ export default function Giveaways() {
               </div>
             )}
             <Button
-              disabled={!pendingFiles?.length || isUploading}
+              disabled={!pendingFiles.length || isUploading}
               onClick={() => {
-                if (pendingFiles?.length) handleScreenshotUpload(pendingFiles);
+                if (pendingFiles.length) handleScreenshotUpload(pendingFiles);
               }}
               className="w-full bg-accent hover:bg-accent/90 text-accent-foreground"
             >
