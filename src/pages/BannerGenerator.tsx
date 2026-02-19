@@ -317,25 +317,28 @@ export default function BannerGenerator() {
     ctx.beginPath();
     ctx.moveTo(100, H - 108); ctx.lineTo(W - 100, H - 108); ctx.stroke();
 
-    // Logo
+    // Logo — рядом с HARDY слева
+    let logoDrawW = 0;
     if (logoRef.current) {
-      const logoH = 38;
-      const logoW = logoH * (logoRef.current.naturalWidth / logoRef.current.naturalHeight);
+      const logoH = 32;
+      logoDrawW = logoH * (logoRef.current.naturalWidth / logoRef.current.naturalHeight);
       ctx.save();
       ctx.globalAlpha = 0.85;
-      ctx.drawImage(logoRef.current, W - 100 - logoW, H - 107, logoW, logoH);
+      ctx.drawImage(logoRef.current, 100, H - 107, logoDrawW, logoH);
       ctx.restore();
     }
 
-    // Footer branding — HARDY | Majestic RP
+    // Footer branding — HARDY | Majestic RP (правее логотипа)
+    const hardyX = logoDrawW > 0 ? 100 + logoDrawW + 10 : 100;
     ctx.fillStyle = ACCENT;
     ctx.font = "900 15px Inter, Arial Black, sans-serif";
-    ctx.fillText("HARDY", 100, H - 74);
+    ctx.fillText("HARDY", hardyX, H - 74);
     ctx.fillStyle = "rgba(255,255,255,0.45)";
     ctx.font = "500 15px Inter, Arial, sans-serif";
-    ctx.fillText(" | Majestic RP", 148, H - 74);
+    ctx.fillText(" | Majestic RP", hardyX + 52, H - 74);
 
     // Promo code block — right side
+    ctx.font = "bold 13px Inter, Arial, sans-serif";
     const promoText = "/promo HRDY — 50 000$ + 7 дней премиума";
     const promoW = ctx.measureText(promoText).width + 36;
     const promoX = W - 100 - promoW;
@@ -344,11 +347,11 @@ export default function BannerGenerator() {
     roundRect(ctx, promoX, promoY, promoW, 34, 8);
     ctx.fillStyle = isWinner ? "rgba(244,196,48,0.12)" : "rgba(230,57,70,0.12)";
     ctx.fill();
-    ctx.strokeStyle = isWinner ? "rgba(244,196,48,0.35)" : "rgba(230,57,70,0.35)";
+    ctx.strokeStyle = isWinner ? "rgba(244,196,48,0.45)" : "rgba(230,57,70,0.45)";
     ctx.lineWidth = 1;
     ctx.stroke();
     ctx.restore();
-    ctx.fillStyle = isWinner ? "rgba(244,196,48,0.9)" : "rgba(230,57,70,0.9)";
+    ctx.fillStyle = isWinner ? "#f4c430" : ACCENT;
     ctx.font = "bold 13px Inter, Arial, sans-serif";
     ctx.fillText(promoText, promoX + 18, promoY + 22);
   }, [bannerType, title, subtitle, description, prize, winner, date, logoLoaded]);
