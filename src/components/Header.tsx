@@ -252,6 +252,25 @@ export function Header() {
                 <p>Сохранённые статьи</p>
               </TooltipContent>
             </Tooltip>
+            {isAdmin && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Link
+                    to="/admin"
+                    className={`px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 flex items-center gap-1.5 ${
+                      location.pathname.startsWith("/admin")
+                        ? "bg-accent text-accent-foreground shadow-md"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted/80"
+                    }`}
+                  >
+                    <Shield className="h-4 w-4" />
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent className="glass-strong">
+                  <p>Админ-панель</p>
+                </TooltipContent>
+              </Tooltip>
+            )}
           </TooltipProvider>
         </nav>
 
