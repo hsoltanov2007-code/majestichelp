@@ -103,25 +103,6 @@ export default function Index() {
               Портал создан исключительно для сервера <span className="text-accent/80 font-medium">Denver</span>. Законы и правила других серверов могут отличаться.
             </p>
             
-            <form onSubmit={handleSearch} className="opacity-0 animate-fade-up stagger-2">
-              <div className="relative max-w-xl mx-auto group">
-                <div className="absolute -inset-1 bg-gradient-to-r from-accent/50 to-primary/50 rounded-2xl blur opacity-0 group-hover:opacity-30 transition-opacity duration-500" />
-                <div className="relative flex gap-2 p-2 glass rounded-xl">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                    <Input
-                      placeholder="Поиск по законам..."
-                      className="pl-12 h-14 text-lg bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-                      value={search}
-                      onChange={(e) => setSearch(e.target.value)}
-                    />
-                  </div>
-                  <Button type="submit" size="lg" className="h-14 px-6 rounded-lg bg-accent hover:bg-accent/90">
-                    Найти
-                  </Button>
-                </div>
-              </div>
-            </form>
 
             <div className="flex flex-wrap items-center justify-center gap-4 opacity-0 animate-fade-up stagger-3">
               <VisitorCounter />
