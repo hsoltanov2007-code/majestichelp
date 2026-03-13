@@ -407,6 +407,22 @@ export function Header() {
                     {isAdmin && <Crown className="h-4 w-4 text-accent ml-auto" />}
                   </Link>
                 )}
+
+                {/* Admin panel link for mobile */}
+                {isAdmin && (
+                  <Link
+                    to="/admin"
+                    onClick={() => setIsOpen(false)}
+                    className={`px-4 py-3 text-base font-medium rounded-xl transition-all flex items-center gap-3 ${
+                      location.pathname.startsWith("/admin")
+                        ? "bg-accent text-accent-foreground shadow-md"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted/80"
+                    }`}
+                  >
+                    <Shield className="h-5 w-5" />
+                    Админ-панель
+                  </Link>
+                )}
               </nav>
             </SheetContent>
           </Sheet>
