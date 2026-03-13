@@ -38,7 +38,6 @@ const toolItems: { path: string; label: string; icon: LucideIcon }[] = [];
 
 const referenceItems: { path: string; label: string; tooltip: string; icon: LucideIcon }[] = [
   { path: "/media", label: "Медиа", tooltip: "Видео контент", icon: Play },
-  { path: "/laws", label: "Законы", tooltip: "Нормативно-правовые акты", icon: FileText },
   { path: "/redux", label: "Redux", tooltip: "Редуксы, ганпаки, моды", icon: Package },
 ];
 
@@ -236,24 +235,6 @@ export function Header() {
               </TooltipContent>
             </Tooltip>
 
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link
-                  to="/forum"
-                  className={`px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 flex items-center gap-1.5 ${
-                    location.pathname.startsWith("/forum")
-                      ? "bg-accent text-accent-foreground shadow-md"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/80"
-                  }`}
-                >
-                  <MessageSquare className="h-4 w-4" />
-                  Форум
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent className="glass-strong">
-                <p>Обсуждение с сообществом</p>
-              </TooltipContent>
-            </Tooltip>
 
             <Tooltip>
               <TooltipTrigger asChild>
@@ -377,19 +358,6 @@ export function Header() {
                   Розыгрыши
                 </Link>
 
-                {/* Форум */}
-                <Link
-                  to="/forum"
-                  onClick={() => setIsOpen(false)}
-                  className={`px-4 py-3 text-base font-medium rounded-xl transition-all flex items-center gap-3 ${
-                    location.pathname.startsWith("/forum")
-                      ? "bg-accent text-accent-foreground shadow-md"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/80"
-                  }`}
-                >
-                  <MessageSquare className="h-5 w-5" />
-                  Форум
-                </Link>
 
                 {/* Избранное */}
                 <Link
