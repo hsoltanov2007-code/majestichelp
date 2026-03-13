@@ -88,7 +88,7 @@ export default function AppView() {
     return null;
   };
 
-  const handleToggleFavorite = (id: string, type: "criminal" | "administrative" | "traffic", article: string, description: string, e?: React.MouseEvent) => {
+  const handleToggleFavorite = (id: string, type: string, article: string, description: string, e?: React.MouseEvent) => {
     e?.stopPropagation();
     const wasFavorite = isFavorite(id, type);
     toggleFavorite({ id, type, article, description });
