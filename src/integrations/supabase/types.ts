@@ -83,6 +83,42 @@ export type Database = {
         }
         Relationships: []
       }
+      code_sources: {
+        Row: {
+          category: string
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          order_index: number | null
+          short_name: string
+          source_url: string
+          updated_at: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          order_index?: number | null
+          short_name: string
+          source_url: string
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          order_index?: number | null
+          short_name?: string
+          source_url?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       discord_news: {
         Row: {
           author_avatar: string | null
@@ -571,6 +607,62 @@ export type Database = {
         }
         Relationships: []
       }
+      legal_code_articles: {
+        Row: {
+          article_number: string
+          article_title: string
+          chapter_name: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          is_void: boolean | null
+          jurisdiction: string | null
+          parts: Json | null
+          section_name: string | null
+          sort_order: number | null
+          source_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          article_number: string
+          article_title?: string
+          chapter_name?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_void?: boolean | null
+          jurisdiction?: string | null
+          parts?: Json | null
+          section_name?: string | null
+          sort_order?: number | null
+          source_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          article_number?: string
+          article_title?: string
+          chapter_name?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_void?: boolean | null
+          jurisdiction?: string | null
+          parts?: Json | null
+          section_name?: string | null
+          sort_order?: number | null
+          source_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "legal_code_articles_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "code_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       media_video_likes: {
         Row: {
           created_at: string
@@ -802,6 +894,35 @@ export type Database = {
         }
         Relationships: []
       }
+      scraped_content: {
+        Row: {
+          content: string | null
+          id: string
+          scraped_at: string | null
+          source_id: string
+        }
+        Insert: {
+          content?: string | null
+          id?: string
+          scraped_at?: string | null
+          source_id: string
+        }
+        Update: {
+          content?: string | null
+          id?: string
+          scraped_at?: string | null
+          source_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scraped_content_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: true
+            referencedRelation: "code_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       site_visitors: {
         Row: {
           created_at: string
@@ -906,6 +1027,42 @@ export type Database = {
           expires_at?: string
           id?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      update_logs: {
+        Row: {
+          articles_reparsed: number | null
+          changes: Json | null
+          created_at: string | null
+          errors: Json | null
+          finished_at: string | null
+          id: string
+          sources_updated: number | null
+          started_at: string | null
+          status: string | null
+        }
+        Insert: {
+          articles_reparsed?: number | null
+          changes?: Json | null
+          created_at?: string | null
+          errors?: Json | null
+          finished_at?: string | null
+          id?: string
+          sources_updated?: number | null
+          started_at?: string | null
+          status?: string | null
+        }
+        Update: {
+          articles_reparsed?: number | null
+          changes?: Json | null
+          created_at?: string | null
+          errors?: Json | null
+          finished_at?: string | null
+          id?: string
+          sources_updated?: number | null
+          started_at?: string | null
+          status?: string | null
         }
         Relationships: []
       }
