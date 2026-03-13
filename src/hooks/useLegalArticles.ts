@@ -68,7 +68,7 @@ export function useLegalArticles(sourceShortName: string): UseLegalArticlesResul
           article_number: row.article_number,
           article_title: row.article_title || "",
           description: row.description || "",
-          parts: (row.parts as ArticlePart[]) || [],
+          parts: (row.parts as unknown as ArticlePart[]) || [],
           is_void: row.is_void || false,
           section_name: row.section_name || "",
           chapter_name: row.chapter_name || "",
