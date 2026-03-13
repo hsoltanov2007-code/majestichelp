@@ -79,7 +79,7 @@ function AppContent() {
         <Route path="/banner-generator" element={<BannerGenerator />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
-      <LegalChatBot />
+      
     </>
   );
 }
