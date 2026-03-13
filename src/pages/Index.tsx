@@ -19,7 +19,7 @@ const sections = [
   { icon: FileText, title: "Административный кодекс", description: "Административные правонарушения", path: "/administrative-code", gradient: "from-accent/20 to-accent/5", iconColor: "text-accent" },
   { icon: Car, title: "Дорожный кодекс", description: "Правила дорожного движения", path: "/traffic-code", gradient: "from-primary/20 to-primary/5", iconColor: "text-primary" },
   { icon: Users, title: "Процедуры", description: "Инструкции для госслужащих", path: "/procedures", gradient: "from-emerald-500/20 to-emerald-500/5", iconColor: "text-emerald-500" },
-  { icon: Shield, title: "Правила ГО", description: "Правила государственных организаций", path: "/government-rules", gradient: "from-primary/20 to-primary/5", iconColor: "text-primary" },
+  
   { icon: BookOpen, title: "Юридическая справка", description: "Теория уголовного права", path: "/legal-reference", gradient: "from-accent/20 to-accent/5", iconColor: "text-accent" },
   { icon: HelpCircle, title: "FAQ", description: "Частые вопросы и ответы", path: "/faq", gradient: "from-muted to-muted/50", iconColor: "text-muted-foreground" },
   { icon: MessageSquare, title: "Глоссарий", description: "Словарь юридических терминов", path: "/glossary", gradient: "from-primary/20 to-primary/5", iconColor: "text-primary" },
