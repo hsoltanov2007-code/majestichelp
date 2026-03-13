@@ -7,39 +7,23 @@ interface LogoProps {
 }
 
 export function Logo({ size = "md", showText = true }: LogoProps) {
-  const sizeClasses = {
-    sm: "w-8 h-8",
-    md: "w-10 h-10",
-    lg: "w-14 h-14",
-  };
-
-  const textSizes = {
-    sm: "text-lg",
-    md: "text-xl",
-    lg: "text-2xl",
-  };
+  const sizeClasses = { sm: "w-7 h-7", md: "w-9 h-9", lg: "w-12 h-12" };
+  const textSizes = { sm: "text-base", md: "text-lg", lg: "text-xl" };
 
   return (
-    <Link to="/" className="flex items-center gap-3 group">
-      <div className={`${sizeClasses[size]} relative`}>
-        {/* Glow effect */}
-        <div className="absolute inset-0 rounded-xl bg-accent/30 blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-        
-        {/* Logo image */}
-        <img 
-          src={hardyLogo} 
-          alt="HARDY" 
-          className={`${sizeClasses[size]} relative object-contain transition-transform duration-300 group-hover:scale-110`}
-        />
-      </div>
-      
+    <Link to="/" className="flex items-center gap-2.5 group">
+      <img 
+        src={hardyLogo} 
+        alt="HARDY" 
+        className={`${sizeClasses[size]} object-contain transition-all duration-500 group-hover:opacity-80`}
+      />
       {showText && (
-        <div className="flex flex-col">
-          <span className={`${textSizes[size]} font-bold leading-tight tracking-wider`}>
-            <span className="text-foreground">HARDY</span>
+        <div className="flex items-baseline gap-1.5">
+          <span className={`${textSizes[size]} font-bold tracking-wider text-foreground`}>
+            HARDY
           </span>
-          <span className="text-xs text-accent font-medium tracking-wider uppercase">
-            Majestic RP
+          <span className="text-[10px] text-accent font-medium tracking-widest uppercase">
+            MRP
           </span>
         </div>
       )}

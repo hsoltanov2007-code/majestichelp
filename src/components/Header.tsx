@@ -1,11 +1,10 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, Bookmark, MessageSquare, User, LogOut, Crown, Brain, Scale, BookOpen, Wrench, ChevronDown, Gavel, FileWarning, Car, ScrollText, Building2, LucideIcon, Home, HelpCircle, FileText, Play, Gift, Package, Shield } from "lucide-react";
+import { Menu, Bookmark, User, LogOut, Crown, BookOpen, ChevronDown, Gavel, FileWarning, Car, ScrollText, LucideIcon, Home, HelpCircle, Play, Gift, Package, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useState, useEffect } from "react";
 import { GlobalSearch } from "@/components/GlobalSearch";
 import { NotificationBell } from "@/components/NotificationBell";
-
 import { Logo } from "@/components/Logo";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -14,12 +13,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import {
   Collapsible,
   CollapsibleContent,
@@ -33,56 +26,43 @@ const codeItems: { path: string; label: string; short: string; icon: LucideIcon 
   { path: "/procedural-code", label: "Процессуальный кодекс", short: "ПК", icon: ScrollText },
 ];
 
-const toolItems: { path: string; label: string; icon: LucideIcon }[] = [];
-
-const referenceItems: { path: string; label: string; tooltip: string; icon: LucideIcon }[] = [
-  { path: "/media", label: "Медиа", tooltip: "Видео контент", icon: Play },
-  { path: "/redux", label: "Redux", tooltip: "Редуксы, ганпаки, моды", icon: Package },
+const referenceItems: { path: string; label: string; icon: LucideIcon }[] = [
+  { path: "/media", label: "Медиа", icon: Play },
+  { path: "/redux", label: "Redux", icon: Package },
 ];
 
 function MobileMenuGroup({ 
-  title, 
-  icon: Icon, 
-  items, 
-  location, 
-  onClose 
+  title, icon: Icon, items, location, onClose 
 }: { 
-  title: string; 
-  icon: LucideIcon; 
+  title: string; icon: LucideIcon; 
   items: { path: string; label: string; icon?: LucideIcon; short?: string }[]; 
-  location: ReturnType<typeof useLocation>; 
-  onClose: () => void;
+  location: ReturnType<typeof useLocation>; onClose: () => void;
 }) {
-  const [isOpen, setIsOpen] = useState(
-    items.some(item => location.pathname.startsWith(item.path))
-  );
+  const [isOpen, setIsOpen] = useState(items.some(item => location.pathname.startsWith(item.path)));
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
       <CollapsibleTrigger asChild>
-        <button className="w-full px-4 py-3 text-base font-medium rounded-xl transition-all flex items-center justify-between text-muted-foreground hover:text-foreground hover:bg-muted/80">
+        <button className="w-full px-4 py-3 text-sm font-medium rounded-xl transition-all flex items-center justify-between text-muted-foreground hover:text-foreground hover:bg-secondary/80">
           <span className="flex items-center gap-3">
-            <Icon className="h-5 w-5" />
+            <Icon className="h-4 w-4" />
             {title}
           </span>
-          <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+          <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
         </button>
       </CollapsibleTrigger>
-      <CollapsibleContent className="pl-6 space-y-1 animate-accordion-down">
+      <CollapsibleContent className="pl-6 space-y-0.5 mt-0.5">
         {items.map((item) => {
           const ItemIcon = item.icon;
           return (
-            <Link
-              key={item.path}
-              to={item.path}
-              onClick={onClose}
-              className={`px-4 py-2.5 text-sm font-medium rounded-lg transition-all flex items-center gap-2 ${
+            <Link key={item.path} to={item.path} onClick={onClose}
+              className={`px-3 py-2 text-sm font-medium rounded-lg transition-all flex items-center gap-2 ${
                 location.pathname.startsWith(item.path)
                   ? "bg-accent/10 text-accent"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                  : "text-muted-foreground hover:text-foreground hover:bg-secondary/60"
               }`}
             >
-              {ItemIcon && <ItemIcon className="h-4 w-4" />}
+              {ItemIcon && <ItemIcon className="h-3.5 w-3.5" />}
               {item.short || item.label}
             </Link>
           );
@@ -98,89 +78,59 @@ export function Header() {
   const { user, profile, isAdmin, signOut } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   const handleSignOut = async () => {
     setIsLoggingOut(true);
-    try {
-      await signOut();
-      navigate('/');
-    } catch (error) {
-      console.error('Error signing out:', error);
-    } finally {
-      setIsLoggingOut(false);
-    }
+    try { await signOut(); navigate('/'); } 
+    catch (e) { console.error(e); } 
+    finally { setIsLoggingOut(false); }
   };
-  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => { document.documentElement.classList.add("dark"); }, []);
 
   useEffect(() => {
-    // Always use dark theme
-    document.documentElement.classList.add("dark");
-  }, []);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 10);
-    };
+    const handleScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const navLinkClass = (active: boolean) => 
+    `px-3 py-1.5 text-[13px] font-medium rounded-lg transition-all duration-300 ${
+      active ? "text-accent" : "text-muted-foreground hover:text-foreground"
+    }`;
 
   return (
-    <header className={`sticky top-0 z-50 w-full transition-all duration-300 ${
+    <header className={`sticky top-0 z-50 w-full transition-all duration-500 ${
       scrolled 
-        ? 'glass-strong shadow-lg shadow-background/5' 
-        : 'bg-transparent border-b border-transparent'
+        ? 'bg-background/80 backdrop-blur-2xl border-b border-border/30 shadow-sm shadow-background/20' 
+        : 'bg-transparent'
     }`}>
-      <div className="container flex h-16 items-center justify-between gap-4">
-        {/* Logo */}
-        <div className="flex items-center gap-4">
-          <Logo size="sm" showText={true} />
-        </div>
+      <div className="container flex h-14 items-center justify-between gap-4">
+        <Logo size="sm" showText={true} />
 
-        {/* Desktop Navigation */}
-        <nav className="hidden lg:flex items-center gap-1">
-          <Link
-            to="/"
-            className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
-              location.pathname === "/"
-                ? "bg-accent text-accent-foreground shadow-md"
-                : "text-muted-foreground hover:text-foreground hover:bg-muted/80"
-            }`}
-          >
-            Главная
-          </Link>
+        {/* Desktop Nav */}
+        <nav className="hidden lg:flex items-center gap-0.5">
+          <Link to="/" className={navLinkClass(location.pathname === "/")}>Главная</Link>
 
-          {/* Кодексы */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className={`gap-1.5 rounded-lg ${
-                  codeItems.some(item => location.pathname.startsWith(item.path))
-                    ? "bg-accent/10 text-accent"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                <BookOpen className="h-4 w-4" />
+              <button className={`flex items-center gap-1 ${navLinkClass(
+                codeItems.some(i => location.pathname.startsWith(i.path))
+              )}`}>
+                <BookOpen className="h-3.5 w-3.5" />
                 Кодексы
-                <ChevronDown className="h-3 w-3" />
-              </Button>
+                <ChevronDown className="h-3 w-3 opacity-50" />
+              </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="glass-strong min-w-[220px]">
+            <DropdownMenuContent align="start" className="bg-card/95 backdrop-blur-2xl border-border/40 min-w-[200px]">
               {codeItems.map((item) => (
                 <DropdownMenuItem key={item.path} asChild>
-                  <Link 
-                    to={item.path} 
-                    className={`w-full cursor-pointer flex items-center gap-3 py-2.5 ${
-                      location.pathname.startsWith(item.path)
-                        ? "bg-accent/10 text-accent"
-                        : ""
-                    }`}
-                  >
-                    <item.icon className="h-4 w-4" />
-                    <span className="font-semibold">{item.short}</span>
+                  <Link to={item.path} className={`cursor-pointer flex items-center gap-3 py-2 ${
+                    location.pathname.startsWith(item.path) ? "text-accent" : ""
+                  }`}>
+                    <item.icon className="h-3.5 w-3.5" />
+                    <span className="font-semibold text-sm">{item.short}</span>
                     <span className="text-muted-foreground text-xs ml-auto">{item.label}</span>
                   </Link>
                 </DropdownMenuItem>
@@ -188,90 +138,28 @@ export function Header() {
             </DropdownMenuContent>
           </DropdownMenu>
 
+          {referenceItems.map((item) => (
+            <Link key={item.path} to={item.path}
+              className={`flex items-center gap-1.5 ${navLinkClass(location.pathname === item.path)}`}>
+              <item.icon className="h-3.5 w-3.5" />
+              {item.label}
+            </Link>
+          ))}
 
-          {/* Справка */}
-          <TooltipProvider delayDuration={300}>
-            {referenceItems.map((item) => (
-              <Tooltip key={item.path}>
-                <TooltipTrigger asChild>
-                  <Link
-                    to={item.path}
-                    className={`px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 flex items-center gap-1.5 ${
-                      location.pathname === item.path
-                        ? "bg-accent text-accent-foreground shadow-md"
-                        : "text-muted-foreground hover:text-foreground hover:bg-muted/80"
-                    }`}
-                  >
-                    <item.icon className="h-4 w-4" />
-                    {item.label}
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent className="glass-strong">
-                  <p>{item.tooltip}</p>
-                </TooltipContent>
-              </Tooltip>
-            ))}
-          </TooltipProvider>
+          <Link to="/giveaways" className={`flex items-center gap-1.5 ${navLinkClass(location.pathname === "/giveaways")}`}>
+            <Gift className="h-3.5 w-3.5" />
+            Розыгрыши
+          </Link>
 
-          {/* Розыгрыши, Форум и Избранное */}
-          <TooltipProvider delayDuration={300}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link
-                  to="/giveaways"
-                  className={`px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 flex items-center gap-1.5 ${
-                    location.pathname === "/giveaways"
-                      ? "bg-accent text-accent-foreground shadow-md"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/80"
-                  }`}
-                >
-                  <Gift className="h-4 w-4" />
-                  Розыгрыши
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent className="glass-strong">
-                <p>Призы и акции</p>
-              </TooltipContent>
-            </Tooltip>
+          <Link to="/favorites" className={navLinkClass(location.pathname === "/favorites")}>
+            <Bookmark className="h-3.5 w-3.5" />
+          </Link>
 
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link
-                  to="/favorites"
-                  className={`px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 flex items-center gap-1.5 ${
-                    location.pathname === "/favorites"
-                      ? "bg-accent text-accent-foreground shadow-md"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/80"
-                  }`}
-                >
-                  <Bookmark className="h-4 w-4" />
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent className="glass-strong">
-                <p>Сохранённые статьи</p>
-              </TooltipContent>
-            </Tooltip>
-            {isAdmin && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Link
-                    to="/admin"
-                    className={`px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 flex items-center gap-1.5 ${
-                      location.pathname.startsWith("/admin")
-                        ? "bg-accent text-accent-foreground shadow-md"
-                        : "text-muted-foreground hover:text-foreground hover:bg-muted/80"
-                    }`}
-                  >
-                    <Shield className="h-4 w-4" />
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent className="glass-strong">
-                  <p>Админ-панель</p>
-                </TooltipContent>
-              </Tooltip>
-            )}
-          </TooltipProvider>
+          {isAdmin && (
+            <Link to="/admin" className={navLinkClass(location.pathname.startsWith("/admin"))}>
+              <Shield className="h-3.5 w-3.5" />
+            </Link>
+          )}
         </nav>
 
         {/* Search (tablet) */}
@@ -279,147 +167,92 @@ export function Header() {
           <GlobalSearch />
         </div>
 
-        {/* Right side actions */}
-        <div className="flex items-center gap-2">
-          {/* Search (desktop) */}
+        {/* Right side */}
+        <div className="flex items-center gap-1.5">
           <div className="hidden lg:block">
             <GlobalSearch />
           </div>
-
           
           {user && <NotificationBell />}
           
           {user ? (
             <>
-              <Button asChild variant="ghost" size="sm" className="gap-2 rounded-lg hover:bg-muted/80 hidden sm:flex" title="Мой профиль">
+              <Button asChild variant="ghost" size="sm" className="gap-1.5 rounded-lg hidden sm:flex h-8 text-xs">
                 <Link to="/profile">
-                  {isAdmin && <Crown className="h-4 w-4 text-accent" />}
-                  <span className={isAdmin ? "text-accent font-semibold" : ""}>
+                  {isAdmin && <Crown className="h-3.5 w-3.5 text-accent" />}
+                  <span className={isAdmin ? "text-accent font-medium" : "text-muted-foreground"}>
                     {profile?.username || 'Профиль'}
                   </span>
                 </Link>
               </Button>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={handleSignOut} 
-                disabled={isLoggingOut}
-                title="Выйти" 
-                className="rounded-lg hover:bg-destructive/10 hover:text-destructive"
-              >
-                <LogOut className="h-5 w-5" />
+              <Button variant="ghost" size="icon" onClick={handleSignOut} disabled={isLoggingOut}
+                className="rounded-lg hover:bg-destructive/10 hover:text-destructive h-8 w-8">
+                <LogOut className="h-4 w-4" />
               </Button>
             </>
           ) : (
-            <Button asChild variant="ghost" size="icon" title="Войти" className="rounded-lg hover:bg-muted/80">
+            <Button asChild variant="ghost" size="icon" className="rounded-lg h-8 w-8">
               <Link to="/auth" state={{ from: location.pathname }}>
-                <User className="h-5 w-5" />
+                <User className="h-4 w-4" />
               </Link>
             </Button>
           )}
 
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild className="lg:hidden">
-              <Button variant="ghost" size="icon" className="rounded-lg">
-                <Menu className="h-5 w-5" />
+              <Button variant="ghost" size="icon" className="rounded-lg h-8 w-8">
+                <Menu className="h-4 w-4" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-80 overflow-y-auto glass-strong border-l-border/50">
-              <div className="mt-4 mb-6">
+            <SheetContent side="right" className="w-72 overflow-y-auto bg-card/95 backdrop-blur-2xl border-l-border/30">
+              <div className="mt-3 mb-5">
                 <GlobalSearch onResultClick={() => setIsOpen(false)} />
               </div>
-              <nav className="flex flex-col gap-2">
-                {/* Главная */}
-                <Link
-                  to="/"
-                  onClick={() => setIsOpen(false)}
-                  className={`px-4 py-3 text-base font-medium rounded-xl transition-all flex items-center gap-3 ${
-                    location.pathname === "/"
-                      ? "bg-accent text-accent-foreground shadow-md"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/80"
-                  }`}
-                >
-                  <Home className="h-5 w-5" />
+              <nav className="flex flex-col gap-1">
+                <Link to="/" onClick={() => setIsOpen(false)}
+                  className={`px-4 py-2.5 text-sm font-medium rounded-xl flex items-center gap-3 ${
+                    location.pathname === "/" ? "text-accent" : "text-muted-foreground hover:text-foreground hover:bg-secondary/80"
+                  }`}>
+                  <Home className="h-4 w-4" />
                   Главная
                 </Link>
 
-                {/* Кодексы */}
-                <MobileMenuGroup 
-                  title="Кодексы" 
-                  icon={BookOpen}
-                  items={codeItems}
-                  location={location}
-                  onClose={() => setIsOpen(false)}
-                />
+                <MobileMenuGroup title="Кодексы" icon={BookOpen} items={codeItems} location={location} onClose={() => setIsOpen(false)} />
+                <MobileMenuGroup title="Справка" icon={HelpCircle} items={referenceItems} location={location} onClose={() => setIsOpen(false)} />
 
-
-                {/* Справка */}
-                <MobileMenuGroup 
-                  title="Справка" 
-                  icon={HelpCircle}
-                  items={referenceItems}
-                  location={location}
-                  onClose={() => setIsOpen(false)}
-                />
-
-                {/* Розыгрыши */}
-                <Link
-                  to="/giveaways"
-                  onClick={() => setIsOpen(false)}
-                  className={`px-4 py-3 text-base font-medium rounded-xl transition-all flex items-center gap-3 ${
-                    location.pathname === "/giveaways"
-                      ? "bg-accent text-accent-foreground shadow-md"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/80"
-                  }`}
-                >
-                  <Gift className="h-5 w-5" />
+                <Link to="/giveaways" onClick={() => setIsOpen(false)}
+                  className={`px-4 py-2.5 text-sm font-medium rounded-xl flex items-center gap-3 ${
+                    location.pathname === "/giveaways" ? "text-accent" : "text-muted-foreground hover:text-foreground hover:bg-secondary/80"
+                  }`}>
+                  <Gift className="h-4 w-4" />
                   Розыгрыши
                 </Link>
 
-
-                {/* Избранное */}
-                <Link
-                  to="/favorites"
-                  onClick={() => setIsOpen(false)}
-                  className={`px-4 py-3 text-base font-medium rounded-xl transition-all flex items-center gap-3 ${
-                    location.pathname === "/favorites"
-                      ? "bg-accent text-accent-foreground shadow-md"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/80"
-                  }`}
-                >
-                  <Bookmark className="h-5 w-5" />
+                <Link to="/favorites" onClick={() => setIsOpen(false)}
+                  className={`px-4 py-2.5 text-sm font-medium rounded-xl flex items-center gap-3 ${
+                    location.pathname === "/favorites" ? "text-accent" : "text-muted-foreground hover:text-foreground hover:bg-secondary/80"
+                  }`}>
+                  <Bookmark className="h-4 w-4" />
                   Избранное
                 </Link>
 
-                {/* Profile link for mobile */}
                 {user && (
-                  <Link
-                    to="/profile"
-                    onClick={() => setIsOpen(false)}
-                    className={`px-4 py-3 text-base font-medium rounded-xl transition-all flex items-center gap-3 ${
-                      location.pathname === "/profile"
-                        ? "bg-accent text-accent-foreground shadow-md"
-                        : "text-muted-foreground hover:text-foreground hover:bg-muted/80"
-                    }`}
-                  >
-                    <User className="h-5 w-5" />
+                  <Link to="/profile" onClick={() => setIsOpen(false)}
+                    className={`px-4 py-2.5 text-sm font-medium rounded-xl flex items-center gap-3 ${
+                      location.pathname === "/profile" ? "text-accent" : "text-muted-foreground hover:text-foreground hover:bg-secondary/80"
+                    }`}>
+                    <User className="h-4 w-4" />
                     {profile?.username || 'Профиль'}
-                    {isAdmin && <Crown className="h-4 w-4 text-accent ml-auto" />}
+                    {isAdmin && <Crown className="h-3.5 w-3.5 text-accent ml-auto" />}
                   </Link>
                 )}
 
-                {/* Admin panel link for mobile */}
                 {isAdmin && (
-                  <Link
-                    to="/admin"
-                    onClick={() => setIsOpen(false)}
-                    className={`px-4 py-3 text-base font-medium rounded-xl transition-all flex items-center gap-3 ${
-                      location.pathname.startsWith("/admin")
-                        ? "bg-accent text-accent-foreground shadow-md"
-                        : "text-muted-foreground hover:text-foreground hover:bg-muted/80"
-                    }`}
-                  >
-                    <Shield className="h-5 w-5" />
+                  <Link to="/admin" onClick={() => setIsOpen(false)}
+                    className={`px-4 py-2.5 text-sm font-medium rounded-xl flex items-center gap-3 ${
+                      location.pathname.startsWith("/admin") ? "text-accent" : "text-muted-foreground hover:text-foreground hover:bg-secondary/80"
+                    }`}>
+                    <Shield className="h-4 w-4" />
                     Админ-панель
                   </Link>
                 )}
