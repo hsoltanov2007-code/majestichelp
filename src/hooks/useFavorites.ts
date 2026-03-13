@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 
 export interface FavoriteItem {
   id: string;
-  type: "criminal" | "administrative" | "traffic";
+  type: string;
   article: string;
   description: string;
 }
