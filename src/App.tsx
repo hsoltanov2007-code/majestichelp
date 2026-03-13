@@ -64,10 +64,6 @@ function AppContent() {
         <Route path="/laws" element={<LawsList />} />
         <Route path="/laws/:lawId" element={<LawDetail />} />
         <Route path="/auth" element={<Auth />} />
-        <Route path="/forum" element={<Forum />} />
-        <Route path="/forum/category/:id" element={<ForumCategory />} />
-        <Route path="/forum/topic/:id" element={<ForumTopic />} />
-        <Route path="/forum/new-topic" element={<NewTopic />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/admin/laws" element={<AdminLaws />} />
         <Route path="/admin/knowledge-base" element={<AdminKnowledgeBase />} />
