@@ -7,7 +7,6 @@ const navigationLinks = [
   { label: "Административный кодекс", path: "/administrative-code" },
   { label: "Дорожный кодекс", path: "/traffic-code" },
   { label: "Процедуры", path: "/procedures" },
-  { label: "Правила ГО", path: "/government-rules" },
 ];
 
 const toolLinks = [
