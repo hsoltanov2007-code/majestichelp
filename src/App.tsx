@@ -4,7 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HashRouter, Routes, Route } from "react-router-dom";
 import { ViewModeProvider } from "@/hooks/useViewMode";
-import { LegalChatBot } from "@/components/LegalChatBot";
+
 import AnimatedBackground from "@/components/AnimatedBackground";
 import { useGlobalSearch } from "@/hooks/useGlobalSearch";
 import { TelegramAuthProvider } from "@/components/TelegramAuthProvider";
