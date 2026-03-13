@@ -1,142 +1,63 @@
 import { Link } from "react-router-dom";
-import { Scale, FileText, Car, Users, BookOpen, Shield, MessageSquare, Play, HelpCircle, Heart, ExternalLink } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import hardyLogo from "@/assets/hardy-logo.png";
 
-const navigationLinks = [
-  { label: "Уголовный кодекс", path: "/criminal-code" },
-  { label: "Административный кодекс", path: "/administrative-code" },
-  { label: "Дорожный кодекс", path: "/traffic-code" },
+const links = [
+  { label: "УК", path: "/criminal-code" },
+  { label: "АК", path: "/administrative-code" },
+  { label: "ДК", path: "/traffic-code" },
   { label: "Процедуры", path: "/procedures" },
-];
-
-const toolLinks = [
-  { label: "Глоссарий", path: "/glossary" },
   { label: "FAQ", path: "/faq" },
-];
-
-const communityLinks = [
+  { label: "Глоссарий", path: "/glossary" },
   { label: "Медиа", path: "/media" },
-  { label: "Инструкции", path: "/instructions" },
 ];
 
 export function Footer() {
-  const currentYear = new Date().getFullYear();
-
   return (
-    <footer className="relative mt-20 border-t border-border/50 bg-card/50 backdrop-blur-sm">
-      {/* Gradient accent line */}
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-accent/50 to-transparent" />
-      
-      <div className="container py-12 md:py-16">
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-          {/* Brand section */}
-          <div className="space-y-4">
-            <Link to="/" className="flex items-center gap-3 group">
-              <img src={hardyLogo} alt="HARDY" className="w-10 h-10 object-contain" />
-              <span className="text-xl font-bold tracking-wider">
-                <span className="text-foreground">HARDY</span>
-                <span className="text-accent"> Portal</span>
+    <footer className="relative mt-24 border-t border-border/20">
+      <div className="container py-10">
+        <div className="flex flex-col md:flex-row justify-between items-start gap-8">
+          {/* Brand */}
+          <div className="space-y-3">
+            <Link to="/" className="flex items-center gap-2.5">
+              <img src={hardyLogo} alt="HARDY" className="w-7 h-7 object-contain opacity-80" />
+              <span className="text-sm font-semibold tracking-wider">
+                HARDY <span className="text-accent">Portal</span>
               </span>
             </Link>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              Ваш надёжный источник информации о законах, правилах и процедурах для Majestic RP.
+            <p className="text-xs text-muted-foreground max-w-xs leading-relaxed">
+              Информация о законах и процедурах для Majestic RP · Denver
             </p>
           </div>
 
-          {/* Navigation links */}
-          <div>
-            <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
-              <Scale className="h-4 w-4 text-accent" />
-              Кодексы
-            </h3>
-            <ul className="space-y-2.5">
-              {navigationLinks.map((link) => (
-                <li key={link.path}>
-                  <Link 
-                    to={link.path}
-                    className="text-sm text-muted-foreground hover:text-accent transition-colors animated-underline"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+          {/* Links */}
+          <div className="flex flex-wrap gap-x-6 gap-y-2">
+            {links.map((link) => (
+              <Link key={link.path} to={link.path}
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+                {link.label}
+              </Link>
+            ))}
           </div>
 
-          {/* Tools links */}
-          <div>
-            <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
-              <BookOpen className="h-4 w-4 text-accent" />
-              Инструменты
-            </h3>
-            <ul className="space-y-2.5">
-              {toolLinks.map((link) => (
-                <li key={link.path}>
-                  <Link 
-                    to={link.path}
-                    className="text-sm text-muted-foreground hover:text-accent transition-colors animated-underline"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Community links */}
-          <div>
-            <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
-              <Users className="h-4 w-4 text-accent" />
-              Сообщество
-            </h3>
-            <ul className="space-y-2.5">
-              {communityLinks.map((link) => (
-                <li key={link.path}>
-                  <Link 
-                    to={link.path}
-                    className="text-sm text-muted-foreground hover:text-accent transition-colors animated-underline"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-              <li>
-                <a 
-                  href="https://discord.gg/58mtY7SqZt"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-muted-foreground hover:text-accent transition-colors animated-underline inline-flex items-center gap-1.5"
-                >
-                  Discord HARDY
-                  <ExternalLink className="h-3 w-3" />
-                </a>
-              </li>
-              <li>
-                <a 
-                  href="https://t.me/Hardyfamq"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-muted-foreground hover:text-accent transition-colors animated-underline inline-flex items-center gap-1.5"
-                >
-                  Telegram канал
-                  <ExternalLink className="h-3 w-3" />
-                </a>
-              </li>
-            </ul>
+          {/* Social */}
+          <div className="flex gap-4">
+            <a href="https://discord.gg/58mtY7SqZt" target="_blank" rel="noopener noreferrer"
+              className="text-xs text-muted-foreground hover:text-accent transition-colors inline-flex items-center gap-1">
+              Discord <ExternalLink className="h-2.5 w-2.5" />
+            </a>
+            <a href="https://t.me/Hardyfamq" target="_blank" rel="noopener noreferrer"
+              className="text-xs text-muted-foreground hover:text-accent transition-colors inline-flex items-center gap-1">
+              Telegram <ExternalLink className="h-2.5 w-2.5" />
+            </a>
           </div>
         </div>
 
-        {/* Bottom bar */}
-        <div className="mt-12 pt-8 border-t border-border/50">
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-            <p className="text-sm text-muted-foreground">
-              © {currentYear} HARDY Portal. Все права защищены.
-            </p>
-            <p className="text-sm text-muted-foreground flex items-center gap-1">
-              Сделано с <Heart className="h-3.5 w-3.5 text-accent fill-accent" /> для Majestic RP
-            </p>
-          </div>
-        </div>
+        <div className="section-divider mt-8 mb-6" />
+        
+        <p className="text-[11px] text-muted-foreground/60 text-center">
+          © {new Date().getFullYear()} HARDY Portal
+        </p>
       </div>
     </footer>
   );
