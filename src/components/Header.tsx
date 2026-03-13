@@ -38,7 +38,6 @@ const toolItems: { path: string; label: string; icon: LucideIcon }[] = [];
 
 const referenceItems: { path: string; label: string; tooltip: string; icon: LucideIcon }[] = [
   { path: "/media", label: "Медиа", tooltip: "Видео контент", icon: Play },
-  { path: "/laws", label: "Законы", tooltip: "Нормативно-правовые акты", icon: FileText },
   { path: "/redux", label: "Redux", tooltip: "Редуксы, ганпаки, моды", icon: Package },
 ];
 
