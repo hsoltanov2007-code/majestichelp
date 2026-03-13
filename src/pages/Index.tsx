@@ -86,15 +86,6 @@ export default function Index() {
 
             <div className="flex flex-wrap items-center justify-center gap-3 opacity-0 animate-fade-up stagger-2 pt-2">
               <VisitorCounter />
-              <InstallAppButton />
-              <Button
-                variant="outline"
-                onClick={() => setViewMode("app")}
-                className="gap-2 border-border/50 hover:bg-secondary hover:border-border text-sm h-9"
-              >
-                <Smartphone className="h-3.5 w-3.5" />
-                Режим приложения
-              </Button>
             </div>
           </div>
         </div>
