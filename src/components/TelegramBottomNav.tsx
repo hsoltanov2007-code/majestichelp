@@ -12,12 +12,6 @@ const navItems = [
     exact: true,
   },
   {
-    path: "/laws",
-    label: "Законы",
-    icon: Scale,
-    exact: false,
-  },
-  {
     path: "/giveaways",
     label: "Розыгрыши",
     icon: Gift,

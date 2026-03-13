@@ -358,19 +358,6 @@ export function Header() {
                   Розыгрыши
                 </Link>
 
-                {/* Форум */}
-                <Link
-                  to="/forum"
-                  onClick={() => setIsOpen(false)}
-                  className={`px-4 py-3 text-base font-medium rounded-xl transition-all flex items-center gap-3 ${
-                    location.pathname.startsWith("/forum")
-                      ? "bg-accent text-accent-foreground shadow-md"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/80"
-                  }`}
-                >
-                  <MessageSquare className="h-5 w-5" />
-                  Форум
-                </Link>
 
                 {/* Избранное */}
                 <Link

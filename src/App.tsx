@@ -61,8 +61,6 @@ function AppContent() {
         <Route path="/favorites" element={<Favorites />} />
         <Route path="/glossary" element={<Glossary />} />
         <Route path="/faq" element={<FAQ />} />
-        <Route path="/laws" element={<LawsList />} />
-        <Route path="/laws/:lawId" element={<LawDetail />} />
         <Route path="/auth" element={<Auth />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/admin/laws" element={<AdminLaws />} />

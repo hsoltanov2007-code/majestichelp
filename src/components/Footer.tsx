@@ -16,7 +16,6 @@ const toolLinks = [
 ];
 
 const communityLinks = [
-  { label: "Форум", path: "/forum" },
   { label: "Медиа", path: "/media" },
   { label: "Инструкции", path: "/instructions" },
 ];
