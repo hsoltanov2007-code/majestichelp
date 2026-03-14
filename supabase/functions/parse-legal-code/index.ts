@@ -102,7 +102,9 @@ function parseLegalCode(text: string): ParsedArticle[] {
       const articleNumber = articleMatch[1].replace(/\.+$/, "");
       let rest = (articleMatch[2] || "").trim();
       
-      if (/утратила?\s+силу/i.test(rest) || /утратила?\s+силу/i.test(lines[i + 1] || '')) {
+      const nextLineForVoid = (lines[i + 1] || '').trim();
+      const nextLineIsSubItem = /^[а-яё]\)/i.test(nextLineForVoid);
+      if (/утратила?\s+силу/i.test(rest) || (!nextLineIsSubItem && /утратила?\s+силу/i.test(nextLineForVoid))) {
         articles.push({
           article_number: articleNumber,
           article_title: 'Утратила силу',
