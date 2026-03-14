@@ -399,13 +399,16 @@ export function LegalCodePage({ sourceShortName, title, favoriteType, basePath }
                                   </div>
                                 )}
                               </div>
-                            </AccordionContent>
-                          </AccordionItem>
-                        ))}
-                      </Accordion>
+                              </AccordionContent>
+                            </AccordionItem>
+                          ))}
+                        </Accordion>
+                      </CollapsibleContent>
                     </div>
-                  ))}
-                </div>
+                  </Collapsible>
+                ))}
+              </CollapsibleContent>
+            </Collapsible>
               ))}
             </div>
           </main>
