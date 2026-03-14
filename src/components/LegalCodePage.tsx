@@ -314,32 +314,46 @@ export function LegalCodePage({ sourceShortName, title, favoriteType, basePath }
                         <span className="text-[10px] font-mono text-muted-foreground/30 ml-1">({chapter.articles.length})</span>
                       </div>
 
-                      <Accordion type="multiple" className="space-y-2" value={openArticles} onValueChange={setOpenArticles}>
+                      <Accordion type="multiple" className="space-y-3" value={openArticles} onValueChange={setOpenArticles}>
                         {chapter.articles.map((article) => (
                           <AccordionItem key={article.id} value={article.id}
                             id={`article-${article.article_number}`}
-                            className={`border border-border/15 rounded-2xl px-0 bg-card/30 transition-all hover:bg-card/50 hover:border-border/25 group/article ${article.is_void ? "opacity-35" : ""}`}>
-                            <AccordionTrigger className="hover:no-underline py-4 px-5">
-                              <div className="flex items-center gap-3 text-left">
-                                <span className="inline-flex items-center justify-center h-8 min-w-[2.5rem] rounded-xl bg-accent/8 text-[11px] font-mono text-accent shrink-0 font-semibold px-2 group-hover/article:bg-accent/12 transition-colors">
-                                  {article.article_number}
-                                </span>
-                                <div className="min-w-0">
-                                  <span className="text-sm font-medium leading-snug">
+                            className={`relative border-0 rounded-2xl px-0 overflow-hidden transition-all group/article ${article.is_void ? "opacity-35" : ""}`}>
+                            {/* Card background with left accent border */}
+                            <div className="absolute inset-0 rounded-2xl bg-card/40 backdrop-blur-sm border border-border/10 group-hover/article:border-accent/20 group-hover/article:bg-card/60 transition-all duration-300" />
+                            <div className="absolute left-0 top-3 bottom-3 w-[3px] rounded-full bg-accent/20 group-hover/article:bg-accent/50 transition-colors duration-300" />
+                            
+                            <AccordionTrigger className="relative hover:no-underline py-4 px-5 pl-6">
+                              <div className="flex items-center gap-3.5 text-left w-full">
+                                <div className="relative">
+                                  <span className="inline-flex items-center justify-center h-9 min-w-[3rem] rounded-xl bg-gradient-to-br from-accent/15 to-accent/5 text-[12px] font-mono text-accent shrink-0 font-bold px-2.5 shadow-sm shadow-accent/5 group-hover/article:from-accent/20 group-hover/article:to-accent/10 group-hover/article:shadow-accent/10 transition-all duration-300">
+                                    {article.article_number}
+                                  </span>
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                  <span className="text-sm font-medium leading-snug group-hover/article:text-foreground transition-colors">
                                     {article.article_title}
                                   </span>
                                   {article.is_void && (
-                                    <span className="ml-2 text-[10px] text-destructive/70 bg-destructive/10 px-1.5 py-0.5 rounded-md font-medium">
+                                    <span className="ml-2 text-[10px] text-destructive/70 bg-destructive/8 px-2 py-0.5 rounded-full font-medium border border-destructive/10">
                                       утр. силу
                                     </span>
                                   )}
+                                  {article.parts.length > 0 && (
+                                    <p className="text-[11px] text-muted-foreground/40 mt-1 line-clamp-1 font-normal">
+                                      {article.parts[0].text.substring(0, 80)}...
+                                    </p>
+                                  )}
                                 </div>
+                                <span className="text-[10px] font-mono text-muted-foreground/25 shrink-0 mr-2">
+                                  {article.parts.length} ч.
+                                </span>
                               </div>
                             </AccordionTrigger>
-                            <AccordionContent className="pt-0 pb-5 px-5">
+                            <AccordionContent className="relative pt-0 pb-5 px-5 pl-6">
                               <div className="space-y-4">
                                 {/* Action Buttons */}
-                                <div className="flex gap-1.5 pb-3 border-b border-border/10">
+                                <div className="flex gap-1.5 pb-3 border-b border-border/8">
                                   <Button variant="ghost" size="sm" onClick={() => handleCopyLink(article.article_number)}
                                     className="h-8 gap-1.5 text-[11px] text-muted-foreground hover:text-foreground rounded-xl hover:bg-secondary/50">
                                     <Link2 className="h-3.5 w-3.5" />
@@ -356,17 +370,17 @@ export function LegalCodePage({ sourceShortName, title, favoriteType, basePath }
                                 {article.parts.map((part) => (
                                   <div key={part.number} className="group/part">
                                     <div className="flex gap-3">
-                                      <span className="inline-flex items-center justify-center h-6 w-6 rounded-lg bg-secondary/50 text-[10px] font-mono text-muted-foreground shrink-0 mt-0.5 font-semibold">
+                                      <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-accent/8 text-[10px] font-mono text-accent/60 shrink-0 mt-0.5 font-bold border border-accent/10">
                                         {part.number}
                                       </span>
                                       <div className="flex-1 min-w-0">
-                                        <p className="text-sm text-foreground/85 leading-[1.7]">
+                                        <p className="text-sm text-foreground/80 leading-[1.75]">
                                           {part.text.replace(/^\*+|\*+$/g, "")}
                                         </p>
                                         {part.punishment && (
-                                          <div className="mt-2 flex items-center gap-2 px-3 py-2 rounded-xl bg-denver-warning/5 border border-denver-warning/10">
-                                            <span className="text-denver-warning shrink-0 text-sm tracking-wide">⭐</span>
-                                            <p className="text-xs text-denver-warning/90">{part.punishment}</p>
+                                          <div className="mt-2.5 flex items-start gap-2.5 px-3.5 py-2.5 rounded-xl bg-denver-warning/5 border border-denver-warning/10">
+                                            <span className="text-denver-warning shrink-0 text-sm leading-relaxed">⭐</span>
+                                            <p className="text-xs text-denver-warning/90 leading-relaxed">{part.punishment}</p>
                                           </div>
                                         )}
                                       </div>
@@ -376,8 +390,8 @@ export function LegalCodePage({ sourceShortName, title, favoriteType, basePath }
 
                                 {/* Description */}
                                 {article.description && (
-                                  <div className="mt-2 p-4 bg-secondary/20 rounded-xl border border-border/10">
-                                    <p className="text-xs text-muted-foreground leading-relaxed">{article.description}</p>
+                                  <div className="mt-3 p-4 bg-secondary/15 rounded-xl border border-border/8">
+                                    <p className="text-xs text-muted-foreground/70 leading-relaxed italic">{article.description}</p>
                                   </div>
                                 )}
                               </div>
