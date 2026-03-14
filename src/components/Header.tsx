@@ -24,6 +24,7 @@ const codeItems: { path: string; label: string; short: string; icon: LucideIcon 
   { path: "/administrative-code", label: "Административный кодекс", short: "АК", icon: FileWarning },
   { path: "/traffic-code", label: "Дорожный кодекс", short: "ДК", icon: Car },
   { path: "/procedural-code", label: "Процессуальный кодекс", short: "ПК", icon: ScrollText },
+  { path: "/closed-territories", label: "Закрытые территории", short: "ЗТ", icon: Shield },
 ];
 
 const referenceItems: { path: string; label: string; icon: LucideIcon }[] = [

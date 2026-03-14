@@ -19,6 +19,7 @@ import Favorites from "./pages/Favorites";
 import Glossary from "./pages/Glossary";
 import FAQ from "./pages/FAQ";
 import ProceduralCode from "./pages/ProceduralCode";
+import ClosedTerritories from "./pages/ClosedTerritories";
 import LawsList from "./pages/LawsList";
 import LawDetail from "./pages/LawDetail";
 import AdminLaws from "./pages/AdminLaws";
@@ -56,6 +57,7 @@ function AppContent() {
         <Route path="/procedures" element={<Procedures />} />
         <Route path="/government-rules" element={<GovernmentRules />} />
         <Route path="/procedural-code" element={<ProceduralCode />} />
+        <Route path="/closed-territories" element={<ClosedTerritories />} />
         <Route path="/legal-reference" element={<LegalReference />} />
         <Route path="/instructions" element={<Instructions />} />
         <Route path="/favorites" element={<Favorites />} />
