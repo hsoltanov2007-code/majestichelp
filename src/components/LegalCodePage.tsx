@@ -7,6 +7,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Search, X, ChevronRight, BookOpen, FileText, AlertCircle, Bookmark, Link2, Hash, Scale } from "lucide-react";
+import { FormattedLegalText } from "@/components/FormattedLegalText";
 import { useLegalArticles, LegalArticle } from "@/hooks/useLegalArticles";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useToast } from "@/hooks/use-toast";
@@ -374,9 +375,10 @@ export function LegalCodePage({ sourceShortName, title, favoriteType, basePath }
                                         {part.number}
                                       </span>
                                       <div className="flex-1 min-w-0">
-                                        <p className="text-sm text-foreground/80 leading-[1.75]">
-                                          {part.text.replace(/^\*+|\*+$/g, "")}
-                                        </p>
+                                        <FormattedLegalText
+                                          text={part.text.replace(/^\*+|\*+$/g, "")}
+                                          className="text-sm text-foreground/80 leading-[1.75] block"
+                                        />
                                         {part.punishment && (
                                           <div className="mt-2.5 flex items-start gap-2.5 px-3.5 py-2.5 rounded-xl bg-denver-warning/5 border border-denver-warning/10">
                                             <span className="text-denver-warning shrink-0 text-sm leading-relaxed">⭐</span>
@@ -405,7 +407,7 @@ export function LegalCodePage({ sourceShortName, title, favoriteType, basePath }
                                 {/* Description */}
                                 {article.description && (
                                   <div className="mt-3 p-4 bg-secondary/15 rounded-xl border border-border/8">
-                                    <p className="text-xs text-muted-foreground/70 leading-relaxed italic">{article.description}</p>
+                                    <FormattedLegalText text={article.description} className="text-xs text-muted-foreground/70 leading-relaxed block" />
                                   </div>
                                 )}
                               </div>
