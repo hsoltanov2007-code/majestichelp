@@ -365,7 +365,7 @@ export function LegalCodePage({ sourceShortName, title, favoriteType, basePath }
                                         </p>
                                         {part.punishment && (
                                           <div className="mt-2 flex items-center gap-2 px-3 py-2 rounded-xl bg-denver-warning/5 border border-denver-warning/10">
-                                            <Scale className="h-3.5 w-3.5 text-denver-warning shrink-0" />
+                                            <span className="text-denver-warning shrink-0 text-sm tracking-wide">⭐</span>
                                             <p className="text-xs text-denver-warning/90">{part.punishment}</p>
                                           </div>
                                         )}
