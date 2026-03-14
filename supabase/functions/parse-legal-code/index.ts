@@ -208,10 +208,17 @@ function parseLegalCode(text: string): ParsedArticle[] {
           j++;
           continue;
         } else if (currentPartNumber) {
-          currentPartText += ' ' + nextLine;
+          // Keep sub-items (а), б)) within the part with line breaks
+          if (nextLine.match(/^[а-яё]\)/i) || nextLine.match(/^[а-яё]\.\d\)/i)) {
+            currentPartText += '\n' + nextLine;
+          } else {
+            currentPartText += ' ' + nextLine;
+          }
         } else {
+          // Preserve line breaks for bullet items and org patterns
+          const isBulletLike = nextLine.match(/^[а-яё]\)/i) || nextLine.match(/^[а-яё]\.\d\)/i);
           const isOrgLine = /^(LSPD|LSCSD|FIB|SANG|Government|EMS|WN|GOV|USSS|NSS|DOJ|DA|PD|SD)/i.test(nextLine);
-          if (isOrgLine) {
+          if (isBulletLike || isOrgLine) {
             description += (description ? '\n' : '') + nextLine;
           } else {
             description += (description ? ' ' : '') + nextLine;
