@@ -19,6 +19,7 @@ import Favorites from "./pages/Favorites";
 import Glossary from "./pages/Glossary";
 import FAQ from "./pages/FAQ";
 import ProceduralCode from "./pages/ProceduralCode";
+import ClosedTerritories from "./pages/ClosedTerritories";
 import LawsList from "./pages/LawsList";
 import LawDetail from "./pages/LawDetail";
 import AdminLaws from "./pages/AdminLaws";
