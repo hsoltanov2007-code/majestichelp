@@ -375,9 +375,10 @@ export function LegalCodePage({ sourceShortName, title, favoriteType, basePath }
                                         {part.number}
                                       </span>
                                       <div className="flex-1 min-w-0">
-                                        <p className="text-sm text-foreground/80 leading-[1.75]">
-                                          {part.text.replace(/^\*+|\*+$/g, "")}
-                                        </p>
+                                        <FormattedLegalText
+                                          text={part.text.replace(/^\*+|\*+$/g, "")}
+                                          className="text-sm text-foreground/80 leading-[1.75] block"
+                                        />
                                         {part.punishment && (
                                           <div className="mt-2.5 flex items-start gap-2.5 px-3.5 py-2.5 rounded-xl bg-denver-warning/5 border border-denver-warning/10">
                                             <span className="text-denver-warning shrink-0 text-sm leading-relaxed">⭐</span>
