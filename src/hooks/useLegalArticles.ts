@@ -5,6 +5,7 @@ export interface ArticlePart {
   number: number;
   text: string;
   punishment?: string;
+  images?: string[];
 }
 
 export interface LegalArticle {

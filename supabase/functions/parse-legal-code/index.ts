@@ -291,6 +291,50 @@ function parseLegalCode(text: string): ParsedArticle[] {
     }
   }
 
+  // Post-process: extract image galleries from spoiler sections
+  // Look for patterns like "Спойлер: Name" followed by ![image](url) lines
+  const imageRe = /!\[image\]\(([^)]+)\)/g;
+  const spoilerRe = /Спойлер:\s*(.+)/i;
+  const imageGalleries: { name: string; images: string[] }[] = [];
+  let currentGalleryName = '';
+  let currentGalleryImages: string[] = [];
+  
+  for (const line of text.split('\n')) {
+    const trimmed = line.trim();
+    const spoilerMatch = trimmed.match(spoilerRe);
+    if (spoilerMatch) {
+      if (currentGalleryName && currentGalleryImages.length > 0) {
+        imageGalleries.push({ name: currentGalleryName, images: [...currentGalleryImages] });
+      }
+      currentGalleryName = spoilerMatch[1].trim();
+      currentGalleryImages = [];
+      continue;
+    }
+    const imgMatch = trimmed.match(/!\[image\]\(([^)]+)\)/);
+    if (imgMatch && currentGalleryName) {
+      currentGalleryImages.push(imgMatch[1]);
+    }
+  }
+  if (currentGalleryName && currentGalleryImages.length > 0) {
+    imageGalleries.push({ name: currentGalleryName, images: [...currentGalleryImages] });
+  }
+  
+  // Also check for section headers like "Federal Investigation Bureau" etc. that aren't in spoiler tags
+  // but precede image blocks — these are handled by spoiler sections above
+  
+  // Attach image galleries to the visualization article (typically article 5 for ЗТ)
+  if (imageGalleries.length > 0) {
+    const vizArticle = articles.find(a => /визуализац/i.test(a.article_title));
+    if (vizArticle) {
+      vizArticle.parts = imageGalleries.map((g, idx) => ({
+        number: String(idx + 1),
+        text: g.name,
+        punishment: '',
+        images: g.images,
+      }));
+    }
+  }
+
   return articles;
 }
 

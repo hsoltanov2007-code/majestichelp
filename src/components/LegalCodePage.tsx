@@ -383,6 +383,20 @@ export function LegalCodePage({ sourceShortName, title, favoriteType, basePath }
                                             <p className="text-xs text-denver-warning/90 leading-relaxed">{part.punishment}</p>
                                           </div>
                                         )}
+                                        {/* Image Gallery */}
+                                        {part.images && part.images.length > 0 && (
+                                          <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                            {part.images.map((imgUrl, imgIdx) => (
+                                              <a key={imgIdx} href={imgUrl} target="_blank" rel="noopener noreferrer"
+                                                className="block rounded-xl overflow-hidden border border-border/10 hover:border-accent/30 transition-all hover:shadow-lg hover:shadow-accent/5 group/img">
+                                                <img src={imgUrl} alt={`${part.text} ${imgIdx + 1}`}
+                                                  className="w-full h-24 sm:h-32 object-cover group-hover/img:scale-105 transition-transform duration-300"
+                                                  loading="lazy"
+                                                />
+                                              </a>
+                                            ))}
+                                          </div>
+                                        )}
                                       </div>
                                     </div>
                                   </div>
