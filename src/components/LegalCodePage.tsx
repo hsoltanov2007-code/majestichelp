@@ -4,9 +4,10 @@ import { Layout } from "@/components/Layout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, X, ChevronRight, BookOpen, FileText, AlertCircle, Bookmark, Link2, Hash, Scale } from "lucide-react";
+import { Search, X, ChevronRight, ChevronDown, BookOpen, FileText, AlertCircle, Bookmark, Link2, Hash, Scale } from "lucide-react";
 import { useLegalArticles, LegalArticle } from "@/hooks/useLegalArticles";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useToast } from "@/hooks/use-toast";
@@ -26,6 +27,8 @@ export function LegalCodePage({ sourceShortName, title, favoriteType, basePath }
   const [showNavigation, setShowNavigation] = useState(false);
   const [activeChapter, setActiveChapter] = useState<string | null>(null);
   const [openArticles, setOpenArticles] = useState<string[]>([]);
+  const [openSections, setOpenSections] = useState<string[]>([]);
+  const [openChapters, setOpenChapters] = useState<string[]>([]);
   const chapterRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const searchInputRef = useRef<HTMLInputElement>(null);
   const { isFavorite, toggleFavorite } = useFavorites();
@@ -289,54 +292,69 @@ export function LegalCodePage({ sourceShortName, title, favoriteType, basePath }
 
           {/* Main Content */}
           <main className="flex-1 min-w-0">
-            <div className="space-y-12">
+            <div className="space-y-4">
               {sections.map((section) => (
-                <div key={section.id}>
-                  {/* Section Header */}
-                  <div className="flex items-center gap-3 mb-8">
-                    <div className="h-8 w-8 rounded-lg bg-accent/10 flex items-center justify-center">
-                      <FileText className="h-4 w-4 text-accent" />
-                    </div>
-                    <h2 className="text-lg font-semibold tracking-tight">{section.title}</h2>
-                    <div className="flex-1 h-px bg-border/10 ml-2" />
-                  </div>
-
-                  {section.chapters.map((chapter) => (
-                    <div key={chapter.id} className="mb-10"
-                      ref={(el) => { chapterRefs.current[chapter.id] = el; }}>
-                      
-                      {/* Chapter Header */}
-                      <div className="flex items-center gap-2.5 mb-4 scroll-mt-20 pl-1">
-                        <Hash className="h-3.5 w-3.5 text-accent/40" />
-                        <h3 className="text-sm font-semibold text-muted-foreground">
-                          {chapter.title}
-                        </h3>
-                        <span className="text-[10px] font-mono text-muted-foreground/30 ml-1">({chapter.articles.length})</span>
+                <Collapsible
+                  key={section.id}
+                  open={openSections.includes(section.id)}
+                  onOpenChange={(open) => setOpenSections(prev => open ? [...prev, section.id] : prev.filter(id => id !== section.id))}
+                >
+                  {/* Section Header - Collapsible */}
+                  <CollapsibleTrigger className="w-full group/section">
+                    <div className="flex items-center gap-3 p-4 rounded-2xl glass hover:bg-card/60 transition-all cursor-pointer">
+                      <div className="h-9 w-9 rounded-xl bg-accent/10 flex items-center justify-center shrink-0 group-hover/section:bg-accent/15 transition-colors">
+                        <FileText className="h-4 w-4 text-accent" />
                       </div>
+                      <h2 className="text-sm lg:text-base font-semibold tracking-tight text-left flex-1">{section.title}</h2>
+                      <span className="text-[10px] font-mono text-muted-foreground/40 mr-2">
+                        {section.chapters.reduce((sum, ch) => sum + ch.articles.length, 0)} ст.
+                      </span>
+                      <ChevronDown className={`h-4 w-4 text-muted-foreground/40 transition-transform duration-200 ${openSections.includes(section.id) ? "rotate-180" : ""}`} />
+                    </div>
+                  </CollapsibleTrigger>
 
-                      <Accordion type="multiple" className="space-y-2" value={openArticles} onValueChange={setOpenArticles}>
-                        {chapter.articles.map((article) => (
-                          <AccordionItem key={article.id} value={article.id}
-                            id={`article-${article.article_number}`}
-                            className={`border border-border/15 rounded-2xl px-0 bg-card/30 transition-all hover:bg-card/50 hover:border-border/25 group/article ${article.is_void ? "opacity-35" : ""}`}>
-                            <AccordionTrigger className="hover:no-underline py-4 px-5">
-                              <div className="flex items-center gap-3 text-left">
-                                <span className="inline-flex items-center justify-center h-8 min-w-[2.5rem] rounded-xl bg-accent/8 text-[11px] font-mono text-accent shrink-0 font-semibold px-2 group-hover/article:bg-accent/12 transition-colors">
-                                  {article.article_number}
-                                </span>
-                                <div className="min-w-0">
-                                  <span className="text-sm font-medium leading-snug">
-                                    {article.article_title}
-                                  </span>
-                                  {article.is_void && (
-                                    <span className="ml-2 text-[10px] text-destructive/70 bg-destructive/10 px-1.5 py-0.5 rounded-md font-medium">
-                                      утр. силу
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                            </AccordionTrigger>
-                            <AccordionContent className="pt-0 pb-5 px-5">
+                  <CollapsibleContent className="pl-2 pt-2 space-y-3">
+                    {section.chapters.map((chapter) => (
+                      <Collapsible
+                        key={chapter.id}
+                        open={openChapters.includes(chapter.id)}
+                        onOpenChange={(open) => setOpenChapters(prev => open ? [...prev, chapter.id] : prev.filter(id => id !== chapter.id))}
+                      >
+                        <div ref={(el) => { chapterRefs.current[chapter.id] = el; }} className="scroll-mt-20">
+                          {/* Chapter Header - Collapsible */}
+                          <CollapsibleTrigger className="w-full group/chapter">
+                            <div className="flex items-center gap-2.5 px-4 py-3 rounded-xl hover:bg-secondary/20 transition-all cursor-pointer">
+                              <ChevronRight className={`h-3.5 w-3.5 text-accent/40 shrink-0 transition-transform duration-200 ${openChapters.includes(chapter.id) ? "rotate-90" : ""}`} />
+                              <Hash className="h-3 w-3 text-muted-foreground/20 shrink-0" />
+                              <h3 className="text-xs lg:text-sm font-medium text-muted-foreground group-hover/chapter:text-foreground transition-colors text-left flex-1">
+                                {chapter.title}
+                              </h3>
+                              <span className="text-[10px] font-mono text-muted-foreground/25">{chapter.articles.length}</span>
+                            </div>
+                          </CollapsibleTrigger>
+
+                          <CollapsibleContent className="pl-4 pt-1">
+                            <Accordion type="multiple" className="space-y-1.5" value={openArticles} onValueChange={setOpenArticles}>
+                              {chapter.articles.map((article) => (
+                                <AccordionItem key={article.id} value={article.id}
+                                  id={`article-${article.article_number}`}
+                                  className={`border border-border/10 rounded-xl px-0 bg-card/20 transition-all hover:bg-card/40 hover:border-border/20 group/article ${article.is_void ? "opacity-35" : ""}`}>
+                                  <AccordionTrigger className="hover:no-underline py-3 px-4">
+                                    <div className="flex items-center gap-2.5 text-left">
+                                      <span className="inline-flex items-center justify-center h-7 min-w-[2.2rem] rounded-lg bg-accent/8 text-[10px] font-mono text-accent shrink-0 font-semibold px-1.5 group-hover/article:bg-accent/12 transition-colors">
+                                        {article.article_number}
+                                      </span>
+                                      <span className="text-[13px] font-medium leading-snug">
+                                        {article.article_title}
+                                        {article.is_void && (
+                                          <span className="ml-2 text-[9px] text-destructive/70 bg-destructive/10 px-1.5 py-0.5 rounded font-medium">
+                                            утр. силу
+                                          </span>
+                                        )}
+                                      </span>
+                                    </div>
+                                  </AccordionTrigger>
+                                  <AccordionContent className="pt-0 pb-4 px-4">
                               <div className="space-y-4">
                                 {/* Action Buttons */}
                                 <div className="flex gap-1.5 pb-3 border-b border-border/10">
@@ -381,13 +399,16 @@ export function LegalCodePage({ sourceShortName, title, favoriteType, basePath }
                                   </div>
                                 )}
                               </div>
-                            </AccordionContent>
-                          </AccordionItem>
-                        ))}
-                      </Accordion>
+                              </AccordionContent>
+                            </AccordionItem>
+                          ))}
+                        </Accordion>
+                      </CollapsibleContent>
                     </div>
-                  ))}
-                </div>
+                  </Collapsible>
+                ))}
+              </CollapsibleContent>
+            </Collapsible>
               ))}
             </div>
           </main>
