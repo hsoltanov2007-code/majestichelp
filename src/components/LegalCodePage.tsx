@@ -27,6 +27,8 @@ export function LegalCodePage({ sourceShortName, title, favoriteType, basePath }
   const [showNavigation, setShowNavigation] = useState(false);
   const [activeChapter, setActiveChapter] = useState<string | null>(null);
   const [openArticles, setOpenArticles] = useState<string[]>([]);
+  const [openSections, setOpenSections] = useState<string[]>([]);
+  const [openChapters, setOpenChapters] = useState<string[]>([]);
   const chapterRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const searchInputRef = useRef<HTMLInputElement>(null);
   const { isFavorite, toggleFavorite } = useFavorites();
