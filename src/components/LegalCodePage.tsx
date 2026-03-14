@@ -407,7 +407,7 @@ export function LegalCodePage({ sourceShortName, title, favoriteType, basePath }
                                 {/* Description */}
                                 {article.description && (
                                   <div className="mt-3 p-4 bg-secondary/15 rounded-xl border border-border/8">
-                                    <p className="text-xs text-muted-foreground/70 leading-relaxed italic">{article.description}</p>
+                                    <FormattedLegalText text={article.description} className="text-xs text-muted-foreground/70 leading-relaxed block" />
                                   </div>
                                 )}
                               </div>
