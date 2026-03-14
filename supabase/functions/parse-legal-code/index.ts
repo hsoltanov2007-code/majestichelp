@@ -247,7 +247,12 @@ function parseLegalCode(text: string): ParsedArticle[] {
         article_number: articleNumber,
         article_title: articleTitle,
         jurisdiction,
-        description: description.replace(/[,.\s]+$/, '').trim(),
+        description: description
+          .replace(/!\[image\]\([^)]*\)/g, '')
+          .replace(/Спойлер:\s*[^\n]*/g, '')
+          .replace(/\s+/g, ' ')
+          .replace(/[,.\s]+$/, '')
+          .trim(),
         section_name: currentSection,
         chapter_name: currentChapter,
         parts,
