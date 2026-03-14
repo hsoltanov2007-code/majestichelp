@@ -7,6 +7,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Search, X, ChevronRight, BookOpen, FileText, AlertCircle, Bookmark, Link2, Hash, Scale } from "lucide-react";
+import { FormattedLegalText } from "@/components/FormattedLegalText";
 import { useLegalArticles, LegalArticle } from "@/hooks/useLegalArticles";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useToast } from "@/hooks/use-toast";
