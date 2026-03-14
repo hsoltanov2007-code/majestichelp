@@ -52,6 +52,8 @@ function parseLegalCode(text: string): ParsedArticle[] {
   const partStartRe = /^(?:ч\.?|част[ьи])\s*([0-9]+(?:\.[0-9]+)*)(?:\.)?\s*(.*)$/i;
   const pointStartRe = /^(?:п\.?|пункт)\s*([0-9]+(?:\.[0-9]+)*)(?:\.)?\s*(.*)$/i;
   const listStartRe = /^([0-9]{1,3})(?:[.)])\s*(.*)$/;
+  const subItemRe = /^([а-яё])\)\s*(.*)$/i;
+  const subItemDotRe = /^([а-яё]\.\d)\)\s*(.*)$/i;
 
   const lines = text
     .split("\n")
@@ -100,7 +102,9 @@ function parseLegalCode(text: string): ParsedArticle[] {
       const articleNumber = articleMatch[1].replace(/\.+$/, "");
       let rest = (articleMatch[2] || "").trim();
       
-      if (/утратила?\s+силу/i.test(rest) || /утратила?\s+силу/i.test(lines[i + 1] || '')) {
+      const nextLineForVoid = (lines[i + 1] || '').trim();
+      const nextLineIsSubItem = /^[а-яё]\)/i.test(nextLineForVoid);
+      if (/утратила?\s+силу/i.test(rest) || (!nextLineIsSubItem && /утратила?\s+силу/i.test(nextLineForVoid))) {
         articles.push({
           article_number: articleNumber,
           article_title: 'Утратила силу',
@@ -149,7 +153,7 @@ function parseLegalCode(text: string): ParsedArticle[] {
         if (/^Статья\s/i.test(nextLine)) break;
         if (/^(?:РАЗДЕЛ|Раздел)\s/i.test(nextLine)) break;
         if (/^(?:ГЛАВА|Глава)\s/i.test(nextLine)) break;
-        if (partStartRe.test(nextLine) || pointStartRe.test(nextLine) || listStartRe.test(nextLine)) break;
+        if (partStartRe.test(nextLine) || pointStartRe.test(nextLine) || listStartRe.test(nextLine) || subItemRe.test(nextLine) || subItemDotRe.test(nextLine)) break;
         if (/^Наказание:/i.test(nextLine)) break;
         if (/^Примечание:/i.test(nextLine)) break;
         if (/^Особенная часть/i.test(nextLine)) break;
@@ -179,9 +183,10 @@ function parseLegalCode(text: string): ParsedArticle[] {
         const partMatch = nextLine.match(partStartRe);
         const pointMatch = nextLine.match(pointStartRe);
         const listMatch = nextLine.match(listStartRe);
+        const subItemMatch = nextLine.match(subItemDotRe) || nextLine.match(subItemRe);
         const punishmentMatch = nextLine.match(/^Наказание:\s*(.*)/i);
         
-        if (partMatch || pointMatch || listMatch) {
+        if (partMatch || pointMatch || listMatch || subItemMatch) {
           if (currentPartNumber) {
             parts.push({ number: currentPartNumber, text: currentPartText.trim(), punishment: '' });
           }
@@ -191,6 +196,9 @@ function parseLegalCode(text: string): ParsedArticle[] {
           } else if (pointMatch) {
             currentPartNumber = `п.${pointMatch[1]}`;
             currentPartText = pointMatch[2] || '';
+          } else if (subItemMatch) {
+            currentPartNumber = subItemMatch[1] + ')';
+            currentPartText = subItemMatch[2] || '';
           } else {
             currentPartNumber = listMatch![1];
             currentPartText = listMatch![2] || '';
@@ -208,15 +216,10 @@ function parseLegalCode(text: string): ParsedArticle[] {
           j++;
           continue;
         } else if (currentPartNumber) {
-          if (nextLine.match(/^[а-я]\)/i) || nextLine.match(/^[а-я]\.\d\)/i)) {
-            currentPartText += '\n' + nextLine;
-          } else {
-            currentPartText += ' ' + nextLine;
-          }
+          currentPartText += ' ' + nextLine;
         } else {
-          const isBulletLike = nextLine.match(/^[а-я]\)/i) || nextLine.match(/^[а-я]\.\d\)/i);
           const isOrgLine = /^(LSPD|LSCSD|FIB|SANG|Government|EMS|WN|GOV|USSS|NSS|DOJ|DA|PD|SD)/i.test(nextLine);
-          if (isBulletLike || isOrgLine) {
+          if (isOrgLine) {
             description += (description ? '\n' : '') + nextLine;
           } else {
             description += (description ? ' ' : '') + nextLine;
