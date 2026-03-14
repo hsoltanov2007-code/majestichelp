@@ -149,7 +149,7 @@ function parseLegalCode(text: string): ParsedArticle[] {
         if (/^Статья\s/i.test(nextLine)) break;
         if (/^(?:РАЗДЕЛ|Раздел)\s/i.test(nextLine)) break;
         if (/^(?:ГЛАВА|Глава)\s/i.test(nextLine)) break;
-        if (partStartRe.test(nextLine) || pointStartRe.test(nextLine) || listStartRe.test(nextLine) || subItemRe.test(nextLine) || subItemDotRe.test(nextLine)) break;
+        if (partStartRe.test(nextLine) || pointStartRe.test(nextLine) || listStartRe.test(nextLine)) break;
         if (/^Наказание:/i.test(nextLine)) break;
         if (/^Примечание:/i.test(nextLine)) break;
         if (/^Особенная часть/i.test(nextLine)) break;
