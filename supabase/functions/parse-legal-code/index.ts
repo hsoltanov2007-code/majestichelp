@@ -52,6 +52,8 @@ function parseLegalCode(text: string): ParsedArticle[] {
   const partStartRe = /^(?:ч\.?|част[ьи])\s*([0-9]+(?:\.[0-9]+)*)(?:\.)?\s*(.*)$/i;
   const pointStartRe = /^(?:п\.?|пункт)\s*([0-9]+(?:\.[0-9]+)*)(?:\.)?\s*(.*)$/i;
   const listStartRe = /^([0-9]{1,3})(?:[.)])\s*(.*)$/;
+  const subItemRe = /^([а-яё])\)\s*(.*)$/i;
+  const subItemDotRe = /^([а-яё]\.\d)\)\s*(.*)$/i;
 
   const lines = text
     .split("\n")
