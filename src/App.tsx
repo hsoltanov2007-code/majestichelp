@@ -57,6 +57,7 @@ function AppContent() {
         <Route path="/procedures" element={<Procedures />} />
         <Route path="/government-rules" element={<GovernmentRules />} />
         <Route path="/procedural-code" element={<ProceduralCode />} />
+        <Route path="/closed-territories" element={<ClosedTerritories />} />
         <Route path="/legal-reference" element={<LegalReference />} />
         <Route path="/instructions" element={<Instructions />} />
         <Route path="/favorites" element={<Favorites />} />
