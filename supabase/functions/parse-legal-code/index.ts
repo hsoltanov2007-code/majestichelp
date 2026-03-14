@@ -179,10 +179,9 @@ function parseLegalCode(text: string): ParsedArticle[] {
         const partMatch = nextLine.match(partStartRe);
         const pointMatch = nextLine.match(pointStartRe);
         const listMatch = nextLine.match(listStartRe);
-        const subItemMatch = nextLine.match(subItemDotRe) || nextLine.match(subItemRe);
         const punishmentMatch = nextLine.match(/^Наказание:\s*(.*)/i);
         
-        if (partMatch || pointMatch || listMatch || subItemMatch) {
+        if (partMatch || pointMatch || listMatch) {
           if (currentPartNumber) {
             parts.push({ number: currentPartNumber, text: currentPartText.trim(), punishment: '' });
           }
@@ -192,9 +191,6 @@ function parseLegalCode(text: string): ParsedArticle[] {
           } else if (pointMatch) {
             currentPartNumber = `п.${pointMatch[1]}`;
             currentPartText = pointMatch[2] || '';
-          } else if (subItemMatch) {
-            currentPartNumber = subItemMatch[1] + ')';
-            currentPartText = subItemMatch[2] || '';
           } else {
             currentPartNumber = listMatch![1];
             currentPartText = listMatch![2] || '';
