@@ -434,7 +434,7 @@ const STATIC_KNOWLEDGE_BASE = `
 6. Всегда отвечай на русском языке
 `;
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
