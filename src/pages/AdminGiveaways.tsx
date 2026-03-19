@@ -484,38 +484,63 @@ export default function AdminGiveaways() {
               <div className="space-y-2">
                 <Label>Условия участия</Label>
                 {conditions.map((c, i) => (
-                  <div key={i} className="space-y-1.5 p-3 rounded-lg bg-muted/50 border border-border">
-                    <div className="flex gap-2">
-                      <Input
-                        value={c.text}
-                        onChange={(e) => {
-                          const newC = [...conditions];
-                          newC[i] = { ...newC[i], text: e.target.value };
-                          setConditions(newC);
-                        }}
-                        placeholder={`Условие ${i + 1}`}
-                      />
-                      {conditions.length > 1 && (
+                  <div key={i} className={`space-y-1.5 p-3 rounded-lg border ${c.type === "telegram" ? "bg-blue-500/10 border-blue-500/30" : "bg-muted/50 border-border"}`}>
+                    {c.type === "telegram" ? (
+                      <div className="flex items-center gap-2">
+                        <Send className="h-4 w-4 text-blue-400 shrink-0" />
+                        <span className="text-sm font-medium flex-1">Подписка на Telegram канал @Hardyfamq</span>
                         <Button type="button" variant="ghost" size="icon" onClick={() => setConditions(conditions.filter((_, j) => j !== i))}>
                           <X className="h-4 w-4" />
                         </Button>
-                      )}
-                    </div>
-                    <Input
-                      value={c.link}
-                      onChange={(e) => {
-                        const newC = [...conditions];
-                        newC[i] = { ...newC[i], link: e.target.value };
-                        setConditions(newC);
-                      }}
-                      placeholder="Ссылка (необязательно)"
-                      className="text-xs"
-                    />
+                      </div>
+                    ) : (
+                      <>
+                        <div className="flex gap-2">
+                          <Input
+                            value={c.text}
+                            onChange={(e) => {
+                              const newC = [...conditions];
+                              newC[i] = { ...newC[i], text: e.target.value };
+                              setConditions(newC);
+                            }}
+                            placeholder={`Условие ${i + 1}`}
+                          />
+                          {conditions.length > 1 && (
+                            <Button type="button" variant="ghost" size="icon" onClick={() => setConditions(conditions.filter((_, j) => j !== i))}>
+                              <X className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                        <Input
+                          value={c.link}
+                          onChange={(e) => {
+                            const newC = [...conditions];
+                            newC[i] = { ...newC[i], link: e.target.value };
+                            setConditions(newC);
+                          }}
+                          placeholder="Ссылка (необязательно)"
+                          className="text-xs"
+                        />
+                      </>
+                    )}
                   </div>
                 ))}
-                <Button type="button" variant="outline" size="sm" onClick={() => setConditions([...conditions, { text: "", link: "" }])}>
-                  <Plus className="h-3 w-3 mr-1" /> Добавить условие
-                </Button>
+                <div className="flex gap-2">
+                  <Button type="button" variant="outline" size="sm" onClick={() => setConditions([...conditions, { text: "", link: "", type: "custom" }])}>
+                    <Plus className="h-3 w-3 mr-1" /> Добавить условие
+                  </Button>
+                  {!conditions.some(c => c.type === "telegram") && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="border-blue-500/30 text-blue-400 hover:bg-blue-500/10"
+                      onClick={() => setConditions([...conditions, { text: "Подписаться на Telegram канал @Hardyfamq", link: "", type: "telegram" }])}
+                    >
+                      <Send className="h-3 w-3 mr-1" /> Telegram подписка
+                    </Button>
+                  )}
+                </div>
               </div>
               <div className="space-y-2">
                 <Label>Дата окончания (опционально)</Label>
