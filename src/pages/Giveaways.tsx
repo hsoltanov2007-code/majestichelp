@@ -537,13 +537,22 @@ export default function Giveaways() {
                 </div>
               </div>
               {!myEntries[g.id] && user && (
-                <Button
-                  className="bg-accent hover:bg-accent/90 text-accent-foreground rounded-xl shadow-lg"
-                  onClick={() => setSelectedGiveaway(g)}
-                >
-                  <Upload className="h-4 w-4 mr-2" />
-                  Участвовать
-                </Button>
+                (g.conditions as Condition[])?.some(c => c.type === "telegram") ? (
+                  <a href={`https://t.me/hardy1bot?start=giveaway_${g.id}`} target="_blank" rel="noopener noreferrer">
+                    <Button className="bg-blue-500 hover:bg-blue-600 text-white rounded-xl shadow-lg">
+                      <Send className="h-4 w-4 mr-2" />
+                      Подписаться
+                    </Button>
+                  </a>
+                ) : (
+                  <Button
+                    className="bg-accent hover:bg-accent/90 text-accent-foreground rounded-xl shadow-lg"
+                    onClick={() => setSelectedGiveaway(g)}
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    Участвовать
+                  </Button>
+                )
               )}
               {!user && (
                 <Button variant="outline" className="rounded-xl" onClick={() => navigate("/auth", { state: { from: "/giveaways" } })}>
