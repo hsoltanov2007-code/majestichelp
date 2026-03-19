@@ -647,7 +647,7 @@ export default function Giveaways() {
                           {(g.conditions as Condition[]).map((c, i) => {
                             const isTelegram = c.type === "telegram";
                             const conditionLink = isTelegram
-                              ? `https://t.me/hardy1bot?start=giveaway_${g.id}`
+                              ? `https://t.me/hardy1bot?start=giveaway_${g.id}${user ? `_${user.id}` : ''}`
                               : c.link;
 
                             return (
