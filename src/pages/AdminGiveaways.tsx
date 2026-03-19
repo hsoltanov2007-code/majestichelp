@@ -163,8 +163,8 @@ export default function AdminGiveaways() {
     setDescription(g.description || "");
     setPrize(g.prize);
     setConditions(
-      g.conditions && (g.conditions as { text: string; link?: string }[]).length > 0
-        ? (g.conditions as { text: string; link?: string }[]).map(c => ({ text: c.text, link: c.link || "" }))
+      g.conditions && (g.conditions as { text: string; link?: string; type?: string }[]).length > 0
+        ? (g.conditions as { text: string; link?: string; type?: string }[]).map(c => ({ text: c.text, link: c.link || "", type: c.type }))
         : [{ text: "", link: "" }]
     );
     setEndsAt(g.ends_at ? g.ends_at.slice(0, 16) : "");
@@ -214,7 +214,7 @@ export default function AdminGiveaways() {
       title: title.trim(),
       description: description.trim() || null,
       prize: prize.trim(),
-      conditions: conditions.filter(c => c.text.trim()).map(c => ({ text: c.text.trim(), ...(c.link.trim() ? { link: c.link.trim() } : {}) })),
+      conditions: conditions.filter(c => c.text.trim()).map(c => ({ text: c.text.trim(), ...(c.link.trim() ? { link: c.link.trim() } : {}), ...(c.type ? { type: c.type } : {}) })),
       ends_at: endsAt || null,
       image_url: finalImageUrl,
       status,
