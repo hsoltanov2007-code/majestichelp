@@ -788,13 +788,22 @@ export default function Giveaways() {
                               </Button>
                             )
                           ) : user ? (
-                            <Button
-                              className="w-full bg-gradient-to-r from-accent to-accent/80 hover:from-accent/90 hover:to-accent/70 text-accent-foreground rounded-xl shadow-lg shadow-accent/20 transition-all duration-300"
-                              onClick={() => setSelectedGiveaway(g)}
-                            >
-                              <Upload className="h-4 w-4 mr-2" />
-                              Участвовать
-                            </Button>
+                            (g.conditions as Condition[])?.some(c => c.type === "telegram") ? (
+                              <a href={`https://t.me/hardy1bot?start=giveaway_${g.id}`} target="_blank" rel="noopener noreferrer" className="w-full">
+                                <Button className="w-full bg-blue-500 hover:bg-blue-600 text-white rounded-xl shadow-lg shadow-blue-500/20 transition-all duration-300">
+                                  <Send className="h-4 w-4 mr-2" />
+                                  Подписаться через Telegram
+                                </Button>
+                              </a>
+                            ) : (
+                              <Button
+                                className="w-full bg-gradient-to-r from-accent to-accent/80 hover:from-accent/90 hover:to-accent/70 text-accent-foreground rounded-xl shadow-lg shadow-accent/20 transition-all duration-300"
+                                onClick={() => setSelectedGiveaway(g)}
+                              >
+                                <Upload className="h-4 w-4 mr-2" />
+                                Участвовать
+                              </Button>
+                            )
                           ) : (
                             <Button className="w-full rounded-xl" variant="outline" onClick={() => navigate("/auth", { state: { from: "/giveaways" } })}>
                               Войти для участия
