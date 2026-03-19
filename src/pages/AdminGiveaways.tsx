@@ -163,8 +163,8 @@ export default function AdminGiveaways() {
     setDescription(g.description || "");
     setPrize(g.prize);
     setConditions(
-      g.conditions && (g.conditions as { text: string; link?: string }[]).length > 0
-        ? (g.conditions as { text: string; link?: string }[]).map(c => ({ text: c.text, link: c.link || "" }))
+      g.conditions && (g.conditions as { text: string; link?: string; type?: string }[]).length > 0
+        ? (g.conditions as { text: string; link?: string; type?: string }[]).map(c => ({ text: c.text, link: c.link || "", type: c.type }))
         : [{ text: "", link: "" }]
     );
     setEndsAt(g.ends_at ? g.ends_at.slice(0, 16) : "");
