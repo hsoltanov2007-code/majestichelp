@@ -23,6 +23,7 @@ import { ru } from "date-fns/locale";
 interface Condition {
   text: string;
   link?: string;
+  type?: string;
 }
 
 interface Giveaway {
