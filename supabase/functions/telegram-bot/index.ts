@@ -43,15 +43,39 @@ async function answerCallback(token: string, callbackId: string, text = "") {
   });
 }
 
-async function checkChannelMembership(token: string, channelId: string, userId: number): Promise<boolean> {
+type ChannelMembershipCheck = {
+  isMember: boolean;
+  verificationUnavailable?: boolean;
+  error?: string;
+};
+
+async function checkChannelMembership(token: string, channelId: string, userId: number): Promise<ChannelMembershipCheck> {
   const res = await fetch(`${TELEGRAM_API}${token}/getChatMember`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ chat_id: channelId, user_id: userId }),
   });
   const data = await res.json();
-  if (!data.ok) return false;
-  return ["member", "administrator", "creator"].includes(data.result?.status);
+
+  if (!data.ok) {
+    const description = typeof data.description === "string" ? data.description : "Unknown Telegram API error";
+    console.error("getChatMember failed:", {
+      channelId,
+      userId,
+      error_code: data.error_code,
+      description,
+    });
+
+    return {
+      isMember: false,
+      error: description,
+      verificationUnavailable: description.toLowerCase().includes("member list is inaccessible"),
+    };
+  }
+
+  return {
+    isMember: ["member", "administrator", "creator"].includes(data.result?.status),
+  };
 }
 
 // ── Helpers ──
@@ -192,9 +216,27 @@ async function showGiveaway(token: string, chatId: number, fromUserId: number, g
 }
 
 async function handleJoin(token: string, chatId: number, fromUserId: number, giveawayId: string, supabase: ReturnType<typeof createClient>, messageId?: number) {
-  const isMember = await checkChannelMembership(token, TELEGRAM_CHANNEL, fromUserId);
+  const membershipCheck = await checkChannelMembership(token, TELEGRAM_CHANNEL, fromUserId);
 
-  if (!isMember) {
+  if (membershipCheck.verificationUnavailable) {
+    await reply(token, chatId,
+      `⚠️ <b>Не удалось проверить подписку автоматически</b>\n\n` +
+      `Telegram не даёт боту доступ к списку подписчиков канала ${TELEGRAM_CHANNEL}.\n\n` +
+      `Чтобы проверка заработала, добавь бота администратором канала и нажми «Проверить» ещё раз.`,
+      {
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: "📢 Открыть канал", url: `https://t.me/${TELEGRAM_CHANNEL.replace("@", "")}` }],
+            [{ text: "🔄 Проверить ещё раз", callback_data: `join_${giveawayId}` }],
+          ],
+        },
+      },
+      messageId
+    );
+    return;
+  }
+
+  if (!membershipCheck.isMember) {
     await reply(token, chatId,
       `❌ <b>Ты не подписан на канал!</b>\n\nПодпишись на ${TELEGRAM_CHANNEL} и нажми «Проверить».`,
       {
@@ -274,7 +316,6 @@ async function handleJoin(token: string, chatId: number, fromUserId: number, giv
     messageId
   );
 }
-
 // ── Main handler ──
 
 Deno.serve(async (req) => {
