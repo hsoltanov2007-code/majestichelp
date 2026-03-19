@@ -99,13 +99,32 @@ async function linkAccount(token: string, chatId: number, code: string, supabase
 
 // ── Giveaway handlers ──
 
-async function showGiveaway(token: string, chatId: number, fromUserId: number, giveawayId: string, supabase: ReturnType<typeof createClient>, messageId?: number) {
+async function showGiveaway(token: string, chatId: number, fromUserId: number, giveawayId: string, supabase: ReturnType<typeof createClient>, messageId?: number, siteUserId?: string) {
   // Check if profile is linked
-  const { data: profile } = await supabase
+  let { data: profile } = await supabase
     .from("profiles")
     .select("id")
     .eq("telegram_chat_id", chatId)
     .maybeSingle();
+
+  // Auto-link if we have siteUserId from deep link
+  if (!profile && siteUserId) {
+    const { data: siteProfile } = await supabase
+      .from("profiles")
+      .select("id, telegram_chat_id")
+      .eq("id", siteUserId)
+      .maybeSingle();
+
+    if (siteProfile && !siteProfile.telegram_chat_id) {
+      await supabase
+        .from("profiles")
+        .update({ telegram_chat_id: chatId })
+        .eq("id", siteUserId);
+      profile = { id: siteUserId };
+    } else if (siteProfile && siteProfile.telegram_chat_id === chatId) {
+      profile = { id: siteUserId };
+    }
+  }
 
   if (!profile) {
     await reply(token, chatId,
@@ -304,10 +323,18 @@ Deno.serve(async (req) => {
       if (parts.length >= 2) {
         const code = parts[1];
 
-        // Giveaway deep link
+        // Giveaway deep link: giveaway_{id} or giveaway_{id}_{userId}
         if (code.startsWith("giveaway_")) {
-          const giveawayId = code.replace("giveaway_", "");
-          await showGiveaway(BOT_TOKEN, chatId, fromUserId, giveawayId, supabase);
+          const parts = code.replace("giveaway_", "").split("_");
+          // UUID is 36 chars with dashes, giveaway ID is first UUID
+          const giveawayId = parts.slice(0, 5).join("_"); // UUID has 5 parts separated by -... wait, we use _ as separator
+          // Actually deep link format: giveaway_{giveawayUUID}_{siteUserUUID}
+          // UUIDs contain dashes not underscores, so split by _ after "giveaway_" gives us at most 2 parts
+          const rawAfterPrefix = code.slice("giveaway_".length);
+          // Find where the first UUID ends (36 chars)
+          const gId = rawAfterPrefix.slice(0, 36);
+          const siteUserId = rawAfterPrefix.length > 37 ? rawAfterPrefix.slice(37) : undefined;
+          await showGiveaway(BOT_TOKEN, chatId, fromUserId, gId, supabase, undefined, siteUserId);
           return new Response("ok", { headers: corsHeaders });
         }
 
