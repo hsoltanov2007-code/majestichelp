@@ -8,6 +8,7 @@ const corsHeaders = {
 const TELEGRAM_API = "https://api.telegram.org/bot";
 const SITE_URL = "https://majestichelp.com";
 const MINI_APP_URL = "https://majestichelp.com";
+const TELEGRAM_CHANNEL = "@Hardyfamq";
 
 // ── Telegram helpers ──
 
@@ -42,6 +43,18 @@ async function answerCallback(token: string, callbackId: string, text = "") {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ callback_query_id: callbackId, text }),
   });
+}
+
+async function checkChannelMembership(token: string, channelId: string, userId: number): Promise<boolean> {
+  const res = await fetch(`${TELEGRAM_API}${token}/getChatMember`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ chat_id: channelId, user_id: userId }),
+  });
+  const data = await res.json();
+  if (!data.ok) return false;
+  const status = data.result?.status;
+  return ["member", "administrator", "creator"].includes(status);
 }
 
 // ── Main menu keyboard ──
@@ -87,12 +100,198 @@ const statusEmoji: Record<string, string> = {
   resolved: "✅",
 };
 
+// ── Giveaway handlers ──
+
+async function handleGiveawayStart(token: string, chatId: number, fromUserId: number, giveawayId: string, supabase: ReturnType<typeof createClient>) {
+  // Check if profile is linked
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("telegram_chat_id", chatId)
+    .maybeSingle();
+
+  if (!profile) {
+    // Try to link by telegram user id — check if there's a profile with this chat_id already
+    await sendMessage(token, chatId,
+      "❌ <b>Аккаунт не привязан</b>\n\n" +
+      "Чтобы участвовать в розыгрыше, сначала привяжи аккаунт:\n" +
+      "1. Зайди на сайт → Профиль\n" +
+      "2. Нажми «Привязать Telegram»\n" +
+      "3. Вернись сюда и попробуй снова",
+      { reply_markup: { inline_keyboard: [[{ text: "🌐 Открыть сайт", web_app: { url: MINI_APP_URL } }]] } }
+    );
+    return;
+  }
+
+  // Fetch giveaway
+  const { data: giveaway } = await supabase
+    .from("giveaways")
+    .select("id, title, prize, status, ends_at, description")
+    .eq("id", giveawayId)
+    .maybeSingle();
+
+  if (!giveaway) {
+    await sendMessage(token, chatId, "❌ Розыгрыш не найден.");
+    return;
+  }
+
+  if (giveaway.status !== "active") {
+    await sendMessage(token, chatId, "❌ Этот розыгрыш уже завершён.", {
+      reply_markup: { inline_keyboard: [[{ text: "◀️ Главное меню", callback_data: "menu_main" }]] },
+    });
+    return;
+  }
+
+  // Check if already participating
+  const { data: existingEntry } = await supabase
+    .from("giveaway_entries")
+    .select("id")
+    .eq("giveaway_id", giveawayId)
+    .eq("user_id", profile.id)
+    .maybeSingle();
+
+  if (existingEntry) {
+    await sendMessage(token, chatId,
+      `✅ <b>Ты уже участвуешь в розыгрыше!</b>\n\n🎁 ${giveaway.title}\n🏆 Приз: ${giveaway.prize}\n\nЖди результатов! 🤞`,
+      { reply_markup: { inline_keyboard: [[{ text: "◀️ Главное меню", callback_data: "menu_main" }]] } }
+    );
+    return;
+  }
+
+  // Show giveaway info with subscribe + participate buttons
+  let msg = `🎁 <b>${giveaway.title}</b>\n\n`;
+  msg += `🏆 Приз: <b>${giveaway.prize}</b>\n`;
+  if (giveaway.description) msg += `📝 ${truncate(giveaway.description, 200)}\n`;
+  if (giveaway.ends_at) msg += `⏰ До: ${formatDate(giveaway.ends_at)}\n`;
+  msg += `\n📋 <b>Условия:</b>\n`;
+  msg += `1. Подписаться на канал ${TELEGRAM_CHANNEL}\n`;
+  msg += `2. Нажать кнопку «Участвовать» ниже\n\n`;
+  msg += `⬇️ Подпишись на канал и нажми «Участвовать»`;
+
+  await sendMessage(token, chatId, msg, {
+    reply_markup: {
+      inline_keyboard: [
+        [{ text: "📢 Подписаться на канал", url: `https://t.me/${TELEGRAM_CHANNEL.replace("@", "")}` }],
+        [{ text: "✅ Участвовать", callback_data: `giveaway_join_${giveawayId}` }],
+        [{ text: "◀️ Главное меню", callback_data: "menu_main" }],
+      ],
+    },
+  });
+}
+
+async function handleGiveawayJoin(token: string, chatId: number, fromUserId: number, giveawayId: string, supabase: ReturnType<typeof createClient>, messageId?: number) {
+  // Check channel subscription
+  const isMember = await checkChannelMembership(token, TELEGRAM_CHANNEL, fromUserId);
+
+  if (!isMember) {
+    await reply(token, chatId,
+      "❌ <b>Ты не подписан на канал!</b>\n\n" +
+      `Подпишись на ${TELEGRAM_CHANNEL} и попробуй снова.`,
+      {
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: "📢 Подписаться на канал", url: `https://t.me/${TELEGRAM_CHANNEL.replace("@", "")}` }],
+            [{ text: "🔄 Проверить подписку", callback_data: `giveaway_join_${giveawayId}` }],
+            [{ text: "◀️ Главное меню", callback_data: "menu_main" }],
+          ],
+        },
+      },
+      messageId
+    );
+    return;
+  }
+
+  // Get profile
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("telegram_chat_id", chatId)
+    .maybeSingle();
+
+  if (!profile) {
+    await reply(token, chatId, "❌ Аккаунт не привязан. Привяжи его на сайте.", {}, messageId);
+    return;
+  }
+
+  // Check giveaway is still active
+  const { data: giveaway } = await supabase
+    .from("giveaways")
+    .select("id, title, prize, status")
+    .eq("id", giveawayId)
+    .maybeSingle();
+
+  if (!giveaway || giveaway.status !== "active") {
+    await reply(token, chatId, "❌ Розыгрыш завершён или не найден.", {
+      reply_markup: { inline_keyboard: [[{ text: "◀️ Главное меню", callback_data: "menu_main" }]] },
+    }, messageId);
+    return;
+  }
+
+  // Check if already participating
+  const { data: existingEntry } = await supabase
+    .from("giveaway_entries")
+    .select("id")
+    .eq("giveaway_id", giveawayId)
+    .eq("user_id", profile.id)
+    .maybeSingle();
+
+  if (existingEntry) {
+    await reply(token, chatId,
+      `✅ <b>Ты уже участвуешь!</b>\n\n🎁 ${giveaway.title}\n🏆 Приз: ${giveaway.prize}`,
+      { reply_markup: { inline_keyboard: [[{ text: "◀️ Главное меню", callback_data: "menu_main" }]] } },
+      messageId
+    );
+    return;
+  }
+
+  // Create entry
+  const { error } = await supabase
+    .from("giveaway_entries")
+    .insert({
+      giveaway_id: giveawayId,
+      user_id: profile.id,
+      screenshot_url: "telegram-verified",
+      screenshot_urls: [],
+      status: "approved",
+    });
+
+  if (error) {
+    if (error.code === "23505") {
+      await reply(token, chatId, "✅ Ты уже участвуешь в этом розыгрыше!", {
+        reply_markup: { inline_keyboard: [[{ text: "◀️ Главное меню", callback_data: "menu_main" }]] },
+      }, messageId);
+    } else {
+      console.error("Giveaway entry error:", error);
+      await reply(token, chatId, "❌ Ошибка. Попробуй позже.", {}, messageId);
+    }
+    return;
+  }
+
+  await reply(token, chatId,
+    `🎉 <b>Ты участвуешь в розыгрыше!</b>\n\n` +
+    `🎁 ${giveaway.title}\n` +
+    `🏆 Приз: <b>${giveaway.prize}</b>\n\n` +
+    `⚠️ <i>Не отписывайся от канала ${TELEGRAM_CHANNEL}, иначе участие будет аннулировано!</i>\n\n` +
+    `Удачи! 🍀`,
+    { reply_markup: { inline_keyboard: [[{ text: "◀️ Главное меню", callback_data: "menu_main" }]] } },
+    messageId
+  );
+}
+
 // ── Command handlers ──
 
-async function handleStart(token: string, chatId: number, text: string, supabase: ReturnType<typeof createClient>) {
+async function handleStart(token: string, chatId: number, fromUserId: number, text: string, supabase: ReturnType<typeof createClient>) {
   const parts = text.split(" ");
   if (parts.length >= 2) {
     const code = parts[1];
+
+    // Handle giveaway deep link
+    if (code.startsWith("giveaway_")) {
+      const giveawayId = code.replace("giveaway_", "");
+      await handleGiveawayStart(token, chatId, fromUserId, giveawayId, supabase);
+      return;
+    }
+
     const { data: linkCode } = await supabase
       .from("telegram_link_codes")
       .select("*")
@@ -232,7 +431,7 @@ async function handleProfile(token: string, chatId: number, supabase: ReturnType
 async function handleGiveaways(token: string, chatId: number, supabase: ReturnType<typeof createClient>, messageId?: number) {
   const { data: giveaways } = await supabase
     .from("giveaways")
-    .select("title, prize, ends_at, description")
+    .select("id, title, prize, ends_at, description")
     .eq("status", "active")
     .order("ends_at", { ascending: true })
     .limit(5);
@@ -247,17 +446,21 @@ async function handleGiveaways(token: string, chatId: number, supabase: ReturnTy
   }
 
   let msg = "🎁 <b>Активные розыгрыши:</b>\n\n";
+  const buttons: Array<{ text: string; callback_data: string }[]> = [];
+
   giveaways.forEach((g, i) => {
     msg += `<b>${i + 1}. ${g.title}</b>\n`;
     msg += `🏆 Приз: <b>${g.prize}</b>\n`;
     if (g.ends_at) msg += `⏰ До: ${formatDate(g.ends_at)}\n`;
     if (g.description) msg += `📝 ${truncate(g.description, 100)}\n`;
     msg += `\n`;
+    buttons.push([{ text: `🎁 ${truncate(g.title, 25)}`, callback_data: `giveaway_view_${g.id}` }]);
   });
-  msg += `🔗 <a href="${SITE_URL}/giveaways">Участвовать на сайте</a>`;
+
+  buttons.push([{ text: "◀️ Главное меню", callback_data: "menu_main" }]);
 
   await reply(token, chatId, msg, {
-    reply_markup: { inline_keyboard: [[{ text: "◀️ Главное меню", callback_data: "menu_main" }]] },
+    reply_markup: { inline_keyboard: buttons },
     disable_web_page_preview: true,
   }, messageId);
 }
@@ -467,10 +670,24 @@ Deno.serve(async (req) => {
       const chatId = cb.message?.chat?.id;
       const msgId = cb.message?.message_id;
       const data = cb.data;
+      const fromUserId = cb.from?.id;
 
       if (!chatId) return new Response("ok", { headers: corsHeaders });
 
       await answerCallback(BOT_TOKEN, cb.id);
+
+      // Handle giveaway callbacks
+      if (data?.startsWith("giveaway_join_")) {
+        const giveawayId = data.replace("giveaway_join_", "");
+        await handleGiveawayJoin(BOT_TOKEN, chatId, fromUserId, giveawayId, supabase, msgId);
+        return new Response("ok", { headers: corsHeaders });
+      }
+
+      if (data?.startsWith("giveaway_view_")) {
+        const giveawayId = data.replace("giveaway_view_", "");
+        await handleGiveawayStart(BOT_TOKEN, chatId, fromUserId, giveawayId, supabase);
+        return new Response("ok", { headers: corsHeaders });
+      }
 
       switch (data) {
         case "menu_main":
@@ -515,9 +732,10 @@ Deno.serve(async (req) => {
 
     const chatId = message.chat.id;
     const text = message.text.trim();
+    const fromUserId = message.from?.id;
 
     if (text.startsWith("/start")) {
-      await handleStart(BOT_TOKEN, chatId, text, supabase);
+      await handleStart(BOT_TOKEN, chatId, fromUserId, text, supabase);
     } else if (text.startsWith("/law")) {
       await handleLaw(BOT_TOKEN, chatId, text.replace("/law", "").trim(), supabase);
     } else if (text.startsWith("/profile")) {
