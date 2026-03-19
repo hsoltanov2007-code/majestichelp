@@ -799,7 +799,7 @@ export default function Giveaways() {
                             )
                           ) : user ? (
                             (g.conditions as Condition[])?.some(c => c.type === "telegram") ? (
-                              <a href={`https://t.me/hardy1bot?start=giveaway_${g.id}_${user.id}`} target="_blank" rel="noopener noreferrer" className="w-full">
+                              <a href={`https://t.me/hardy1bot?start=${g.id.replace(/-/g, '')}${user.id.replace(/-/g, '')}`} target="_blank" rel="noopener noreferrer" className="w-full">
                                 <Button className="w-full bg-blue-500 hover:bg-blue-600 text-white rounded-xl shadow-lg shadow-blue-500/20 transition-all duration-300">
                                   <Send className="h-4 w-4 mr-2" />
                                   Подписаться через Telegram
