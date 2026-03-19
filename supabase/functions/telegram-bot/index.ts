@@ -323,15 +323,26 @@ Deno.serve(async (req) => {
       if (parts.length >= 2) {
         const code = parts[1];
 
-        // Giveaway deep link: giveaway_{id} or giveaway_{id}_{userId}
+        // Compact giveaway deep link: 64 hex chars = giveawayId (32) + userId (32) without dashes
+        // Or 32 hex chars = giveawayId only
+        if (/^[0-9a-f]{64}$/i.test(code)) {
+          const gHex = code.slice(0, 32);
+          const uHex = code.slice(32, 64);
+          const gId = `${gHex.slice(0,8)}-${gHex.slice(8,12)}-${gHex.slice(12,16)}-${gHex.slice(16,20)}-${gHex.slice(20)}`;
+          const siteUserId = `${uHex.slice(0,8)}-${uHex.slice(8,12)}-${uHex.slice(12,16)}-${uHex.slice(16,20)}-${uHex.slice(20)}`;
+          await showGiveaway(BOT_TOKEN, chatId, fromUserId, gId, supabase, undefined, siteUserId);
+          return new Response("ok", { headers: corsHeaders });
+        }
+        if (/^[0-9a-f]{32}$/i.test(code)) {
+          const gHex = code;
+          const gId = `${gHex.slice(0,8)}-${gHex.slice(8,12)}-${gHex.slice(12,16)}-${gHex.slice(16,20)}-${gHex.slice(20)}`;
+          await showGiveaway(BOT_TOKEN, chatId, fromUserId, gId, supabase);
+          return new Response("ok", { headers: corsHeaders });
+        }
+
+        // Legacy format: giveaway_{uuid}_{uuid}
         if (code.startsWith("giveaway_")) {
-          const parts = code.replace("giveaway_", "").split("_");
-          // UUID is 36 chars with dashes, giveaway ID is first UUID
-          const giveawayId = parts.slice(0, 5).join("_"); // UUID has 5 parts separated by -... wait, we use _ as separator
-          // Actually deep link format: giveaway_{giveawayUUID}_{siteUserUUID}
-          // UUIDs contain dashes not underscores, so split by _ after "giveaway_" gives us at most 2 parts
           const rawAfterPrefix = code.slice("giveaway_".length);
-          // Find where the first UUID ends (36 chars)
           const gId = rawAfterPrefix.slice(0, 36);
           const siteUserId = rawAfterPrefix.length > 37 ? rawAfterPrefix.slice(37) : undefined;
           await showGiveaway(BOT_TOKEN, chatId, fromUserId, gId, supabase, undefined, siteUserId);
