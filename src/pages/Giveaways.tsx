@@ -538,7 +538,7 @@ export default function Giveaways() {
               </div>
               {!myEntries[g.id] && user && (
                 (g.conditions as Condition[])?.some(c => c.type === "telegram") ? (
-                  <a href={`https://t.me/hardy1bot?start=giveaway_${g.id}`} target="_blank" rel="noopener noreferrer">
+                  <a href={`https://t.me/hardy1bot?start=giveaway_${g.id}_${user.id}`} target="_blank" rel="noopener noreferrer">
                     <Button className="bg-blue-500 hover:bg-blue-600 text-white rounded-xl shadow-lg">
                       <Send className="h-4 w-4 mr-2" />
                       Подписаться
