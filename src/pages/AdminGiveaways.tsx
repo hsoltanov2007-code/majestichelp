@@ -39,6 +39,7 @@ import {
   Image,
   Pencil,
   Upload,
+  Send,
 } from "lucide-react";
 
 interface Giveaway {
