@@ -635,22 +635,29 @@ export default function Giveaways() {
                       <div className="space-y-2">
                         <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Условия</p>
                         <ul className="space-y-1.5">
-                          {(g.conditions as Condition[]).map((c, i) => (
-                            <li key={i} className="flex items-start gap-2 text-sm">
-                              <CheckCircle2 className="h-4 w-4 mt-0.5 text-accent shrink-0" />
-                              <span className="flex-1">
-                                {c.link ? (
-                                  <a href={c.link} target="_blank" rel="noopener noreferrer"
-                                    className="text-accent hover:underline inline-flex items-center gap-1">
-                                    {c.text}
-                                    <ExternalLink className="h-3 w-3" />
-                                  </a>
-                                ) : (
-                                  <span className="text-muted-foreground">{c.text}</span>
-                                )}
-                              </span>
-                            </li>
-                          ))}
+                          {(g.conditions as Condition[]).map((c, i) => {
+                            const isTelegram = c.type === "telegram";
+                            const conditionLink = isTelegram
+                              ? `https://t.me/hardy1bot?start=giveaway_${g.id}`
+                              : c.link;
+
+                            return (
+                              <li key={i} className="flex items-start gap-2 text-sm">
+                                <CheckCircle2 className="h-4 w-4 mt-0.5 text-accent shrink-0" />
+                                <span className="flex-1">
+                                  {conditionLink ? (
+                                    <a href={conditionLink} target="_blank" rel="noopener noreferrer"
+                                      className="text-accent hover:underline inline-flex items-center gap-1">
+                                      {c.text}
+                                      <ExternalLink className="h-3 w-3" />
+                                    </a>
+                                  ) : (
+                                    <span className="text-muted-foreground">{c.text}</span>
+                                  )}
+                                </span>
+                              </li>
+                            );
+                          })}
                         </ul>
                       </div>
                     )}
