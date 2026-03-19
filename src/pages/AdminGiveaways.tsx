@@ -214,7 +214,7 @@ export default function AdminGiveaways() {
       title: title.trim(),
       description: description.trim() || null,
       prize: prize.trim(),
-      conditions: conditions.filter(c => c.text.trim()).map(c => ({ text: c.text.trim(), ...(c.link.trim() ? { link: c.link.trim() } : {}) })),
+      conditions: conditions.filter(c => c.text.trim()).map(c => ({ text: c.text.trim(), ...(c.link.trim() ? { link: c.link.trim() } : {}), ...(c.type ? { type: c.type } : {}) })),
       ends_at: endsAt || null,
       image_url: finalImageUrl,
       status,
