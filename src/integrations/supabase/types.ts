@@ -417,7 +417,7 @@ export type Database = {
           giveaway_id: string
           id: string
           rejection_reason: string | null
-          screenshot_url: string
+          screenshot_url: string | null
           screenshot_urls: string[] | null
           status: string
           user_id: string
@@ -427,7 +427,7 @@ export type Database = {
           giveaway_id: string
           id?: string
           rejection_reason?: string | null
-          screenshot_url: string
+          screenshot_url?: string | null
           screenshot_urls?: string[] | null
           status?: string
           user_id: string
@@ -437,7 +437,7 @@ export type Database = {
           giveaway_id?: string
           id?: string
           rejection_reason?: string | null
-          screenshot_url?: string
+          screenshot_url?: string | null
           screenshot_urls?: string[] | null
           status?: string
           user_id?: string
