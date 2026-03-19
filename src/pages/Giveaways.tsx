@@ -537,13 +537,22 @@ export default function Giveaways() {
                 </div>
               </div>
               {!myEntries[g.id] && user && (
-                <Button
-                  className="bg-accent hover:bg-accent/90 text-accent-foreground rounded-xl shadow-lg"
-                  onClick={() => setSelectedGiveaway(g)}
-                >
-                  <Upload className="h-4 w-4 mr-2" />
-                  Участвовать
-                </Button>
+                (g.conditions as Condition[])?.some(c => c.type === "telegram") ? (
+                  <a href={`https://t.me/hardy1bot?start=giveaway_${g.id}`} target="_blank" rel="noopener noreferrer">
+                    <Button className="bg-blue-500 hover:bg-blue-600 text-white rounded-xl shadow-lg">
+                      <Send className="h-4 w-4 mr-2" />
+                      Подписаться
+                    </Button>
+                  </a>
+                ) : (
+                  <Button
+                    className="bg-accent hover:bg-accent/90 text-accent-foreground rounded-xl shadow-lg"
+                    onClick={() => setSelectedGiveaway(g)}
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    Участвовать
+                  </Button>
+                )
               )}
               {!user && (
                 <Button variant="outline" className="rounded-xl" onClick={() => navigate("/auth", { state: { from: "/giveaways" } })}>
@@ -643,9 +652,19 @@ export default function Giveaways() {
 
                             return (
                               <li key={i} className="flex items-start gap-2 text-sm">
-                                <CheckCircle2 className="h-4 w-4 mt-0.5 text-accent shrink-0" />
+                                {isTelegram ? (
+                                  <Send className="h-4 w-4 mt-0.5 text-blue-400 shrink-0" />
+                                ) : (
+                                  <CheckCircle2 className="h-4 w-4 mt-0.5 text-accent shrink-0" />
+                                )}
                                 <span className="flex-1">
-                                  {conditionLink ? (
+                                  {isTelegram ? (
+                                    <a href={conditionLink!} target="_blank" rel="noopener noreferrer"
+                                      className="text-blue-400 hover:text-blue-300 font-medium inline-flex items-center gap-1">
+                                      {c.text}
+                                      <ExternalLink className="h-3 w-3" />
+                                    </a>
+                                  ) : conditionLink ? (
                                     <a href={conditionLink} target="_blank" rel="noopener noreferrer"
                                       className="text-accent hover:underline inline-flex items-center gap-1">
                                       {c.text}
@@ -779,13 +798,22 @@ export default function Giveaways() {
                               </Button>
                             )
                           ) : user ? (
-                            <Button
-                              className="w-full bg-gradient-to-r from-accent to-accent/80 hover:from-accent/90 hover:to-accent/70 text-accent-foreground rounded-xl shadow-lg shadow-accent/20 transition-all duration-300"
-                              onClick={() => setSelectedGiveaway(g)}
-                            >
-                              <Upload className="h-4 w-4 mr-2" />
-                              Участвовать
-                            </Button>
+                            (g.conditions as Condition[])?.some(c => c.type === "telegram") ? (
+                              <a href={`https://t.me/hardy1bot?start=giveaway_${g.id}`} target="_blank" rel="noopener noreferrer" className="w-full">
+                                <Button className="w-full bg-blue-500 hover:bg-blue-600 text-white rounded-xl shadow-lg shadow-blue-500/20 transition-all duration-300">
+                                  <Send className="h-4 w-4 mr-2" />
+                                  Подписаться через Telegram
+                                </Button>
+                              </a>
+                            ) : (
+                              <Button
+                                className="w-full bg-gradient-to-r from-accent to-accent/80 hover:from-accent/90 hover:to-accent/70 text-accent-foreground rounded-xl shadow-lg shadow-accent/20 transition-all duration-300"
+                                onClick={() => setSelectedGiveaway(g)}
+                              >
+                                <Upload className="h-4 w-4 mr-2" />
+                                Участвовать
+                              </Button>
+                            )
                           ) : (
                             <Button className="w-full rounded-xl" variant="outline" onClick={() => navigate("/auth", { state: { from: "/giveaways" } })}>
                               Войти для участия
