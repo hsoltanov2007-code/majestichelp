@@ -652,9 +652,19 @@ export default function Giveaways() {
 
                             return (
                               <li key={i} className="flex items-start gap-2 text-sm">
-                                <CheckCircle2 className="h-4 w-4 mt-0.5 text-accent shrink-0" />
+                                {isTelegram ? (
+                                  <Send className="h-4 w-4 mt-0.5 text-blue-400 shrink-0" />
+                                ) : (
+                                  <CheckCircle2 className="h-4 w-4 mt-0.5 text-accent shrink-0" />
+                                )}
                                 <span className="flex-1">
-                                  {conditionLink ? (
+                                  {isTelegram ? (
+                                    <a href={conditionLink!} target="_blank" rel="noopener noreferrer"
+                                      className="text-blue-400 hover:text-blue-300 font-medium inline-flex items-center gap-1">
+                                      {c.text}
+                                      <ExternalLink className="h-3 w-3" />
+                                    </a>
+                                  ) : conditionLink ? (
                                     <a href={conditionLink} target="_blank" rel="noopener noreferrer"
                                       className="text-accent hover:underline inline-flex items-center gap-1">
                                       {c.text}
