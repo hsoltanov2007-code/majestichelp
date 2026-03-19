@@ -85,7 +85,7 @@ export default function AdminGiveaways() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [prize, setPrize] = useState("");
-  const [conditions, setConditions] = useState<{ text: string; link: string }[]>([{ text: "", link: "" }]);
+  const [conditions, setConditions] = useState<{ text: string; link: string; type?: string }[]>([{ text: "", link: "" }]);
   const [endsAt, setEndsAt] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
