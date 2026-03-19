@@ -99,13 +99,32 @@ async function linkAccount(token: string, chatId: number, code: string, supabase
 
 // ── Giveaway handlers ──
 
-async function showGiveaway(token: string, chatId: number, fromUserId: number, giveawayId: string, supabase: ReturnType<typeof createClient>, messageId?: number) {
+async function showGiveaway(token: string, chatId: number, fromUserId: number, giveawayId: string, supabase: ReturnType<typeof createClient>, messageId?: number, siteUserId?: string) {
   // Check if profile is linked
-  const { data: profile } = await supabase
+  let { data: profile } = await supabase
     .from("profiles")
     .select("id")
     .eq("telegram_chat_id", chatId)
     .maybeSingle();
+
+  // Auto-link if we have siteUserId from deep link
+  if (!profile && siteUserId) {
+    const { data: siteProfile } = await supabase
+      .from("profiles")
+      .select("id, telegram_chat_id")
+      .eq("id", siteUserId)
+      .maybeSingle();
+
+    if (siteProfile && !siteProfile.telegram_chat_id) {
+      await supabase
+        .from("profiles")
+        .update({ telegram_chat_id: chatId })
+        .eq("id", siteUserId);
+      profile = { id: siteUserId };
+    } else if (siteProfile && siteProfile.telegram_chat_id === chatId) {
+      profile = { id: siteUserId };
+    }
+  }
 
   if (!profile) {
     await reply(token, chatId,
