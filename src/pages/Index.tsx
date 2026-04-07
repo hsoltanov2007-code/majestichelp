@@ -12,6 +12,7 @@ import AppView from "./AppView";
 
 const sections = [
   { icon: ClipboardList, title: "Шпаргалка", description: "Быстрый справочник по всем кодексам", path: "/cheat-sheet", accent: true },
+  { icon: Scale, title: "Памятка новичка", description: "Гайд для новых госслужащих", path: "/beginner-guide", accent: true },
   { icon: Scale, title: "Уголовный кодекс", description: "Все статьи УК с розыском и штрафами", path: "/criminal-code" },
   { icon: FileText, title: "Административный кодекс", description: "Административные правонарушения", path: "/administrative-code" },
   { icon: Car, title: "Дорожный кодекс", description: "Правила дорожного движения", path: "/traffic-code" },
