@@ -220,6 +220,10 @@ export default function CheatSheet() {
                     })}
                     type="criminal"
                     stars={article.stars}
+                    court={article.court}
+                    bail={article.bail}
+                    procedure={article.procedure}
+                    category={article.category}
                   />
                 ))}
               </div>
