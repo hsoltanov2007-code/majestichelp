@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { Layout } from "@/components/Layout";
-import { ExternalLink, Heart, Scale, FileText, Gavel } from "lucide-react";
+import { ExternalLink, Heart, Scale, FileText, Gavel, ChevronDown, Star, Briefcase } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useArticles } from "@/hooks/useArticles";
 import { useFavorites } from "@/hooks/useFavorites";
@@ -16,6 +17,10 @@ interface ArticleItemProps {
   onToggleFavorite?: () => void;
   type: "criminal" | "admin";
   stars?: number;
+  court?: boolean;
+  bail?: string;
+  procedure?: string;
+  category?: string;
 }
 
 const ArticleItem = ({ 
@@ -27,9 +32,14 @@ const ArticleItem = ({
   isFavorite, 
   onToggleFavorite,
   type,
-  stars
+  stars,
+  court,
+  bail,
+  procedure,
+  category
 }: ArticleItemProps) => {
-  // Determine border color based on severity (for criminal articles)
+  const [isOpen, setIsOpen] = useState(false);
+
   const getBorderColor = () => {
     if (type === "admin") return "border-l-accent";
     if (stars && stars >= 5) return "border-l-destructive";
@@ -37,7 +47,6 @@ const ArticleItem = ({
     return "border-l-emerald-500";
   };
 
-  // Parse article number
   const getArticleNumber = () => {
     const match = article.match(/^([\d.]+\s*(?:ч\.\d+)?)/);
     return match ? match[1].replace("ч.", "ч.") : article;
@@ -45,16 +54,23 @@ const ArticleItem = ({
 
   const articleNum = getArticleNumber();
   const isSubPart = article.includes("ч.") || isChild;
+  const hasDetails = fine || procedure || court || bail || category;
 
   return (
     <div 
       className={cn(
-        "relative border-l-4 rounded-r-lg bg-card/30 hover:bg-card/50 transition-colors",
+        "relative border-l-4 rounded-r-lg bg-card/30 transition-colors",
         getBorderColor(),
         isSubPart && "ml-4"
       )}
     >
-      <div className="flex items-start gap-3 p-3">
+      <div 
+        className={cn(
+          "flex items-start gap-3 p-3 cursor-pointer hover:bg-card/50 transition-colors",
+          isOpen && "bg-card/50"
+        )}
+        onClick={() => hasDetails && setIsOpen(!isOpen)}
+      >
         <span className={cn(
           "font-mono text-sm font-semibold shrink-0 min-w-[60px]",
           type === "criminal" ? "text-destructive" : "text-accent"
@@ -63,24 +79,70 @@ const ArticleItem = ({
         </span>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-foreground leading-tight">{description}</p>
-          {fine && (
-            <p className="text-xs text-muted-foreground mt-1 leading-tight">{fine}</p>
+        </div>
+        <div className="flex items-center gap-1 shrink-0">
+          {stars && stars > 0 && (
+            <span className="flex items-center gap-0.5 text-xs text-muted-foreground">
+              <Star className="h-3 w-3 fill-accent text-accent" />
+              <span>{stars}</span>
+            </span>
+          )}
+          {onToggleFavorite && (
+            <button 
+              onClick={(e) => { e.stopPropagation(); onToggleFavorite(); }}
+              className="p-1 hover:bg-muted rounded transition-colors"
+            >
+              <Heart 
+                className={cn(
+                  "h-4 w-4",
+                  isFavorite ? "fill-destructive text-destructive" : "text-muted-foreground"
+                )} 
+              />
+            </button>
+          )}
+          {hasDetails && (
+            <ChevronDown className={cn(
+              "h-4 w-4 text-muted-foreground transition-transform duration-200",
+              isOpen && "rotate-180"
+            )} />
           )}
         </div>
-        {onToggleFavorite && (
-          <button 
-            onClick={onToggleFavorite}
-            className="shrink-0 p-1 hover:bg-muted rounded transition-colors"
-          >
-            <Heart 
-              className={cn(
-                "h-4 w-4",
-                isFavorite ? "fill-destructive text-destructive" : "text-muted-foreground"
-              )} 
-            />
-          </button>
-        )}
       </div>
+      
+      {isOpen && hasDetails && (
+        <div className="px-3 pb-3 pt-0 border-t border-border/30 space-y-1.5 animate-in slide-in-from-top-1 duration-150">
+          {fine && (
+            <div className="flex items-start gap-2 text-xs">
+              <span className="text-muted-foreground shrink-0 font-medium">Наказание:</span>
+              <span className="text-foreground">{fine}</span>
+            </div>
+          )}
+          {bail && (
+            <div className="flex items-start gap-2 text-xs">
+              <span className="text-muted-foreground shrink-0 font-medium">Залог:</span>
+              <span className="text-foreground">{bail || "—"}</span>
+            </div>
+          )}
+          {court && (
+            <div className="flex items-center gap-1.5 text-xs">
+              <Briefcase className="h-3 w-3 text-accent" />
+              <span className="text-accent font-medium">Требуется суд</span>
+            </div>
+          )}
+          {procedure && (
+            <div className="flex items-start gap-2 text-xs">
+              <span className="text-muted-foreground shrink-0 font-medium">Процедура:</span>
+              <span className="text-foreground">{procedure}</span>
+            </div>
+          )}
+          {category && (
+            <div className="flex items-start gap-2 text-xs">
+              <span className="text-muted-foreground shrink-0 font-medium">Глава:</span>
+              <span className="text-muted-foreground">{category}</span>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };
@@ -158,6 +220,10 @@ export default function CheatSheet() {
                     })}
                     type="criminal"
                     stars={article.stars}
+                    court={article.court}
+                    bail={article.bail}
+                    procedure={article.procedure}
+                    category={article.category}
                   />
                 ))}
               </div>
