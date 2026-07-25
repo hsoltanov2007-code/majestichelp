@@ -532,6 +532,39 @@ export type Database = {
         }
         Relationships: []
       }
+      image_uploads: {
+        Row: {
+          created_at: string
+          expires_at: string
+          files: string[]
+          id: string
+          slug: string
+          title: string | null
+          user_id: string | null
+          views_count: number
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          files?: string[]
+          id?: string
+          slug: string
+          title?: string | null
+          user_id?: string | null
+          views_count?: number
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          files?: string[]
+          id?: string
+          slug?: string
+          title?: string | null
+          user_id?: string | null
+          views_count?: number
+        }
+        Relationships: []
+      }
       knowledge_base: {
         Row: {
           category: string
