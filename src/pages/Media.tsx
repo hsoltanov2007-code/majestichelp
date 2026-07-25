@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Play, Heart, Eye, ExternalLink, Plus, Trash2, Loader2, Edit, Sparkles } from "lucide-react";
+import { Play, Heart, Eye, ExternalLink, Plus, Trash2, Loader2, Edit, Sparkles, Image as ImageIcon, ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Layout } from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -376,6 +377,21 @@ export default function Media() {
             </Dialog>
           )}
         </div>
+        <Link to="/image-host" className="block mb-8 group">
+          <Card className="glass border-0 hover-lift overflow-hidden">
+            <CardContent className="p-6 flex items-center gap-4">
+              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center shrink-0">
+                <ImageIcon className="h-7 w-7 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-xl font-bold group-hover:text-accent transition-colors">Хостинг изображений</h3>
+                <p className="text-sm text-muted-foreground">Загружай фото и получай короткие ссылки — до 30 дней хранения, авто-сжатие</p>
+              </div>
+              <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-accent group-hover:translate-x-1 transition" />
+            </CardContent>
+          </Card>
+        </Link>
+
 
         {loading ? (
           <div className="flex items-center justify-center py-20">
