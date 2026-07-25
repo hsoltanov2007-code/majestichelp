@@ -42,6 +42,8 @@ import Redux from "./pages/Redux";
 import AdminRedux from "./pages/AdminRedux";
 import BannerGenerator from "./pages/BannerGenerator";
 import BeginnerGuide from "./pages/BeginnerGuide";
+import ImageHost from "./pages/ImageHost";
+import ImageView from "./pages/ImageView";
 const queryClient = new QueryClient();
 
 // Wrapper component to use hooks inside HashRouter
@@ -81,6 +83,8 @@ function AppContent() {
         <Route path="/admin/redux" element={<AdminRedux />} />
         <Route path="/banner-generator" element={<BannerGenerator />} />
         <Route path="/beginner-guide" element={<BeginnerGuide />} />
+        <Route path="/image-host" element={<ImageHost />} />
+        <Route path="/i/:slug" element={<ImageView />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       
