@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, Bookmark, User, LogOut, Crown, BookOpen, ChevronDown, Gavel, FileWarning, Car, ScrollText, LucideIcon, Home, HelpCircle, Play, Gift, Package, Shield } from "lucide-react";
+import { Menu, Bookmark, User, LogOut, Crown, BookOpen, ChevronDown, Gavel, FileWarning, Car, ScrollText, LucideIcon, Home, HelpCircle, Play, Gift, Package, Shield, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useState, useEffect } from "react";
@@ -29,6 +29,7 @@ const codeItems: { path: string; label: string; short: string; icon: LucideIcon 
 
 const referenceItems: { path: string; label: string; icon: LucideIcon }[] = [
   { path: "/media", label: "Медиа", icon: Play },
+  { path: "/image-host", label: "Хостинг фото", icon: ImageIcon },
   { path: "/redux", label: "Redux", icon: Package },
 ];
 
