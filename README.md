@@ -1,73 +1,268 @@
-# Welcome to your Lovable project
+# HARDY
 
-## Project info
+📋 ПОЛНЫЙ ПРОМПТ ДЛЯ LOVABLE
+Задача:
+Создать официальный сайт-базу знаний для игрового сервера Majestic RP | Denver, где будут представлены:
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+Уголовный кодекс (УК) со всеми статьями
 
-## How can I edit this code?
+Административный кодекс (АК)
 
-There are several ways of editing your application.
+Дорожный кодекс (ДК)
 
-**Use Lovable**
+Процедуры для госслужащих (задержание, арест, применение силы)
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+Теория уголовного права
 
-Changes made via Lovable will be committed automatically to this repo.
+Дизайн и стиль:
+Стиль: Официальный, государственный, минималистичный
 
-**Use your preferred IDE**
+Цветовая схема: Темно-синий (#0A2342), белый (#FFFFFF), акцентный красный (#C41E3A) для важных элементов
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+Шрифты: Sans-serif (Arial, Helvetica) для читаемости
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+Логотип: Использовать лого Denver в шапке
 
-Follow these steps:
+Адаптивность: Обязательно для мобильных устройств
+
+Структура сайта:
+1. ГЛАВНАЯ СТРАНИЦА
+Крупный заголовок: "Официальный портал Denver | Majestic RP"
+
+Краткое описание: "Здесь собраны все законы, правила и процедуры штата Denver"
+
+Блоки-карточки с быстрыми переходами:
+
+🔍 Поиск по законам (поисковая строка на видном месте)
+
+⚖️ Уголовный кодекс
+
+📜 Административный кодекс
+
+🚗 Дорожный кодекс
+
+👮 Процедуры для госслужащих
+
+📚 Юридическая справка
+
+Блок "Последние обновления" (3 последние измененные статьи)
+
+2. СТРАНИЦА "УГОЛОВНЫЙ КОДЕКС"
+Формат отображения каждой статьи:
+
+text
+📌 Статья 6.1 ч.1 (F/R)
+⭐ Уровень розыска: 3 звезды
+⚖️ Суд: Не требуется
+💵 Залог: $75,000
+💰 Штраф: Не предусмотрен
+
+📝 Расшифровка:
+Нанесение побоев легкой или средней тяжести
+
+🔧 Процедура задержания:
+1. Надеть наручники на подозреваемого
+2. Идентифицировать себя
+3. Первичный обыск (на усмотрение)
+4. Разъяснить статьи и правило Миранды
+...
+Фильтры и поиск:
+
+Фильтр по уровню розыска (1-5⭐)
+
+Фильтр "Требуется суд" / "Не требуется суд"
+
+Фильтр по разделам (Преступления против личности, против собственности и т.д.)
+
+Поиск по номеру статьи или ключевым словам
+
+3. СТРАНИЦА "АДМИНИСТРАТИВНЫЙ КОДЕКС"
+Аналогичный формат, но с отметкой "АК" вместо "УК"
+
+Все статьи из таблицы (2.1 АК, 2.2 АК, и т.д.)
+
+Только штрафы, без тюремного срока
+
+4. СТРАНИЦА "ДОРОЖНЫЙ КОДЕКС"
+Статьи из столбца "Дорожный кодекс":
+
+text
+🚦 Статья 1.0
+💵 Штраф: 5.000 $
+📝 Описание: Водитель по требованию должен предоставить лицензии
+5. СТРАНИЦА "ПРОЦЕДУРЫ ДЛЯ ГОССЛУЖАЩИХ"
+Разделы:
+
+Процедура задержания (полный список из таблицы)
+
+Процедура ареста (полный список из таблицы)
+
+Стадии применения силы (1.0-5.0 с описанием)
+
+Правило Миранды (полный текст)
+
+Временные ограничения (тайминги для звонков, допросов)
+
+Субъекты задержания (кто может присутствовать)
+
+Неприкосновенные лица (полный список)
+
+Таблица залогов (стоимость по звездам)
+
+6. СТРАНИЦА "ЮРИДИЧЕСКАЯ СПРАВКА"
+Теория из второго листа таблицы:
+
+Состав преступления
+
+Структура нормы права
+
+Формы вины (умысел/неосторожность)
+
+Принципы уголовного права
+
+Общественная опасность
+
+Виды правонарушений
+
+7. СТРАНИЦА "ИНСТРУКЦИИ"
+Как пользоваться сайтом
+
+Как искать статьи (Ctrl+F)
+
+Обозначения:
+
+(F/R) - что означает
+
+⭐ - уровень розыска
+
+✔️/❌ - требуется ли суд
+
+Ссылки на Discord сервера
+
+Функциональные требования:
+Поиск по всему сайту - обязательная строка поиска в шапке
+
+Мобильная версия - все таблицы должны адаптироваться
+
+Тёмная/светлая тема - переключатель в шапке
+
+Печать статьи - кнопка "Распечатать" для каждой статьи
+
+Копирование ссылки - кнопка "Скопировать ссылку на статью"
+
+Закладки - возможность сохранить статьи в "Избранное" (через LocalStorage)
+
+Хлебные крошки - навигация типа: Главная > УК > Раздел 6 > Статья 6.1
+
+Навигация:
+text
+[Логотип Denver] | ПОИСК | [Тема: ☀/🌙]
+---
+Главная | УК | АК | ДК | Процедуры | Справка | Инструкции
+---
+Динамические элементы:
+Интерактивная таблица УК - сортировка по колонкам (звезды, залог, штраф)
+
+Аккордеоны - для сворачивания длинных процедур
+
+Ховер-подсказки - при наведении на термины показывать пояснения
+
+Счётчик статей - "Всего статей в УК: 45"
+
+Статус статьи - цветовая маркировка:
+
+Красная рамка - особо опасные (5⭐)
+
+Желтая рамка - средней тяжести (3-4⭐)
+
+Зеленая рамка - административные
+
+Контент для заполнения:
+(Здесь вставь ВСЮ таблицу из Excel - все статьи, процедуры, дорожный кодекс)
+
+Дополнительные страницы:
+Новости - для объявлений об изменениях в законах
+
+Контакты - список руководства, форма обратной связи
+
+FAQ - частые вопросы игроков
+
+Глоссарий - объяснение терминов (F/R, розыск, залог и т.д.)
+
+🚀 Инструкция для реализации в Lovable:
+Создай 7 основных страниц с названиями как выше
+
+Используй компоненты:
+
+Table - для статей (сделай её интерактивной)
+
+Accordion - для процедур
+
+Card - для карточек статей
+
+Search Bar - для поиска по сайту
+
+Настрой навигацию через Navigation Menu
+
+Добавь поиск через Site Search компонент
+
+Импортируй контент из Excel:
+
+Копируй столбцы
+
+Вставляй в текстовые блоки
+
+Форматируй через Markdown
+
+📱 Мобильная версия:
+Вертикальная навигация (гамбургер-меню)
+
+Упрощенные таблицы (каждая строка = карточка)
+
+Увеличенные кнопки
+
+Убранные второстепенные колонки
+
+Пример первой статьи в Lovable редакторе:
+
+markdown
+## 📌 Статья 6.1 ч.1 (F/R)
+
+**Уровень розыска:** ⭐⭐⭐
+**Суд:** Не требуется ❌
+**Залог:** $75,000
+**Штраф:** Не предусмотрен
+
+### 📝 Расшифровка
+Нанесение побоев легкой или средней тяжести
+
+### 🔧 Процедура задержания
+1. Надеть наручники на подозреваемого
+2. Идентифицировать себя
+3. Первичный обыск (на усмотрение)
+4. Разъяснить статьи и правило Миранды
+5. Доставить подозреваемого в КПЗ
+...
+
+This project was built with [Lovable](https://lovable.dev).
+
+**Live app**: https://majestichelp.lovable.app
+
+## Build with Lovable
+
+Continue developing this project in the [Lovable editor](https://lovable.dev/projects/931d79e3-48d9-4711-8801-f40d6ed96c50).
+
+- **Ship faster**: describe what you want to build and Lovable handles the code.
+- **Stay in sync**: every change made in Lovable is committed straight to this repository.
+- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+
+## Development
+
+Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
+git clone <this-repository-url>
+cd <repository-name>
 npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
 ```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
