@@ -84,6 +84,25 @@ export default function ImageView() {
     );
   }
 
+  const downloadImage = async (url: string, index: number) => {
+    try {
+      const res = await fetch(url);
+      const blob = await res.blob();
+      const ext = (blob.type.split("/")[1] || "jpg").replace("jpeg", "jpg");
+      const name = urls.length > 1 ? `majesticHARDY-${index + 1}.${ext}` : `majesticHARDY.${ext}`;
+      const objUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = objUrl;
+      a.download = name;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(objUrl), 2000);
+    } catch {
+      window.open(url, "_blank");
+    }
+  };
+
   return (
     <Layout>
       <div className="container py-8 max-w-6xl">
