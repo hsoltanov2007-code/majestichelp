@@ -98,6 +98,27 @@ export default function ImageHost() {
     }
   };
 
+  useEffect(() => {
+    const onPaste = (e: ClipboardEvent) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      const imgs: File[] = [];
+      for (const item of Array.from(items)) {
+        if (item.type.startsWith("image/")) {
+          const f = item.getAsFile();
+          if (f) imgs.push(f);
+        }
+      }
+      if (imgs.length > 0) {
+        e.preventDefault();
+        prepareFiles(imgs);
+        toast({ title: `Вставлено из буфера: ${imgs.length}` });
+      }
+    };
+    window.addEventListener("paste", onPaste);
+    return () => window.removeEventListener("paste", onPaste);
+  }, []);
+
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setDragOver(false);
@@ -215,6 +236,7 @@ export default function ImageHost() {
               <Upload className="h-10 w-10 mx-auto mb-3 text-muted-foreground" />
               <p className="font-medium">Перетащи или нажми, чтобы выбрать</p>
               <p className="text-sm text-muted-foreground mt-1">PNG, JPG, WEBP — можно несколько</p>
+              <p className="text-xs text-muted-foreground mt-2">или вставь скриншот через <kbd className="px-1.5 py-0.5 rounded bg-muted text-foreground">Ctrl</kbd> + <kbd className="px-1.5 py-0.5 rounded bg-muted text-foreground">V</kbd></p>
             </div>
 
             {preparing && (
