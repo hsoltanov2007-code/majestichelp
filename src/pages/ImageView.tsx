@@ -84,6 +84,25 @@ export default function ImageView() {
     );
   }
 
+  const downloadImage = async (url: string, index: number) => {
+    try {
+      const res = await fetch(url);
+      const blob = await res.blob();
+      const ext = (blob.type.split("/")[1] || "jpg").replace("jpeg", "jpg");
+      const name = urls.length > 1 ? `majesticHARDY-${index + 1}.${ext}` : `majesticHARDY.${ext}`;
+      const objUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = objUrl;
+      a.download = name;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(objUrl), 2000);
+    } catch {
+      window.open(url, "_blank");
+    }
+  };
+
   return (
     <Layout>
       <div className="container py-8 max-w-6xl">
@@ -108,14 +127,14 @@ export default function ImageView() {
             <Card key={i} className="glass border-0 overflow-hidden group cursor-pointer" onClick={() => setLightbox(url)}>
               <CardContent className="p-0 relative">
                 <img src={url} alt={`Изображение ${i + 1}`} className="w-full h-64 object-cover transition-transform group-hover:scale-105" loading="lazy" />
-                <a
-                  href={url}
-                  download
-                  onClick={(e) => e.stopPropagation()}
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); downloadImage(url, i); }}
+                  title="Скачать"
                   className="absolute top-2 right-2 w-9 h-9 rounded-full bg-background/80 backdrop-blur flex items-center justify-center opacity-0 group-hover:opacity-100 transition hover:bg-accent hover:text-accent-foreground"
                 >
                   <Download className="h-4 w-4" />
-                </a>
+                </button>
               </CardContent>
             </Card>
           ))}
